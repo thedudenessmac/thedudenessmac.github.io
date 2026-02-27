@@ -823,6 +823,7 @@
         panels.forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
         document.getElementById(tab.dataset.tab).classList.add('active');
+        history.replaceState(null, '', '#' + tab.dataset.tab);
       });
     });
 
