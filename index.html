@@ -98,8 +98,8 @@
     @media (max-width: 600px) {
       .home-header { padding: 36px 24px 34px; }
       .name { font-size: 42px; }
-      main { padding: 0; align-items: stretch; min-height: 0; }
-      .monitor-svg { width: 100%; height: 100%; max-width: none; display: block; }
+      main { padding: 0; overflow-x: auto; overflow-y: hidden; min-height: 0; align-items: stretch; }
+      .monitor-svg { height: 100%; width: auto; max-width: none; display: block; flex-shrink: 0; }
     }
   </style>
 </head>
@@ -281,9 +281,13 @@
 
   <script>
     if (window.innerWidth <= 600) {
-      const svg = document.querySelector('.monitor-svg');
-      svg.setAttribute('viewBox', '207 30 267 410');
-      svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+      const main = document.querySelector('main');
+      const svg  = document.querySelector('.monitor-svg');
+      requestAnimationFrame(() => {
+        // Centre scroll on the ENTER button (at x:340 of 680 virtual px)
+        const enterPx = svg.getBoundingClientRect().width * (340 / 680);
+        main.scrollLeft = enterPx - main.clientWidth / 2;
+      });
     }
   </script>
 
