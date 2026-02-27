@@ -145,8 +145,7 @@
 
     /* ── Responsive ── */
     @media (max-width: 600px) {
-      .home-header { padding: 36px 24px 34px; }
-      .name { font-size: 42px; }
+      .home-header { display: none; }
       body { background: #111; }
       main { background: #111; padding: 0; flex: 1; }
       footer { background: #111; border-top-color: #2a2a2a; color: #444; }
@@ -180,13 +179,27 @@
     <a href="portfolio.html" class="mobile-clapper">
       <div class="clapper-stripe-top"></div>
       <div class="clapper-body">
+
         <div class="clapper-row">
           <div class="clapper-cell wide">
-            <span class="clapper-label">Production</span>
+            <span class="clapper-label">Name</span>
             <span class="clapper-val">Marko Balac</span>
           </div>
         </div>
         <div class="clapper-divider"></div>
+
+        <div class="clapper-row">
+          <div class="clapper-cell wide">
+            <span class="clapper-label">Role</span>
+            <span class="clapper-val" style="color:#c8850e;">Script Supervisor</span>
+          </div>
+          <div class="clapper-cell wide">
+            <span class="clapper-label">Location</span>
+            <span class="clapper-val small">Toronto, ON</span>
+          </div>
+        </div>
+        <div class="clapper-divider"></div>
+
         <div class="clapper-row">
           <div class="clapper-cell">
             <span class="clapper-label">Camera</span>
@@ -206,6 +219,7 @@
           </div>
         </div>
         <div class="clapper-divider"></div>
+
         <div class="clapper-row">
           <div class="clapper-cell wide">
             <span class="clapper-label">Director</span>
@@ -217,6 +231,7 @@
           </div>
         </div>
         <div class="clapper-divider"></div>
+
         <div class="clapper-enter">▶ Enter</div>
       </div>
     </a>
