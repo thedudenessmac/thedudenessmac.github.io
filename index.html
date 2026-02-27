@@ -98,7 +98,8 @@
     @media (max-width: 600px) {
       .home-header { padding: 36px 24px 34px; }
       .name { font-size: 42px; }
-      main { padding: 32px 16px 40px; }
+      main { padding: 0; align-items: stretch; min-height: 0; }
+      .monitor-svg { width: 100%; height: 100%; max-width: none; display: block; }
     }
   </style>
 </head>
@@ -280,7 +281,9 @@
 
   <script>
     if (window.innerWidth <= 600) {
-      document.querySelector('.monitor-svg').setAttribute('viewBox', '190 30 440 410');
+      const svg = document.querySelector('.monitor-svg');
+      svg.setAttribute('viewBox', '265 30 255 410');
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
     }
   </script>
 
