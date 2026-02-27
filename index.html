@@ -78,24 +78,54 @@
       height: auto;
     }
 
-    /* ── Mobile ENTER button ── */
-    .mobile-enter {
+    /* ── Mobile clapperboard ── */
+    .mobile-clapper {
       display: none;
-      align-items: center;
-      justify-content: center;
-    }
-    .mobile-enter a {
-      background: #c8850e;
-      color: #fff;
-      font-family: 'Courier Prime', Courier, monospace;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 4px;
-      text-transform: uppercase;
       text-decoration: none;
-      padding: 16px 40px;
+      width: 280px;
+      background: #111;
+      border: 1px solid #2a2a2a;
     }
-    .mobile-enter a:hover { background: #a86c0a; }
+    .clapper-stripe-top {
+      height: 40px;
+      background: repeating-linear-gradient(
+        -45deg,
+        #171717 0px,  #171717 18px,
+        #e8e8e8 18px, #e8e8e8 36px
+      );
+    }
+    .clapper-body { padding: 18px 18px 12px; }
+    .clapper-row { display: flex; gap: 10px; margin-bottom: 14px; }
+    .clapper-cell { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+    .clapper-cell.wide { flex: 3; }
+    .clapper-label {
+      font-family: 'Courier Prime', Courier, monospace;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #555;
+      text-transform: uppercase;
+    }
+    .clapper-val {
+      font-family: 'Courier Prime', Courier, monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #f0f0f0;
+      text-transform: uppercase;
+    }
+    .clapper-val.small { font-size: 13px; }
+    .clapper-divider { height: 1px; background: #2a2a2a; margin: 4px 0 14px; }
+    .clapper-enter {
+      text-align: center;
+      padding: 14px 0 6px;
+      font-family: 'Courier Prime', Courier, monospace;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      color: #c8850e;
+      text-transform: uppercase;
+    }
+    .mobile-clapper:hover .clapper-enter { color: #a86c0a; }
 
     /* SVG button hover states */
     .mon-enter { cursor: pointer; }
@@ -119,7 +149,7 @@
       .name { font-size: 42px; }
       main { padding: 24px 40px; }
       .monitor-svg { display: none; }
-      .mobile-enter { display: flex; }
+      .mobile-clapper { display: block; }
     }
   </style>
 </head>
@@ -134,7 +164,49 @@
   </header>
 
   <main>
-    <div class="mobile-enter"><a href="portfolio.html">ENTER</a></div>
+    <a href="portfolio.html" class="mobile-clapper">
+      <div class="clapper-stripe-top"></div>
+      <div class="clapper-body">
+        <div class="clapper-row">
+          <div class="clapper-cell wide">
+            <span class="clapper-label">Production</span>
+            <span class="clapper-val">Marko Balac</span>
+          </div>
+        </div>
+        <div class="clapper-divider"></div>
+        <div class="clapper-row">
+          <div class="clapper-cell">
+            <span class="clapper-label">Camera</span>
+            <span class="clapper-val">A</span>
+          </div>
+          <div class="clapper-cell">
+            <span class="clapper-label">Roll</span>
+            <span class="clapper-val">A001</span>
+          </div>
+          <div class="clapper-cell">
+            <span class="clapper-label">Scene</span>
+            <span class="clapper-val">—</span>
+          </div>
+          <div class="clapper-cell">
+            <span class="clapper-label">Take</span>
+            <span class="clapper-val">—</span>
+          </div>
+        </div>
+        <div class="clapper-divider"></div>
+        <div class="clapper-row">
+          <div class="clapper-cell wide">
+            <span class="clapper-label">Director</span>
+            <span class="clapper-val small">—</span>
+          </div>
+          <div class="clapper-cell wide">
+            <span class="clapper-label">Script Supervisor</span>
+            <span class="clapper-val small">M. Balac</span>
+          </div>
+        </div>
+        <div class="clapper-divider"></div>
+        <div class="clapper-enter">▶ Enter</div>
+      </div>
+    </a>
     <svg class="monitor-svg" viewBox="0 0 680 440" xmlns="http://www.w3.org/2000/svg" aria-label="On-set preview monitor">
 
       <defs>
