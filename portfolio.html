@@ -393,9 +393,10 @@
       .credits-table tr:last-child { border-bottom: none; }
       .credits-table td { display: block; border-bottom: none !important; padding: 0; min-width: unset; }
       .credits-table td:nth-child(1) { flex: 1; order: 1; font-size: 13px; font-weight: 700; }
-      .credits-table td:nth-child(2) { width: 100%; order: 4; font-size: 12px; padding-top: 3px; }
+      .credits-table td:nth-child(2) { width: 100%; order: 3; font-size: 12px; padding-top: 3px; }
+      .credits-table td:nth-child(2):not(:empty)::before { content: "dir. "; }
       .credits-table td:nth-child(3) { display: none; }
-      .credits-table td:nth-child(4) { width: 100%; order: 3; padding-top: 5px; }
+      .credits-table td:nth-child(4) { width: 100%; order: 4; padding-top: 5px; }
       .credits-table td:nth-child(5) { order: 2; font-size: 13px; text-align: right; }
       .credits-group td { width: 100%; padding: 16px 0 6px; font-size: 10px; }
       .credits-divider td { padding-top: 32px; }
