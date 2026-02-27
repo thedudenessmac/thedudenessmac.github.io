@@ -78,6 +78,25 @@
       height: auto;
     }
 
+    /* ── Mobile ENTER button ── */
+    .mobile-enter {
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .mobile-enter a {
+      background: #c8850e;
+      color: #fff;
+      font-family: 'Courier Prime', Courier, monospace;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 16px 40px;
+    }
+    .mobile-enter a:hover { background: #a86c0a; }
+
     /* SVG button hover states */
     .mon-enter { cursor: pointer; }
     .mon-enter rect { transition: fill 0.15s; }
@@ -98,8 +117,9 @@
     @media (max-width: 600px) {
       .home-header { padding: 36px 24px 34px; }
       .name { font-size: 42px; }
-      main { padding: 0; overflow-x: auto; overflow-y: hidden; min-height: 0; align-items: stretch; }
-      .monitor-svg { height: 100%; width: auto; max-width: none; display: block; flex-shrink: 0; }
+      main { padding: 24px 40px; }
+      .monitor-svg { display: none; }
+      .mobile-enter { display: flex; }
     }
   </style>
 </head>
@@ -114,6 +134,7 @@
   </header>
 
   <main>
+    <div class="mobile-enter"><a href="portfolio.html">ENTER</a></div>
     <svg class="monitor-svg" viewBox="0 0 680 440" xmlns="http://www.w3.org/2000/svg" aria-label="On-set preview monitor">
 
       <defs>
@@ -280,15 +301,6 @@
   </footer>
 
   <script>
-    if (window.innerWidth <= 600) {
-      const main = document.querySelector('main');
-      const svg  = document.querySelector('.monitor-svg');
-      requestAnimationFrame(() => {
-        // Centre scroll on the ENTER button (at x:340 of 680 virtual px)
-        const enterPx = svg.getBoundingClientRect().width * (340 / 680);
-        main.scrollLeft = enterPx - main.clientWidth / 2;
-      });
-    }
   </script>
 
 </body>
