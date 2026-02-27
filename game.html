@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Continuity! — A Film Set Puzzle</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0c0c18;
+      color: #e0e0d8;
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+    }
+    .back-link {
+      align-self: flex-start;
+      font-size: 11px;
+      color: #3a5878;
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      margin-bottom: 24px;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+      font-family: 'Courier Prime', Courier, monospace;
+    }
+    .back-link:hover { opacity: 1; }
+
+    /* ── Monitor housing ── */
+    .monitor-housing {
+      display: flex;
+      flex-direction: column;
+      width: min(720px, 100%);
+      box-shadow: 0 0 0 2px #1a1a2e, 0 20px 60px rgba(0,0,0,0.9);
+    }
+
+    /* ── HUD bars ── */
+    .hud-top, .hud-bot {
+      background: #06060e;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      height: 34px;
+      gap: 10px;
+      font-family: 'Courier Prime', Courier, monospace;
+      font-size: 12px;
+    }
+    .hud-top { border-bottom: 1px solid #0e0e1c; }
+    .hud-bot { border-top:    1px solid #0e0e1c; }
+
+    .hud-cam {
+      background: #c8850e;
+      color: #000;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 1px 7px;
+      flex-shrink: 0;
+      font-family: 'Courier Prime', Courier, monospace;
+    }
+    .hud-title {
+      color: #c8850e;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.12em;
+    }
+    .hud-sep  { color: #1e1e30; }
+    .hud-data { color: #484860; font-size: 12px; flex-shrink: 0; letter-spacing: 0.04em; }
+    .hud-phase {
+      flex: 1;
+      text-align: center;
+      color: #cccccc;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+    }
+    .hud-rec {
+      color: #ef4444;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .rec-sq {
+      width: 7px;
+      height: 7px;
+      background: #ef4444;
+      display: inline-block;
+      flex-shrink: 0;
+      animation: recblink 1.2s step-end infinite;
+    }
+    @keyframes recblink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    .hud-tc {
+      background: #000;
+      color: #c8850e;
+      font-size: 12px;
+      padding: 2px 8px;
+      border: 1px solid #111120;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+    }
+    .hud-score {
+      flex: 1;
+      text-align: center;
+      color: #ffffff;
+      font-size: 12px;
+    }
+    .hud-round {
+      color: #3a3a52;
+      font-size: 12px;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      cursor: crosshair;
+    }
+  </style>
+</head>
+<body>
+  <a class="back-link" href="index.html">← BACK</a>
+  <div class="monitor-housing">
+    <div class="hud-top">
+      <span class="hud-cam">A</span>
+      <span class="hud-title">CONTINUITY!</span>
+      <span class="hud-sep">·</span>
+      <span class="hud-data">SDI 1</span>
+      <span class="hud-sep">·</span>
+      <span class="hud-data">23.98p</span>
+      <span class="hud-phase" id="hud-phase">STANDBY</span>
+      <span class="hud-data">S-Log3 › Rec.709</span>
+      <span class="hud-sep">·</span>
+      <span class="hud-data">1920×1080</span>
+      <span class="hud-sep">·</span>
+      <span class="hud-rec"><span class="rec-sq"></span>REC</span>
+    </div>
+    <canvas id="game"></canvas>
+    <div class="hud-bot">
+      <span class="hud-tc" id="hud-tc">00:00:00:00</span>
+      <span class="hud-sep">·</span>
+      <span class="hud-data">T2.8  ·  35mm</span>
+      <span class="hud-score" id="hud-score">0 PTS</span>
+      <span class="hud-data">ISO 800  ·  180°  ·  3200K</span>
+      <span class="hud-sep">·</span>
+      <span class="hud-round" id="hud-round">3 ROUNDS</span>
+    </div>
+  </div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  CONTINUITY! — pixel-art film continuity game
+//  Observe TAKE 1 (10s) · Find all 5 changes in TAKE 2 · Submit
+//  3 rounds · +10 per correct find · −5 per wrong click
+// ═══════════════════════════════════════════════════════════════════
+
+const canvas = document.getElementById('game');
+const ctx    = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+const S   = 3;      // 1 virtual px = 3 real px
+const VW  = 240;    // virtual width
+const VH  = 160;    // virtual height
+const TOP = 18;     // top bar height
+const BOT = 18;     // bottom bar height
+const SH  = VH - TOP - BOT;   // scene height = 124
+
+canvas.width  = VW * S;
+canvas.height = VH * S;
+
+// ── Colour palette ────────────────────────────────────────────────
+const C = {
+  wall: '#272736',   wallDk: '#1c1c2c',
+  base: '#18182a',
+  floor: '#161626',  floorDk: '#101018',
+  tape: '#909090',
+  tableTop: '#8a6040',  tableSide: '#5a3c20',  tableLeg: '#3c2810',
+  skin: '#ddb07a',   hair: '#241508',
+  shirt: '#2e5e8a',  shirtDk: '#1e3e5a',
+  pants: '#222238',  pantsDk: '#141428',
+  shoe: '#0e0e0e',
+  mugA: '#ddd5c2',  mugB: '#ada898',  mugCoffee: '#261608',
+  boardA: '#c8a450',  boardB: '#886420',  boardLine: '#745410',
+  rack: '#261608',   rackMid: '#36261a',
+  jacketA: '#762e0e',  jacketB: '#4a1c06',  jacketC: '#5a2208',
+  chairA: '#7a4e2e',   chairB: '#4a2e12',
+  tieRed: '#b01e10',   tieBlue: '#1450a0',
+  frameA: '#6a4618',   frameB: '#4a2c08',
+  glass1: '#6070a0',   glass2: '#586890',
+  hills1: '#587050',   hills2: '#3e5830',
+  bookA: '#d0c290',   bookB: '#2a1606',   bookLine: '#a09060',
+  potA: '#b05428',    potB: '#883818',    soil: '#301a0c',
+  leafA: '#48a020',   leafB: '#36881a',   leafC: '#58c028',
+  stemA: '#448018',
+  uiBg: '#070710',    uiText: '#d4d4cc',
+  uiDim: '#585870',   uiAccent: '#3468b8',
+  uiGold: '#d8a818',  uiGold2: '#f0cc40',
+  uiGreen: '#20982a', uiRed: '#ba2018',   uiAmber: '#c07c10',
+};
+
+// ── Helpers ───────────────────────────────────────────────────────
+function r(x, y, w, h, c) {
+  ctx.fillStyle = c;
+  ctx.fillRect(x * S, y * S, w * S, h * S);
+}
+function txt(text, x, y, size, color, align = 'center') {
+  ctx.fillStyle = color;
+  ctx.font = `${size * S}px "Press Start 2P", monospace`;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x * S, y * S);
+}
+function inZ(mx, my, z) {
+  return mx >= z.x && mx < z.x + z.w && my >= z.y && my < z.y + z.h;
+}
+function getMouse(e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    mx: (e.clientX - rect.left) * (canvas.width  / rect.width)  / S,
+    my: (e.clientY - rect.top)  * (canvas.height / rect.height) / S,
+  };
+}
+
+// ── Scene drawing ─────────────────────────────────────────────────
+
+function drawBg() {
+  r(0, TOP,      VW, SH - 40, C.wall);
+  r(0, TOP,      VW, 4, '#1a1a2a');        // ceiling shadow strip
+  r(0, TOP + SH - 44, VW, 2,  C.wallDk);
+  r(0, TOP + SH - 42, VW, 4,  C.base);
+  r(0, TOP + SH - 38, VW, 38, C.floor);
+  for (let i = 0; i < 4; i++) r(0, TOP + SH - 34 + i * 8, VW, 1, C.floorDk);
+  // Tape mark (actor position)
+  r(110, TOP + SH - 6,  14, 1, C.tape);
+  r(116, TOP + SH - 10,  2, 6, C.tape);
+}
+
+function drawFrame() {
+  // Picture frame on wall, left side — never changes
+  r(22, TOP + 8, 24, 17, C.frameA);
+  r(23, TOP + 9, 22, 15, C.frameB);
+  // Painting: sky + hills
+  r(24, TOP + 10, 20, 13, C.glass1);
+  r(24, TOP + 10, 20,  7, C.glass2);
+  r(24, TOP + 16, 20,  3, C.hills1);
+  r(24, TOP + 18, 14,  5, C.hills2);
+  r(24, TOP + 19,  8,  4, '#2e4820');
+}
+
+function drawTable() {
+  r(5, TOP + 58, 68, 5, C.tableTop);
+  r(5, TOP + 58, 68, 1, '#9a7252');        // top-surface highlight
+  r(5, TOP + 62, 68, 3, C.tableSide);
+  r(9,  TOP + 65, 4, 20, C.tableLeg);
+  r(65, TOP + 65, 4, 20, C.tableLeg);
+  r(12, TOP + 65, 1, 20, '#2a1a08');
+  r(68, TOP + 65, 1, 20, '#2a1a08');
+}
+
+function drawBook() {
+  // Script/binder on table — never changes
+  r(34, TOP + 50, 4,  9, C.bookB);
+  r(38, TOP + 50, 18, 9, C.bookA);
+  r(38, TOP + 50, 18, 2, '#b8aa78');
+  r(40, TOP + 54, 14, 1, C.bookLine);
+  r(40, TOP + 57, 10, 1, C.bookLine);
+}
+
+function drawMug(left) {
+  const mx = left ? 12 : 55;
+  const my = TOP + 46;
+  r(mx,      my,      9, 12, C.mugA);
+  r(mx + 7,  my + 1,  2, 11, C.mugB);
+  r(mx,      my + 10, 9,  2, C.mugB);
+  r(mx + 1,  my,      7,  3, C.mugCoffee);
+  r(mx + 9,  my + 2,  2,  1, C.mugB);
+  r(mx + 10, my + 3,  1,  4, C.mugB);
+  r(mx + 9,  my + 7,  2,  1, C.mugB);
+  r(mx + 2,  my - 4,  1,  3, '#4a4a5a');
+  r(mx + 6,  my - 5,  1,  4, '#4a4a5a');
+}
+
+function drawClipboard(x, y) {
+  r(x,     y,      10, 14, C.boardA);
+  r(x + 9, y + 1,   2, 14, C.boardB);
+  r(x + 1, y + 13, 10,  2, C.boardB);
+  r(x + 2, y - 3,   6,  4, C.boardB);
+  r(x + 3, y - 4,   4,  2, C.boardLine);
+  r(x + 1, y + 4,   8,  1, C.boardLine);
+  r(x + 1, y + 7,   8,  1, C.boardLine);
+  r(x + 1, y + 10,  6,  1, C.boardLine);
+}
+
+function drawCharacter(clipLeft, tieColor) {
+  const cx = 112;
+  const cy = TOP + 24;   // grounded: feet land on floor at TOP+SH-38
+
+  // Floor shadow (at feet level)
+  r(cx - 4, TOP + SH - 38, 28, 3, '#0b0b18');
+
+  // Left arm
+  if (clipLeft) {
+    r(cx - 3,  cy + 16,  3,  4, C.shirt);  // short shoulder stub to arm junction
+    r(cx - 15, cy + 20, 15,  4, C.shirt);  // sleeved forearm
+    r(cx - 15, cy + 20,  4,  4, C.skin);   // wrist/hand at far end
+    drawClipboard(cx - 26, cy + 13);
+  } else {
+    r(cx - 3, cy + 16, 3, 18, C.shirt);    // full hanging sleeve
+    r(cx - 3, cy + 30, 3,  6, C.skin);     // hanging hand
+  }
+
+  // Right arm
+  if (!clipLeft) {
+    r(cx + 16, cy + 16,  3,  4, C.shirt);  // short shoulder stub to arm junction
+    r(cx + 16, cy + 20, 15,  4, C.shirt);  // sleeved forearm
+    r(cx + 27, cy + 20,  4,  4, C.skin);   // wrist/hand at far end
+    drawClipboard(cx + 28, cy + 13);
+  } else {
+    r(cx + 16, cy + 16, 3, 18, C.shirt);   // full hanging sleeve
+    r(cx + 16, cy + 30, 3,  6, C.skin);    // hanging hand
+  }
+
+  // Body
+  r(cx,      cy + 14, 16, 22, C.shirt);
+  r(cx + 13, cy + 14,  3, 22, C.shirtDk);
+  // Tie
+  r(cx + 6,  cy + 14,  4, 16, tieColor);
+  r(cx + 5,  cy + 28,  6,  5, tieColor);
+  // Collar
+  r(cx + 1,  cy + 14, 14,  4, '#e0e0e0');
+  r(cx + 6,  cy + 14,  4,  5, '#d4d4d4');
+  // Pants
+  r(cx,      cy + 36, 16, 22, C.pants);
+  r(cx + 7,  cy + 40,  2, 18, C.pantsDk);
+  r(cx + 13, cy + 36,  3, 22, C.pantsDk);
+  // Shoes
+  r(cx - 1,  cy + 57,  8,  5, C.shoe);
+  r(cx + 8,  cy + 57,  8,  5, C.shoe);
+  r(cx - 2,  cy + 60,  3,  2, C.shoe);
+  r(cx + 15, cy + 60,  3,  2, C.shoe);
+  // Head
+  r(cx + 2,  cy,      12, 14, C.skin);
+  r(cx + 13, cy + 1,   2, 11, C.skin);
+  r(cx + 1,  cy + 2,   1, 10, '#c09060');
+  // Hair
+  r(cx + 2,  cy,      12,  4, C.hair);
+  r(cx + 2,  cy + 4,   2,  3, C.hair);
+  r(cx + 12, cy + 4,   2,  3, C.hair);
+  // Eyes
+  r(cx + 4,  cy + 6,   3,  3, '#181010');
+  r(cx + 9,  cy + 6,   3,  3, '#181010');
+  r(cx + 4,  cy + 6,   1,  1, '#fff');
+  r(cx + 9,  cy + 6,   1,  1, '#fff');
+  // Nose & mouth
+  r(cx + 7,  cy + 9,   2,  2, '#b88060');
+  r(cx + 5,  cy + 12,  5,  1, '#8a5848');
+}
+
+function drawRack(hasJacket) {
+  const rx = 195;
+  r(rx - 10, TOP + SH - 6,  22, 3, C.rack);
+  r(rx - 14, TOP + SH - 4,  30, 4, C.rackMid);
+  r(rx,      TOP + 8,   3, SH - 10, C.rack);
+  r(rx + 2,  TOP + 8,   1, SH - 10, C.rackMid);
+  r(rx - 22, TOP + 8,  46,  3, C.rack);
+  r(rx - 24, TOP + 6,   4,  7, C.rackMid);
+  r(rx + 22, TOP + 6,   4,  7, C.rackMid);
+
+  if (hasJacket) {
+    r(rx - 13, TOP + 11, 30,  5, C.jacketB);
+    r(rx - 11, TOP + 11, 26,  5, C.jacketA);
+    r(rx - 13, TOP + 16, 13, 26, C.jacketA);
+    r(rx - 13, TOP + 16,  2, 26, C.jacketB);
+    r(rx -  2, TOP + 16,  2, 26, C.jacketB);
+    r(rx +  3, TOP + 16, 13, 26, C.jacketA);
+    r(rx + 14, TOP + 16,  2, 26, C.jacketB);
+    r(rx -  1, TOP + 16,  5, 26, C.jacketB);
+    r(rx,      TOP + 16,  3, 26, '#180802');
+    r(rx - 7,  TOP + 16,  5, 10, C.jacketB);
+    r(rx +  5, TOP + 16,  5, 10, C.jacketB);
+    r(rx - 11, TOP + 30,  6,  5, C.jacketB);
+    r(rx +  8, TOP + 30,  6,  5, C.jacketB);
+    r(rx +  1, TOP + 20,  1,  1, '#c89858');
+    r(rx +  1, TOP + 24,  1,  1, '#c89858');
+    r(rx +  1, TOP + 28,  1,  1, '#c89858');
+  }
+}
+
+function drawPlant() {
+  // Potted plant, far right — never changes
+  const px = 220;
+  const py = TOP + SH - 38;  // floor level
+  // Pot
+  r(px,      py,      16, 13, C.potA);
+  r(px + 1,  py + 11, 14,  2, C.potB);
+  r(px + 3,  py,      10,  3, C.potB);
+  r(px + 2,  py + 2,  12,  4, C.soil);
+  // Stems
+  r(px + 7,  py - 11,  2, 11, C.stemA);
+  r(px + 5,  py - 15,  2,  7, C.stemA);
+  r(px + 10, py - 13,  2,  9, C.stemA);
+  // Leaves
+  r(px + 3,  py - 19,  10, 7, C.leafA);
+  r(px + 1,  py - 16,   7, 5, C.leafB);
+  r(px + 10, py - 17,   7, 5, C.leafB);
+  r(px + 5,  py - 22,   6, 4, C.leafC);
+  r(px + 2,  py - 14,   4, 3, C.leafB);
+}
+
+function drawChair(left) {
+  const cx = left ? 76 : 148;
+  const cy = TOP + 44;
+  r(cx,      cy,       3, 32, C.chairA);
+  r(cx + 19, cy,       3, 32, C.chairA);
+  r(cx + 2,  cy,       1, 32, C.chairB);
+  r(cx + 21, cy,       1, 32, C.chairB);
+  r(cx,      cy +  5, 22,  3, C.chairB);
+  r(cx,      cy + 12, 22,  3, C.chairB);
+  r(cx -  1, cy + 18, 24,  5, C.chairA);
+  r(cx -  1, cy + 22, 24,  2, C.chairB);
+  r(cx +  1, cy + 24,  3, 18, C.chairB);
+  r(cx + 18, cy + 24,  3, 18, C.chairB);
+  r(cx,      cy + 28,  2, 14, C.chairB);
+  r(cx + 20, cy + 28,  2, 14, C.chairB);
+}
+
+function drawScene(state) {
+  drawBg();
+  drawFrame();
+  drawTable();
+  drawBook();
+  if (state.chairLeft) drawChair(true);
+  drawRack(state.hasJacket);
+  drawPlant();
+  drawMug(state.mugLeft);
+  drawCharacter(state.clipLeft, state.tieRed ? C.tieRed : C.tieBlue);
+  if (!state.chairLeft) drawChair(false);
+}
+
+// ── Zone definitions ──────────────────────────────────────────────
+// All zones are in virtual coords. state = take2 state for SPOT phase.
+function getZones(state) {
+  const cy = TOP + 24;   // must match drawCharacter
+  return {
+    // ── Changeable (correct to click) ──
+    mug: {
+      x: state.mugLeft ? 9 : 52,
+      y: TOP + 41, w: 14, h: 18,   // +1 up to catch steam top
+    },
+    clipboard: {
+      x: state.clipLeft ? (112 - 26 - 3) : (112 + 28 - 2),
+      y: cy + 9, w: 14, h: 19,     // +1 up to catch board clamp
+    },
+    jacket: {
+      x: 179, y: TOP + 8, w: 36, h: 42,  // centred on jacket body
+    },
+    chair: {
+      x: state.chairLeft ? 74 : 146,
+      y: TOP + 42, w: 28, h: 44,
+    },
+    tie: {
+      x: 112 + 4, y: cy + 13, w: 10, h: 24,
+    },
+    // ── Stable distractors (wrong to click) ──
+    frame: {
+      x: 20, y: TOP + 6, w: 28, h: 21,
+    },
+    book: {
+      x: 32, y: TOP + 48, w: 24, h: 13,  // widened to cover full book
+    },
+    plant: {
+      x: 218, y: TOP + SH - 60, w: 22, h: 40,  // trimmed dead space below pot
+    },
+  };
+}
+
+const CHANGEABLE = ['mug', 'clipboard', 'jacket', 'chair', 'tie'];
+const STABLE     = ['frame', 'book', 'plant'];
+// Submit button (virtual coords, sits in bottom bar)
+const SUBMIT = { x: VW / 2 - 32, y: TOP + SH + 4, w: 64, h: 10 };
+
+// ── Round definitions ─────────────────────────────────────────────
+// All 5 changeable elements flip every round.
+const ROUNDS = [
+  {
+    take1: { mugLeft: true,  clipLeft: false, hasJacket: true,  chairLeft: true,  tieRed: true  },
+    take2: { mugLeft: false, clipLeft: true,  hasJacket: false, chairLeft: false, tieRed: false },
+  },
+  {
+    take1: { mugLeft: false, clipLeft: true,  hasJacket: false, chairLeft: false, tieRed: false },
+    take2: { mugLeft: true,  clipLeft: false, hasJacket: true,  chairLeft: true,  tieRed: true  },
+  },
+  {
+    take1: { mugLeft: true,  clipLeft: true,  hasJacket: true,  chairLeft: false, tieRed: true  },
+    take2: { mugLeft: false, clipLeft: false, hasJacket: false, chairLeft: true,  tieRed: false },
+  },
+];
+
+// ── UI helpers ────────────────────────────────────────────────────
+function filmStrip(vy) {
+  r(0, vy, VW, 8, '#0a0a0a');
+  for (let i = 0; i < 24; i++) r(1 + i * 10, vy + 1, 5, 6, '#1a1a1a');
+}
+
+function drawTopBar(left, right) {
+  r(0, 0, VW, TOP, C.uiBg);
+  txt(left,  6, TOP / 2, 3.5, C.uiText, 'left');
+  if (right) txt(right, VW - 6, TOP / 2, 3.5, C.uiDim, 'right');
+}
+
+function drawBottomBar(left, center, right) {
+  const by = TOP + SH;
+  r(0, by, VW, BOT, C.uiBg);
+  if (left)   txt(left,    8,      by + BOT / 2, 3.5, C.uiGold,  'left');
+  if (center) txt(center,  VW / 2, by + BOT / 2, 3.5, C.uiDim,   'center');
+  if (right)  txt(right,   VW - 8, by + BOT / 2, 3.5, C.uiDim,   'right');
+}
+
+function drawSubmitBtn(hover) {
+  const by = TOP + SH;
+  const col = hover ? C.uiGold2 : C.uiGold;
+  r(SUBMIT.x - 1, SUBMIT.y - 1, SUBMIT.w + 2, SUBMIT.h + 2, '#3a3010');
+  r(SUBMIT.x,     SUBMIT.y,     SUBMIT.w,     SUBMIT.h,     hover ? '#3a2e08' : '#26200a');
+  txt('SUBMIT', VW / 2, by + BOT / 2, 3.5, col);
+}
+
+function drawObserveBar(t, total) {
+  const pct = 1 - t / total;
+  const col = pct > 0.35 ? C.uiAccent : C.uiRed;
+  r(0, TOP + SH - 2, Math.ceil(VW * pct), 2, col);
+}
+
+function outline(z, color, dash) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 2;
+  ctx.setLineDash(dash ? [4, 3] : []);
+  ctx.strokeRect(z.x * S + 1, z.y * S + 1, z.w * S - 2, z.h * S - 2);
+  ctx.restore();
+}
+
+// ── Title / intro / end screens ───────────────────────────────────
+function drawTitle(frame) {
+  r(0, 0, VW, VH, C.uiBg);
+
+  // ── Clapperboard slate ──────────────────────────────────────────
+  const bx  = VW / 2 - 40;  // left edge = 80
+  const by  = 12;
+  const bw  = 80;
+  const cH  = 14;   // clapper stick height
+  const bdH = 40;   // body height
+
+  // Drop shadow
+  r(bx + 3, by + 3, bw + 2, cH + bdH, '#000');
+
+  // ── Diagonal stripe clapper ──
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(bx * S, by * S, bw * S, cH * S);
+  ctx.clip();
+  r(bx, by, bw, cH, '#161616');
+  const stripeW = 8 * S;
+  const clipPx  = cH * S;
+  ctx.fillStyle = '#e2e2e2';
+  for (let i = -1; i <= Math.ceil((bw * S + clipPx) / (stripeW * 2)) + 1; i++) {
+    const px = bx * S + i * stripeW * 2;
+    ctx.beginPath();
+    ctx.moveTo(px,               by * S);
+    ctx.lineTo(px + stripeW,     by * S);
+    ctx.lineTo(px + stripeW + clipPx, (by + cH) * S);
+    ctx.lineTo(px + clipPx,      (by + cH) * S);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // ── Hinge bar ──
+  r(bx - 1, by + cH - 4, bw + 2, 5, '#383838');
+  r(bx,     by + cH - 3, bw,     1, '#5a5a5a');
+  // Centre pivot
+  r(bx + bw / 2 - 6, by + cH - 6, 12, 9, '#282828');
+  r(bx + bw / 2 - 5, by + cH - 5, 10, 7, '#444444');
+  r(bx + bw / 2 - 3, by + cH - 4,  6, 5, '#363636');
+
+  // ── Slate body ──
+  r(bx, by + cH, bw, bdH, '#d4ccb4');
+  r(bx, by + cH, bw,   1, '#a8a088');  // inner top shadow
+
+  // ── Outer border ──
+  r(bx - 1, by,             bw + 2, 1,            '#1c1c1c');
+  r(bx - 1, by + cH + bdH,  bw + 2, 1,            '#1c1c1c');
+  r(bx - 1, by,             1,       cH + bdH + 1, '#1c1c1c');
+  r(bx + bw, by,            1,       cH + bdH + 1, '#1c1c1c');
+
+  // ── Dark header band with production name ──
+  r(bx, by + cH,      bw, 11, '#181820');
+  r(bx, by + cH + 11, bw,  1, '#302818');
+  txt('CONTINUITY!', VW / 2, by + cH + 6, 3, '#c8850e');
+
+  // ── Field rows ──
+  const mid = bx + bw / 2;
+  const fy  = by + cH + 13;  // absolute y = 32
+
+  // Row 1: SCENE | TAKE
+  r(mid,   fy,      1,               10, '#b0a888');  // vertical divider
+  r(bx + 2, fy + 9, mid - bx - 3,    1, '#b0a888');  // bottom line left
+  r(mid + 1, fy + 9, bx + bw - mid - 2, 1, '#b0a888'); // bottom line right
+
+  ctx.save();
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#6a6050';
+  ctx.font = `${2 * S}px "Press Start 2P", monospace`;
+  ctx.textAlign = 'left';
+  ctx.fillText('SCN',  (bx + 3) * S,  (fy + 5) * S);
+  ctx.fillText('TAKE', (mid + 2) * S, (fy + 5) * S);
+  ctx.fillStyle = '#1c180e';
+  ctx.font = `${2.5 * S}px "Press Start 2P", monospace`;
+  ctx.textAlign = 'right';
+  ctx.fillText('1', (mid - 3) * S,     (fy + 5) * S);
+  ctx.fillText('1', (bx + bw - 3) * S, (fy + 5) * S);
+
+  // Row 2: DIR
+  const fy2 = fy + 10;
+  r(bx + 2, fy2 + 9, bw - 4, 1, '#b0a888');
+  ctx.fillStyle = '#6a6050';
+  ctx.font = `${2 * S}px "Press Start 2P", monospace`;
+  ctx.textAlign = 'left';
+  ctx.fillText('DIR', (bx + 3) * S, (fy2 + 5) * S);
+
+  // Row 3: CAM
+  const fy3 = fy2 + 10;
+  ctx.fillText('CAM', (bx + 3) * S, (fy3 + 4) * S);
+  ctx.fillStyle = '#1c180e';
+  ctx.textAlign = 'right';
+  ctx.fillText('A', (bx + bw - 3) * S, (fy3 + 4) * S);
+  ctx.restore();
+
+  // ── Main title text ──
+  txt('CONTINUITY!', VW / 2, 83, 8, C.uiGold);
+  txt('A FILM SET PUZZLE', VW / 2, 99, 3, '#3a5888');
+  txt('FIND ALL 5 CHANGES', VW / 2, 111, 3, C.uiDim);
+  txt('BETWEEN TAKES', VW / 2, 119, 3, C.uiDim);
+  if (Math.floor(frame / 28) % 2 === 0)
+    txt('CLICK TO START', VW / 2, 135, 3, C.uiText);
+  filmStrip(VH - 8);
+}
+
+function drawIntro(roundIdx, frame) {
+  r(0, 0, VW, VH, C.uiBg);
+  txt(`SCENE ${roundIdx + 1} OF ${ROUNDS.length}`, VW / 2, 52, 3, '#383858');
+  txt('WATCH CAREFULLY', VW / 2, 72, 4.5, C.uiText);
+  txt('FIVE THINGS WILL CHANGE', VW / 2, 88, 3, C.uiDim);
+  for (let i = 0; i < ROUNDS.length; i++) {
+    const col = i < roundIdx ? C.uiGold : (i === roundIdx ? C.uiAccent : '#1e1e36');
+    r(VW / 2 - ROUNDS.length * 6 + i * 12, 108, 5, 5, col);
+  }
+  filmStrip(VH - 8);
+}
+
+function drawCut(t, total) {
+  r(0, 0, VW, VH, '#000');
+  const flash = Math.max(0, 1 - (t / total) * 3.5);
+  if (flash > 0) {
+    ctx.fillStyle = `rgba(255,255,255,${flash * 0.3})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  txt('CUT!', VW / 2, VH / 2, 12, '#ffffff');
+}
+
+function drawEnd(win, totalScore, frame) {
+  r(0, 0, VW, VH, C.uiBg);
+  if (win) {
+    txt('WRAPPED!',       VW / 2, 46, 7,   C.uiGold);
+    txt('NICE COVERAGE',  VW / 2, 64, 3.5, '#3a5888');
+  } else {
+    txt('THAT\'S A',      VW / 2, 38, 5,   C.uiRed);
+    txt('WRAP.',          VW / 2, 52, 5,   C.uiRed);
+    txt('THE EDITOR NOTICED.', VW / 2, 68, 3, '#806050');
+  }
+  txt(`FINAL SCORE: ${totalScore}`, VW / 2, 88, 3.5, C.uiGold);
+  txt(`OUT OF ${ROUNDS.length * 50}`,     VW / 2, 98, 3,   C.uiDim);
+  if (Math.floor(frame / 28) % 2 === 0)
+    txt('CLICK TO PLAY AGAIN', VW / 2, 118, 3, C.uiText);
+  filmStrip(VH - 8);
+}
+
+// ── Result overlay ────────────────────────────────────────────────
+function drawResult(roundState, selected, roundScore, correct, wrong) {
+  // Highlight all zones
+  const z = getZones(roundState.take2);
+  for (const key of CHANGEABLE) {
+    if (selected.has(key)) outline(z[key], 'rgba(30,180,40,0.95)',  false);  // found ✓
+    else                   outline(z[key], 'rgba(200,130,0,0.9)',   true);   // missed !
+  }
+  for (const key of STABLE) {
+    if (selected.has(key)) outline(z[key], 'rgba(190,30,20,0.95)', false);  // wrong ✗
+  }
+  // Top bar
+  const topMsg = `${correct}/5 FOUND  ${wrong > 0 ? '· ' + wrong + ' WRONG' : ''}`;
+  drawTopBar(topMsg);
+  // Bottom bar
+  const by = TOP + SH;
+  r(0, by, VW, BOT, C.uiBg);
+  const scoreCol = roundScore > 0 ? C.uiGold : C.uiDim;
+  txt(`ROUND SCORE: +${roundScore}`, VW / 2, by + BOT / 2, 3.5, scoreCol);
+}
+
+// ── Game state ────────────────────────────────────────────────────
+const OBSERVE_F = 480;   // 8 s
+const CUT_F     = 55;
+const INTRO_F   = 110;
+const RESULT_F  = 260;   // ~4 s (or click to continue)
+
+let state     = 'TITLE';
+let roundIdx  = 0;
+let score     = 0;
+let timer     = 0;
+let frame     = 0;
+let hovered   = null;   // zone key under cursor
+let submitHov = false;  // cursor over submit button
+let selected  = new Set();
+let lastResult = { correct: 0, wrong: 0, roundScore: 0 };
+
+function rnd() { return ROUNDS[roundIdx]; }
+
+function processSubmit() {
+  let correct = 0, wrong = 0;
+  for (const k of selected) {
+    if (CHANGEABLE.includes(k)) correct++;
+    else                         wrong++;
+  }
+  const roundScore = Math.max(0, correct * 10 - wrong * 5);
+  score += roundScore;
+  lastResult = { correct, wrong, roundScore };
+  timer = 0;
+  state = 'RESULT';
+}
+
+function advanceFromResult() {
+  roundIdx++;
+  if (roundIdx >= ROUNDS.length) {
+    state = 'END';
+  } else {
+    selected.clear();
+    timer = 0;
+    state = 'INTRO';
+  }
+}
+
+// ── HUD updater ───────────────────────────────────────────────────
+function updateHUD() {
+  const phaseEl = document.getElementById('hud-phase');
+  const scoreEl = document.getElementById('hud-score');
+  const roundEl = document.getElementById('hud-round');
+  const tcEl    = document.getElementById('hud-tc');
+
+  const phaseMap = {
+    TITLE:   'STANDBY',
+    INTRO:   `SCENE ${roundIdx + 1} / ${ROUNDS.length}`,
+    OBSERVE: 'TAKE 1  ·  OBSERVE',
+    CUT:     'CUT!',
+    SPOT:    'TAKE 2  ·  SPOT CHANGES',
+    RESULT:  'REVIEWING',
+    END:     'WRAPPED',
+  };
+  if (phaseEl) phaseEl.textContent = phaseMap[state] || state;
+  if (scoreEl) scoreEl.textContent = `${score} PTS`;
+  if (roundEl) {
+    if (state === 'TITLE' || state === 'END') roundEl.textContent = `${ROUNDS.length} ROUNDS`;
+    else roundEl.textContent = `ROUND ${roundIdx + 1} / ${ROUNDS.length}`;
+  }
+  const fps = 60;
+  const ff  = frame % fps;
+  const ss  = Math.floor(frame / fps) % 60;
+  const mm  = Math.floor(frame / (fps * 60)) % 60;
+  const hh  = Math.floor(frame / (fps * 3600)) % 24;
+  const pad = n => String(n).padStart(2, '0');
+  if (tcEl) tcEl.textContent = `${pad(hh)}:${pad(mm)}:${pad(ss)}:${pad(ff)}`;
+}
+
+// ── Main loop ─────────────────────────────────────────────────────
+function loop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  frame++;
+  updateHUD();
+
+  if (state === 'TITLE') {
+    drawTitle(frame);
+
+  } else if (state === 'INTRO') {
+    drawIntro(roundIdx, frame);
+    if (++timer >= INTRO_F) { timer = 0; state = 'OBSERVE'; }
+
+  } else if (state === 'OBSERVE') {
+    drawScene(rnd().take1);
+    const secs = Math.ceil((OBSERVE_F - timer) / 60);
+    drawTopBar('TAKE 1', `${secs}s`);
+    drawObserveBar(timer, OBSERVE_F);
+    drawBottomBar(`${score} PTS`, null, `SCENE ${roundIdx + 1}/${ROUNDS.length}`);
+    if (++timer >= OBSERVE_F) { timer = 0; state = 'CUT'; }
+
+  } else if (state === 'CUT') {
+    drawCut(timer, CUT_F);
+    if (++timer >= CUT_F) { timer = 0; state = 'SPOT'; selected.clear(); hovered = null; }
+
+  } else if (state === 'SPOT') {
+    drawScene(rnd().take2);
+    drawTopBar('TAKE 2', `${selected.size} SELECTED`);
+    drawBottomBar(`${score} PTS`, null, null);
+
+    // Zone highlights (selected or hovered)
+    const z = getZones(rnd().take2);
+    for (const [k, zn] of Object.entries(z)) {
+      if (selected.has(k)) outline(zn, 'rgba(240,210,30,0.85)', false);
+      else if (hovered === k) outline(zn, 'rgba(180,160,30,0.5)', true);
+    }
+    drawSubmitBtn(submitHov);
+
+  } else if (state === 'RESULT') {
+    drawScene(rnd().take2);
+    drawResult(rnd(), selected, lastResult.roundScore, lastResult.correct, lastResult.wrong);
+    if (++timer >= RESULT_F) advanceFromResult();
+
+  } else if (state === 'END') {
+    const perfect = score >= ROUNDS.length * 50;
+    drawEnd(perfect || score >= ROUNDS.length * 30, score, frame);
+  }
+
+  requestAnimationFrame(loop);
+}
+
+// ── Input ─────────────────────────────────────────────────────────
+canvas.addEventListener('mousemove', e => {
+  const { mx, my } = getMouse(e);
+  hovered   = null;
+  submitHov = false;
+
+  if (state === 'SPOT') {
+    if (inZ(mx, my, SUBMIT)) { submitHov = true; }
+    else {
+      const z = getZones(rnd().take2);
+      for (const [k, zn] of Object.entries(z)) {
+        if (inZ(mx, my, zn)) { hovered = k; break; }
+      }
+    }
+    canvas.style.cursor = (hovered || submitHov) ? 'pointer' : 'crosshair';
+  } else {
+    canvas.style.cursor = 'crosshair';
+  }
+});
+
+canvas.addEventListener('click', e => {
+  const { mx, my } = getMouse(e);
+
+  if (state === 'TITLE') {
+    roundIdx = 0; score = 0; timer = 0; frame = 0;
+    selected.clear();
+    state = 'INTRO';
+    return;
+  }
+  if (state === 'END') {
+    roundIdx = 0; score = 0; timer = 0; frame = 0;
+    selected.clear();
+    state = 'TITLE';
+    return;
+  }
+  if (state === 'RESULT') {
+    advanceFromResult();
+    return;
+  }
+  if (state !== 'SPOT') return;
+
+  // Submit button
+  if (inZ(mx, my, SUBMIT)) {
+    processSubmit();
+    return;
+  }
+
+  // Scene zones — toggle selection
+  const z = getZones(rnd().take2);
+  for (const [k, zn] of Object.entries(z)) {
+    if (inZ(mx, my, zn)) {
+      if (selected.has(k)) selected.delete(k);
+      else selected.add(k);
+      break;
+    }
+  }
+});
+
+// ── Boot ──────────────────────────────────────────────────────────
+document.fonts.ready.then(() => requestAnimationFrame(loop));
+</script>
+</body>
+</html>

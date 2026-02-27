@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marko Balac — Script Supervisor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f7f5f0;
+      color: #1a1a1a;
+      font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Clapperboard stripe ────────────────────── */
+    .stripe {
+      height: 26px;
+      background: repeating-linear-gradient(
+        -45deg,
+        #171717 0px,  #171717 18px,
+        #e8e8e8 18px, #e8e8e8 36px
+      );
+    }
+
+    /* ── Header (dark slate) ────────────────────── */
+    header {
+      background: #111111;
+      padding: 36px 0 34px;
+    }
+
+    .header-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .name {
+      font-size: 52px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -1px;
+      line-height: 1.0;
+      margin-bottom: 8px;
+    }
+
+    .header-role {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #c8850e;
+      margin-bottom: 10px;
+    }
+
+    .header-location {
+      font-size: 15px;
+      color: #888888;
+    }
+
+    /* Clickable name */
+    .name a {
+      color: inherit;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .name a:hover { opacity: 0.8; }
+
+    /* ── Tab navigation (sticky) ────────────────── */
+    nav {
+      background: #ffffff;
+      border-bottom: 1px solid #dbd7d0;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .tab-bar {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 0 0 40px;
+      display: flex;
+    }
+
+    .tab {
+      padding: 17px 22px 15px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-family: 'Courier Prime', Courier, monospace;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #aaa;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    .tab:hover { color: #555; }
+    .tab.active {
+      color: #111111;
+      border-bottom-color: #c8850e;
+    }
+
+    /* ── Content area ────────────────────────────── */
+    .content {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    .panel {
+      display: none;
+      padding: 52px 0 88px;
+    }
+    .panel.active { display: block; }
+
+    /* Script slug line — used as section header */
+    .slug {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #7a7268;
+      margin-bottom: 36px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e0dbd4;
+    }
+
+    /* ── About ───────────────────────────────────── */
+    .about-layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+    }
+
+    .about-text { flex: 1; }
+
+    .about-text p {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #252525;
+    }
+    .about-text p + p { margin-top: 12px; }
+    .cv-link { color: #c8850e; text-underline-offset: 3px; }
+
+    /* Photo inside About panel */
+    .about-photo {
+      width: 260px;
+      height: 346px;
+      flex-shrink: 0;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ── Credits ─────────────────────────────────── */
+    .credits-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .credits-table thead th {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #b0a898;
+      text-align: left;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #dbd7d0;
+    }
+    .credits-table tbody tr { border-bottom: 1px solid #edeae5; }
+    .credits-table tbody tr:last-child { border-bottom: none; }
+    .credits-table td {
+      padding: 14px 0;
+      font-size: 14px;
+      vertical-align: top;
+    }
+    .credits-table td:first-child {
+      font-weight: 700;
+      padding-right: 28px;
+      min-width: 180px;
+    }
+    .credits-table td:not(:first-child) {
+      color: #666;
+      padding-right: 20px;
+    }
+    /* Film format tag (e.g. 16mm) */
+    .film-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #888;
+      border: 1px solid #bbb;
+      padding: 1px 4px;
+      margin-left: 7px;
+      vertical-align: middle;
+    }
+
+    .producer {
+      display: block;
+      font-size: 12px;
+      color: #b0a898;
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    .fmt {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #c8850e;
+      border: 1px solid #c8850e;
+      padding: 2px 5px;
+    }
+
+    .credits-group td {
+      padding: 22px 0 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #b0a898;
+      border-bottom: 1px solid #dbd7d0;
+    }
+
+    .credits-earlier td {
+      color: #999;
+      font-size: 13px;
+    }
+    .credits-earlier td:first-child { font-weight: 400; }
+    .credits-divider td {
+      padding: 32px 0 0;
+      border-bottom: 1px solid #e8e4de;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #c8c0b8;
+    }
+
+    /* ── Skills ──────────────────────────────────── */
+    .note {
+      font-size: 14px;
+      color: #b0a898;
+      font-style: italic;
+    }
+    .skills-list { max-width: 560px; }
+    .skill-row {
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+      padding: 14px 0;
+      border-bottom: 1px solid #edeae5;
+    }
+    .skill-row:first-child { border-top: 1px solid #edeae5; }
+    .skill-name {
+      font-size: 14px;
+      font-weight: 700;
+      min-width: 140px;
+      flex-shrink: 0;
+      color: #1a1a1a;
+    }
+    .skill-desc {
+      font-size: 14px;
+      color: #666;
+    }
+    .skills-list + .slug { margin-top: 48px; }
+
+    /* ── Contact ─────────────────────────────────── */
+    .contact-details { max-width: 480px; }
+
+    .contact-line {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      padding: 14px 0;
+      border-bottom: 1px solid #edeae5;
+    }
+    .contact-line:first-child { border-top: 1px solid #edeae5; }
+
+    .contact-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #c0b8b0;
+      min-width: 52px;
+      flex-shrink: 0;
+    }
+
+    .contact-value {
+      font-size: 15px;
+      color: #252525;
+      text-decoration: none;
+    }
+    .contact-value:hover { color: #c8850e; }
+
+    .contact-note {
+      margin-top: 22px;
+      font-size: 13px;
+      color: #b0a898;
+    }
+
+    .imdb-link {
+      font-family: 'Courier Prime', Courier, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #c8850e;
+      text-decoration: none;
+      border: 1px solid #c8850e;
+      padding: 4px 10px;
+      transition: background-color 0.15s, color 0.15s;
+    }
+    .imdb-link:hover { background: #c8850e; color: #fff; }
+
+    /* ── Footer ──────────────────────────────────── */
+    footer {
+      border-top: 1px solid #dbd7d0;
+    }
+    .footer-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 22px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #c0b8b0;
+    }
+    .game-link {
+      color: #c8850e;
+      text-decoration: none;
+      border: 1px dashed #c8850e;
+      padding: 4px 9px;
+      margin-left: auto;
+      margin-right: 40px;
+      align-self: center;
+      white-space: nowrap;
+      font-size: 11px;
+      transition: color 0.15s, background-color 0.15s;
+    }
+    .game-link:hover {
+      background-color: #c8850e;
+      color: #ffffff;
+    }
+
+    /* ── Responsive ──────────────────────────────── */
+    @media (max-width: 600px) {
+      header { padding: 40px 0 36px; }
+      .header-inner { padding: 0 22px; }
+      .name { font-size: 42px; letter-spacing: -1px; }
+      .header-role { font-size: 12px; }
+      .tab-bar { padding: 0 14px; }
+      .tab { padding: 15px 14px 13px; font-size: 11px; }
+      .content { padding: 0 22px; }
+      .about-layout { flex-direction: column; gap: 28px; }
+      .about-photo-placeholder, .about-photo { width: 100%; height: 220px; }
+      .footer-inner { padding: 20px 22px; flex-direction: column; gap: 10px; text-align: center; }
+      .credits-table td:first-child { min-width: unset; }
+      .game-link { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Clapperboard stripe: the hinged top of the slate -->
+  <div class="stripe"></div>
+
+  <!-- Header: the information board of the slate -->
+  <header>
+    <div class="header-inner">
+      <h1 class="name"><a href="home.html">Marko Balac</a></h1>
+      <p class="header-role">Script Supervisor</p>
+      <p class="header-location">Toronto, ON</p>
+    </div>
+  </header>
+
+  <!-- Sticky tab navigation -->
+  <nav>
+    <div class="tab-bar">
+      <button type="button" class="tab active" data-tab="about">About</button>
+      <button type="button" class="tab" data-tab="credits">Credits</button>
+      <button type="button" class="tab" data-tab="skills">Kit</button>
+      <button type="button" class="tab" data-tab="gallery">Gallery</button>
+      <button type="button" class="tab" data-tab="contact">Contact</button>
+      <a href="game.html" class="game-link">Play: Continuity!</a>
+    </div>
+  </nav>
+
+  <!-- Tab panels -->
+  <div class="content">
+
+    <section id="about" class="panel active">
+      <p class="slug">INT. ABOUT ME — MORNING</p>
+      <div class="about-layout">
+        <div class="about-text">
+          <p>Hello and welcome! My name is Marko. I'm a musician. A writer. A cook. An educator. A photographer. A plain-old human being.</p>
+          <p>And I am also a SCRIPT SUPERVISOR.</p>
+          <p>My job, in the simplest sense, is to protect the integrity of the artistic vision that sustains every narrative project, be it a short film, feature, or series.</p>
+          <p>Or, put another way: I am a cost-containment measure for the production at large. I solve problems BEFORE they become EXPENSIVE problems days, weeks, or months down the line.</p>
+          <p>Truth be told, these are really two sides of the same coin.</p>
+          <p>Please find a copy of my CV <a href="marko-balac-cv.pdf" class="cv-link" target="_blank" rel="noopener noreferrer">here</a>.</p>
+        </div>
+        <img src="headshot.jpg" alt="Marko Balac" class="about-photo">
+      </div>
+    </section>
+
+    <section id="credits" class="panel">
+      <p class="slug">INT. SELECTED CREDITS — DAY/NIGHT</p>
+      <!-- Replace placeholder rows with real credits -->
+      <table class="credits-table">
+        <thead>
+          <tr>
+            <th>Production</th>
+            <th>Director</th>
+            <th>Role</th>
+            <th>Format</th>
+            <th>Year</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Matcha Latte <span class="film-tag">16mm</span></td>
+            <td>Andrés Pérez Galicia<span class="producer">prod. Nessa Hallman</span></td>
+            <td>Script Supervisor</td>
+            <td><span class="fmt">Short</span></td>
+            <td>2026</td>
+          </tr>
+          <tr>
+            <td>A Beautiful Lie</td>
+            <td>Pablo de la Chica<span class="producer">prod. Mohaid Sharif</span></td>
+            <td>Script Supervisor</td>
+            <td><span class="fmt">Short</span></td>
+            <td>2025</td>
+          </tr>
+
+          <!-- Earlier credits -->
+          <tr class="credits-divider"><td colspan="5">Earlier Credits</td></tr>
+
+          <tr class="credits-group"><td colspan="5">Set Production Assistant</td></tr>
+          <tr class="credits-earlier">
+            <td>In Character <span class="producer">CFC</span></td><td></td><td>Set PA <span class="producer">Daily</span></td><td><span class="fmt">Short</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Mayday <span class="producer">Season 20</span></td><td></td><td>Set PA <span class="producer">Daily</span></td><td><span class="fmt">Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Spinning</td><td></td><td>Set PA <span class="producer">Daily</span></td><td><span class="fmt">Short</span></td><td>2019</td>
+          </tr>
+
+          <tr class="credits-group"><td colspan="5">Office Production Assistant</td></tr>
+          <tr class="credits-earlier">
+            <td>Utopia Falls</td><td></td><td>Office PA <span class="producer">Daily</span></td><td><span class="fmt">Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>The Queen's Gambit</td><td></td><td>Office PA <span class="producer">Daily</span></td><td><span class="fmt">Series</span></td><td>2019</td>
+          </tr>
+
+          <tr class="credits-group"><td colspan="5">Location Support Personnel</td></tr>
+          <tr class="credits-earlier">
+            <td>Mrs. America</td><td></td><td>Location Support <span class="producer">Daily</span></td><td><span class="fmt">Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Grand Army</td><td></td><td>Location Support <span class="producer">Daily</span></td><td><span class="fmt">Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Condor <span class="producer">Season 2</span></td><td></td><td>Location Support <span class="producer">Daily</span></td><td><span class="fmt">Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>The Organ Donor</td><td></td><td>Location Support <span class="producer">Daily</span></td><td><span class="fmt">Feature</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Ginny &amp; Georgia</td><td></td><td>Location Support <span class="producer">Daily</span></td><td><span class="fmt">Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>The Boys</td><td></td><td>Location Support <span class="producer">Daily</span></td><td><span class="fmt">Series</span></td><td>2019</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="skills" class="panel">
+      <p class="slug">INT. KIT — DAY</p>
+      <div class="skills-list">
+        <div class="skill-row">
+          <span class="skill-name">ScriptE</span>
+          <span class="skill-desc">Digital continuity software — supported on set</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-name">Paper &amp; Pencil</span>
+          <span class="skill-desc">Traditional notes, breakdown sheets, and lined script</span>
+        </div>
+      </div>
+      <p class="slug">INT. REPORT SAMPLES — FOR REFERENCE</p>
+      <p class="note">Samples coming soon.</p>
+    </section>
+
+    <section id="gallery" class="panel">
+      <p class="slug">INT. GALLERY — BTS</p>
+      <p class="note">Photos coming soon.</p>
+    </section>
+
+    <section id="contact" class="panel">
+      <p class="slug">INT. CONTACT — ALWAYS OPEN</p>
+      <div class="contact-details">
+        <p class="contact-line"><span class="contact-label">Email</span><a href="mailto:marko.a.balac@gmail.com" class="contact-value">marko.a.balac@gmail.com</a></p>
+        <p class="contact-line"><span class="contact-label">Phone</span><a href="tel:+14034006581" class="contact-value">+1 (403) 400-6581</a></p>
+        <p class="contact-line"><span class="contact-label">IMDb</span><a href="https://www.imdb.com/name/nm18259375/" class="contact-value imdb-link" target="_blank" rel="noopener noreferrer">IMDb Profile</a></p>
+        <p class="contact-note">Based in Toronto, ON.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div class="footer-inner">
+      <span>&copy; 2026 Marko Balac</span>
+      <a href="https://www.imdb.com/name/nm18259375/" class="imdb-link" target="_blank" rel="noopener noreferrer">IMDb</a>
+    </div>
+  </footer>
+
+  <script>
+    const tabs   = document.querySelectorAll('.tab');
+    const panels = document.querySelectorAll('.panel');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t   => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Activate tab from URL hash on load (e.g. index.html#contact)
+    const initHash = window.location.hash.slice(1);
+    if (initHash) {
+      const hashTab = document.querySelector(`.tab[data-tab="${initHash}"]`);
+      if (hashTab) {
+        tabs.forEach(t   => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        hashTab.classList.add('active');
+        document.getElementById(initHash).classList.add('active');
+      }
+    }
+  </script>
+
+</body>
+</html>
