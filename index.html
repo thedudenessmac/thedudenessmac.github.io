@@ -148,7 +148,7 @@
       .home-header { display: none; }
       body { background: #fff; }
       main { background: #fff; padding: 0; flex: 1; align-items: stretch; }
-      footer { background: #fff; border-top: 2px solid #111; color: #999; padding: 14px 20px; }
+      footer { background: #fff; color: #999; padding: 14px 20px; }
       .monitor-svg { display: none; }
       .stripe { background: repeating-linear-gradient(-45deg, #000 0px, #000 36px, #fff 36px, #fff 72px); height: 44px; border-bottom: 3px solid #000; }
 
@@ -161,19 +161,19 @@
         border-top: 3px solid #111;
       }
       .clapper-stripe-top { display: none; }
-      .clapper-body { display: flex; flex-direction: column; flex: 1; }
+      .clapper-body { display: flex; flex-direction: column; flex: 1; justify-content: flex-start; }
       .clapper-divider { display: none; }
 
-      .clapper-row { display: flex; flex: 1; border-bottom: 3px solid #111; }
-      .clapper-row.name-row { flex: 2.5; }
-      .clapper-row.enter-row { flex: 2; border-bottom: none; }
+      .clapper-row { display: flex; min-height: 72px; border-bottom: 3px solid #111; }
+      .clapper-row.name-row { min-height: 120px; }
+      .clapper-row.enter-row { flex: 1; min-height: 90px; border-bottom: none; }
 
       .clapper-cell {
         flex: 1;
-        padding: 10px 16px;
+        padding: 14px 16px 10px;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         gap: 6px;
         border-right: 3px solid #111;
       }
@@ -181,31 +181,32 @@
       .clapper-cell.wide { flex: 2; }
 
       .clapper-label {
-        font-size: 9px;
+        font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.18em;
         color: #888;
         text-transform: uppercase;
       }
       .clapper-val {
-        font-size: 20px;
+        font-size: 28px;
         font-weight: 700;
         color: #111;
         line-height: 1.1;
         text-transform: uppercase;
       }
-      .clapper-val.amber { color: #c8850e; font-size: 17px; }
-      .clapper-val.small { font-size: 16px; }
-      .name-row .clapper-val { font-size: 34px; letter-spacing: -1px; }
+      .clapper-val.amber { color: #c8850e; font-size: 26px; }
+      .clapper-val.small { font-size: 21px; }
+      .name-row .clapper-val { font-size: 44px; letter-spacing: -1px; }
 
       .clapper-enter {
         flex: 1;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
+        padding-top: 22px;
         justify-content: center;
-        font-size: 26px;
+        font-size: 48px;
         font-weight: 700;
-        letter-spacing: 8px;
+        letter-spacing: 10px;
         color: #c8850e;
         text-transform: uppercase;
       }
@@ -248,38 +249,16 @@
 
         <div class="clapper-row">
           <div class="clapper-cell">
-            <span class="clapper-label">Camera</span>
-            <span class="clapper-val">A</span>
-          </div>
-          <div class="clapper-cell">
             <span class="clapper-label">Roll</span>
             <span class="clapper-val">A001</span>
           </div>
-          <div class="clapper-cell wide">
-            <span class="clapper-label">Date</span>
-            <span class="clapper-val">2026</span>
-          </div>
-        </div>
-
-        <div class="clapper-row">
           <div class="clapper-cell">
             <span class="clapper-label">Scene</span>
-            <span class="clapper-val">—</span>
+            <span class="clapper-val">17R</span>
           </div>
           <div class="clapper-cell">
             <span class="clapper-label">Take</span>
-            <span class="clapper-val">—</span>
-          </div>
-        </div>
-
-        <div class="clapper-row">
-          <div class="clapper-cell wide">
-            <span class="clapper-label">Director</span>
-            <span class="clapper-val small">—</span>
-          </div>
-          <div class="clapper-cell wide">
-            <span class="clapper-label">Script Supervisor</span>
-            <span class="clapper-val small">M. Balac</span>
+            <span class="clapper-val">9</span>
           </div>
         </div>
 
