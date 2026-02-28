@@ -25,42 +25,78 @@
       height: 26px;
       background: repeating-linear-gradient(
         -45deg,
-        #171717 0px,  #171717 36px,
-        #e8e8e8 36px, #e8e8e8 72px
+        #171717 0px,  #171717 42px,
+        #e8e8e8 42px, #e8e8e8 84px
       );
+      border-bottom: 3px solid #fff;
       flex-shrink: 0;
     }
 
-    /* ── Header ── */
+    /* ── Header slate ── */
     .home-header {
       background: #111111;
-      padding: 36px 40px 34px;
-      text-align: center;
       flex-shrink: 0;
+      display: flex;
+      justify-content: center;
+      padding: 0 18px;
     }
 
-    .name {
+    .slate-inner {
+      max-width: 980px;
+      width: 100%;
+    }
+
+    .slate-row {
+      display: flex;
+      border-bottom: 3px solid #fff;
+    }
+    .slate-row:last-child { border-bottom: none; }
+
+    .slate-cell {
+      flex: 1;
+      padding: 12px 24px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      position: relative;
+    }
+    .slate-cell:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 8px;
+      width: 3px;
+      background: #fff;
+    }
+
+    .slate-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+    }
+
+    .slate-name {
       font-size: 52px;
       font-weight: 700;
       color: #ffffff;
       letter-spacing: -1px;
       line-height: 1.0;
-      margin-bottom: 8px;
-    }
-
-    .header-role {
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: 0.18em;
+      padding: 8px 0 4px;
       text-transform: uppercase;
-      color: #c8850e;
-      margin-bottom: 10px;
     }
 
-    .header-location {
-      font-size: 15px;
-      color: #888;
+    .slate-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      text-transform: uppercase;
     }
+
+    .slate-amber { color: #c8850e; font-size: 26px; }
+    .slate-dim   { color: #fff; font-size: 20px; }
 
     /* ── Main ── */
     main {
@@ -68,7 +104,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px 60px;
+      padding: 24px 18px;
     }
 
     /* ── Monitor SVG ── */
@@ -77,7 +113,7 @@
       /* 310px ≈ stripe + header + footer + 2×24px padding */
       height: clamp(280px, calc(100vh - 310px), 720px);
       width: auto;
-      max-width: calc(100vw - 120px);
+      max-width: calc(100vw - 36px);
     }
 
     /* ── Mobile clapperboard ── */
@@ -285,9 +321,38 @@
   <div class="stripe"></div>
 
   <header class="home-header">
-    <p class="name">Marko Balac</p>
-    <p class="header-role">Script Supervisor</p>
-    <p class="header-location">Based in Toronto, ON</p>
+    <div class="slate-inner">
+      <div class="slate-row">
+        <div class="slate-cell">
+          <span class="slate-label">Production</span>
+          <span class="slate-name">Marko Balac</span>
+        </div>
+      </div>
+      <div class="slate-row">
+        <div class="slate-cell">
+          <span class="slate-label">Role</span>
+          <span class="slate-val slate-amber">Script Supervisor</span>
+        </div>
+        <div class="slate-cell">
+          <span class="slate-label">Location</span>
+          <span class="slate-val slate-dim">Based in Toronto, ON</span>
+        </div>
+      </div>
+      <div class="slate-row">
+        <div class="slate-cell">
+          <span class="slate-label">Roll</span>
+          <span class="slate-val">A007</span>
+        </div>
+        <div class="slate-cell">
+          <span class="slate-label">Scene</span>
+          <span class="slate-val">47A</span>
+        </div>
+        <div class="slate-cell">
+          <span class="slate-label">Take</span>
+          <span class="slate-val">9</span>
+        </div>
+      </div>
+    </div>
   </header>
 
   <main>

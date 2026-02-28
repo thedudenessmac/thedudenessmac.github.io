@@ -25,9 +25,10 @@
       height: 26px;
       background: repeating-linear-gradient(
         -45deg,
-        #171717 0px,  #171717 36px,
-        #e8e8e8 36px, #e8e8e8 72px
+        #171717 0px,  #171717 42px,
+        #e8e8e8 42px, #e8e8e8 84px
       );
+      border-bottom: 3px solid #fff;
     }
 
     /* ── Header (dark slate) ────────────────────── */
@@ -253,7 +254,10 @@
       color: #c8c0b8;
     }
 
-    /* ── Services ─────────────────────────────────── */
+    /* ── Gallery ─────────────────────────────────── */
+    .gallery-section { margin-bottom: 40px; }
+    .gallery-section:last-child { margin-bottom: 0; }
+/* ── Services ─────────────────────────────────── */
     .note { font-size: 14px; color: #b0a898; font-style: italic; }
     .service-phase { margin-bottom: 40px; }
     .phase-label { margin-bottom: 14px; }
@@ -439,9 +443,9 @@
       <p class="slug">INT. ABOUT ME — MORNING</p>
       <div class="about-layout">
         <div class="about-text">
-          <p>Hello and welcome! My name is Marko. I'm a musician. A writer. A cook. An educator. A photographer. A plain-old human being.</p>
+          <p>Hello and welcome! My name is Marko. I'm a musician. A writer. A cook. An educator. A photographer. A tech geek. A plain-old human being.</p>
           <p>And I am also a SCRIPT SUPERVISOR.</p>
-          <p>My job, in the simplest sense, is to protect the integrity of the artistic vision that sustains every narrative project, be it a short film, feature, or series.</p>
+          <p>My job, most simply put, is to protect the integrity of the artistic vision that sustains every narrative project, be it a short film, feature, or series.</p>
           <p>Or, put another way: I am a cost-containment measure for the production at large. I solve problems BEFORE they become EXPENSIVE problems days, weeks, or months down the road.</p>
           <p>Truth be told, these are really two sides of the same coin!</p>
           <p>Please find a copy of my CV <a href="marko-balac-cv.pdf" class="cv-link" target="_blank" rel="noopener noreferrer">here</a>.</p>
@@ -453,6 +457,7 @@
     <section id="credits" class="panel">
       <p class="slug">INT. PRODUCTION CREDITS — DUSK</p>
       <!-- Replace placeholder rows with real credits -->
+      <p class="phase-label"><span class="phase-tag phase-green">Recent Credits</span></p>
       <table class="credits-table">
         <thead>
           <tr>
@@ -791,8 +796,17 @@
     </section>
 
     <section id="gallery" class="panel">
-      <p class="slug">INT. GALLERY — BTS</p>
-      <p class="note">Photos coming soon.</p>
+      <p class="slug">INT. GALLERY — NIGHT</p>
+
+      <div class="gallery-section">
+        <p class="phase-label"><span class="phase-tag phase-grey">Behind the Scenes</span></p>
+        <p class="note">Photos coming soon.</p>
+      </div>
+
+      <div class="gallery-section">
+        <p class="phase-label"><span class="phase-tag phase-grey">Personal Photography</span></p>
+        <p class="note">Photos coming soon.</p>
+      </div>
     </section>
 
     <section id="contact" class="panel">
