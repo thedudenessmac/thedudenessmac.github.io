@@ -196,7 +196,7 @@
       }
       .clapper-val.amber { color: #c8850e; font-size: 26px; }
       .clapper-val.small { font-size: 21px; }
-      .name-row .clapper-val { font-size: 44px; letter-spacing: -1px; }
+      .name-row .clapper-val { letter-spacing: -1px; white-space: nowrap; }
 
       .clapper-enter {
         flex: 1;
@@ -439,6 +439,26 @@
   </footer>
 
   <script>
+  (function() {
+    function fitClapperName() {
+      var el = document.querySelector('.name-row .clapper-val');
+      if (!el) return;
+      var cell = el.closest('.clapper-cell');
+      if (!cell || cell.offsetWidth === 0) return;
+      var available = cell.offsetWidth - 32;
+      var lo = 10, hi = 120;
+      el.style.fontSize = hi + 'px';
+      while (lo < hi) {
+        var mid = Math.floor((lo + hi + 1) / 2);
+        el.style.fontSize = mid + 'px';
+        if (el.scrollWidth <= available) lo = mid;
+        else hi = mid - 1;
+      }
+      el.style.fontSize = lo + 'px';
+    }
+    window.addEventListener('load', fitClapperName);
+    window.addEventListener('resize', fitClapperName);
+  })();
   </script>
 
 </body>
