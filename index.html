@@ -134,6 +134,11 @@
     .mon-enter rect { transition: fill 0.15s; }
     .mon-enter:hover rect { fill: #a86c0a; }
 
+    /* Cam fade transition */
+    #cam-a, #cam-b { transition: opacity 0.5s ease; }
+    #cam-toggle { cursor: pointer; }
+    #cam-toggle:hover text { fill: #f0a030; }
+
 
     /* ── Footer ── */
     footer {
@@ -330,171 +335,288 @@
     <svg class="monitor-svg" viewBox="0 0 680 440" xmlns="http://www.w3.org/2000/svg" aria-label="On-set preview monitor">
 
       <defs>
-        <!-- Subtle scanline pattern -->
         <pattern id="scan" x="0" y="0" width="1" height="3" patternUnits="userSpaceOnUse">
           <rect x="0" y="0" width="1" height="1" fill="#000" opacity="0.12"/>
         </pattern>
-        <!-- Screen vignette -->
         <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
           <stop offset="0%" stop-color="#000" stop-opacity="0"/>
           <stop offset="100%" stop-color="#000" stop-opacity="0.35"/>
         </radialGradient>
-        <!-- Screen clip path -->
         <clipPath id="screenClip">
           <rect x="42" y="42" width="596" height="356"/>
         </clipPath>
-        <!-- Dusk sky gradient -->
         <linearGradient id="skyGrad" x1="0" y1="42" x2="0" y2="320" gradientUnits="userSpaceOnUse">
           <stop offset="0%"   stop-color="#1a3060"/>
           <stop offset="45%"  stop-color="#3a6090"/>
           <stop offset="78%"  stop-color="#c86818"/>
           <stop offset="100%" stop-color="#f09020"/>
         </linearGradient>
-        <!-- Crescent moon mask -->
         <mask id="moonMask">
           <circle cx="152" cy="130" r="22" fill="white"/>
           <circle cx="164" cy="130" r="20" fill="black"/>
         </mask>
+        <radialGradient id="earthGrad" cx="38%" cy="35%" r="65%">
+          <stop offset="0%"   stop-color="#4a9ae0"/>
+          <stop offset="55%"  stop-color="#1a5099"/>
+          <stop offset="100%" stop-color="#081830"/>
+        </radialGradient>
       </defs>
 
       <!-- ── Monitor housing ── -->
       <rect x="4" y="4" width="672" height="432" fill="#1c1c1c"/>
-      <!-- Bevel highlight (top/left) -->
       <rect x="4" y="4" width="672" height="2" fill="#2e2e2e"/>
       <rect x="4" y="4" width="2" height="432" fill="#2e2e2e"/>
-      <!-- Bevel shadow (bottom/right) -->
       <rect x="4" y="434" width="672" height="2" fill="#101010"/>
       <rect x="674" y="4" width="2" height="432" fill="#101010"/>
-
-      <!-- Pixel control buttons (right side of housing) -->
       <rect x="649" y="52" width="8" height="8" fill="#242424"/>
       <rect x="649" y="64" width="8" height="8" fill="#242424"/>
       <rect x="649" y="76" width="8" height="8" fill="#242424"/>
       <rect x="649" y="88" width="8" height="8" fill="#242424"/>
-
-      <!-- Pixel vents (left side) -->
       <rect x="22" y="52" width="2" height="6" fill="#161616"/>
       <rect x="22" y="62" width="2" height="6" fill="#161616"/>
       <rect x="22" y="72" width="2" height="6" fill="#161616"/>
       <rect x="22" y="82" width="2" height="6" fill="#161616"/>
       <rect x="22" y="92" width="2" height="6" fill="#161616"/>
-
-      <!-- Status LEDs (bottom right of housing) -->
+      <!-- Status LEDs -->
       <rect x="652" y="424" width="8" height="6" fill="#22c55e"/>
       <rect x="640" y="424" width="8" height="6" fill="#252525"/>
+      <!-- Cam toggle button (HUD element, bottom housing) -->
+      <g id="cam-toggle">
+        <rect x="570" y="417" width="62" height="17" fill="#141414" rx="2"/>
+        <rect x="570" y="417" width="62" height="17" fill="none" stroke="#c8850e" stroke-width="1" rx="2" opacity="0.7"/>
+        <text id="cam-toggle-label" x="601" y="429" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="10" font-weight="700" fill="#c8850e">B CAM ▶</text>
+      </g>
 
       <!-- ── Screen bezel ── -->
       <rect x="22" y="22" width="636" height="396" fill="#0b0b0b"/>
-
-      <!-- ── Screen ── -->
+      <!-- ── Screen base ── -->
       <rect x="42" y="42" width="596" height="356" fill="#000"/>
 
-      <!-- ── Landscape ── -->
-      <g clip-path="url(#screenClip)">
-      <!-- Dusk sky -->
-      <rect x="42" y="42" width="596" height="356" fill="url(#skyGrad)"/>
+      <!-- ══ A CAM ══ -->
+      <g id="cam-a">
+        <g clip-path="url(#screenClip)">
+          <rect x="42" y="42" width="596" height="356" fill="url(#skyGrad)"/>
+          <circle cx="152" cy="130" r="36" fill="#d07010" opacity="0.10"/>
+          <circle cx="152" cy="130" r="28" fill="#e08818" opacity="0.14"/>
+          <circle cx="152" cy="130" r="22" fill="#f5b040" mask="url(#moonMask)"/>
+          <ellipse cx="310" cy="300" rx="320" ry="60" fill="#f08020" opacity="0.35"/>
+          <ellipse cx="310" cy="308" rx="210" ry="34" fill="#f4a030" opacity="0.25"/>
+          <path d="M42,288 C110,270 200,262 290,268 C360,272 420,260 490,256 C545,253 595,260 638,266 L638,398 L42,398 Z" fill="#2e5228"/>
+          <path d="M42,322 C90,304 170,292 250,296 C310,300 365,284 425,280 C472,277 520,283 568,278 C598,275 622,280 638,286 L638,398 L42,398 Z" fill="#223e1c"/>
+          <rect x="42" y="358" width="596" height="40" fill="#1a3016"/>
+          <circle cx="507" cy="265" r="3" fill="#0a1408"/>
+          <rect x="505" y="268" width="4" height="10" fill="#0a1408"/>
+          <line x1="502" y1="271" x2="512" y2="270" stroke="#0a1408" stroke-width="2"/>
+          <line x1="507" y1="278" x2="504" y2="285" stroke="#0a1408" stroke-width="2"/>
+          <line x1="507" y1="278" x2="510" y2="285" stroke="#0a1408" stroke-width="2"/>
+          <circle cx="520" cy="265" r="3" fill="#0a1408"/>
+          <rect x="518" y="268" width="4" height="10" fill="#0a1408"/>
+          <line x1="515" y1="271" x2="525" y2="270" stroke="#0a1408" stroke-width="2"/>
+          <line x1="520" y1="278" x2="517" y2="285" stroke="#0a1408" stroke-width="2"/>
+          <line x1="520" y1="278" x2="523" y2="285" stroke="#0a1408" stroke-width="2"/>
+        </g>
+        <rect x="42" y="42" width="596" height="356" fill="url(#scan)"/>
+        <!-- TOP HUD -->
+        <rect x="48" y="47" width="23" height="22" fill="#c8850e"/>
+        <text x="59" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="13" font-weight="700" fill="#000">A</text>
+        <text x="77" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#aaa">SDI 1</text>
+        <text x="116" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">1920×1080</text>
+        <text x="340" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#c8850e">S-Log3 › Rec.709</text>
+        <text x="592" y="63" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#fff">23.98p</text>
+        <rect x="596" y="48" width="9" height="9" fill="#ef4444"/>
+        <text x="609" y="63" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#ef4444">REC</text>
+        <rect x="42" y="78" width="596" height="1" fill="#161616"/>
+        <!-- BOTTOM HUD -->
+        <rect x="42" y="362" width="596" height="1" fill="#161616"/>
+        <rect x="48" y="368" width="96" height="22" fill="#000"/>
+        <text x="53" y="384" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#c8850e">01:02:14:07</text>
+        <text x="340" y="384" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">F 4.2'  ·  T2.8  ·  35mm</text>
+        <text x="630" y="384" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#888">ISO 800  ·  180°  ·  3200K</text>
+      </g>
 
-      <!-- Harvest moon glow -->
-      <circle cx="152" cy="130" r="36" fill="#d07010" opacity="0.10"/>
-      <circle cx="152" cy="130" r="28" fill="#e08818" opacity="0.14"/>
-      <!-- Harvest moon crescent -->
-      <circle cx="152" cy="130" r="22" fill="#f5b040" mask="url(#moonMask)"/>
+      <!-- ══ B CAM ══ -->
+      <g id="cam-b" style="opacity:0; pointer-events:none;">
+        <g clip-path="url(#screenClip)">
+          <!-- Deep space -->
+          <rect x="42" y="42" width="596" height="356" fill="#050810"/>
+          <!-- Stars -->
+          <circle cx="78"  cy="58"  r="1"   fill="#fff" opacity="0.9"/>
+          <circle cx="115" cy="72"  r="1.5" fill="#fff" opacity="0.7"/>
+          <circle cx="152" cy="50"  r="1"   fill="#fff" opacity="0.8"/>
+          <circle cx="190" cy="88"  r="1"   fill="#dde" opacity="0.6"/>
+          <circle cx="65"  cy="105" r="1"   fill="#fff" opacity="0.7"/>
+          <circle cx="230" cy="62"  r="1"   fill="#fff" opacity="0.9"/>
+          <circle cx="270" cy="80"  r="1.5" fill="#fff" opacity="0.5"/>
+          <circle cx="300" cy="55"  r="1"   fill="#fff" opacity="0.8"/>
+          <circle cx="350" cy="70"  r="1"   fill="#dde" opacity="0.6"/>
+          <circle cx="90"  cy="140" r="1.5" fill="#fff" opacity="0.7"/>
+          <circle cx="130" cy="180" r="1"   fill="#fff" opacity="0.5"/>
+          <circle cx="60"  cy="200" r="1"   fill="#dde" opacity="0.8"/>
+          <circle cx="72"  cy="250" r="1"   fill="#fff" opacity="0.6"/>
+          <circle cx="170" cy="240" r="1"   fill="#fff" opacity="0.7"/>
+          <circle cx="200" cy="260" r="1.5" fill="#fff" opacity="0.5"/>
+          <circle cx="180" cy="180" r="1"   fill="#dde" opacity="0.6"/>
+          <circle cx="220" cy="50"  r="1"   fill="#fff" opacity="0.7"/>
+          <circle cx="550" cy="58"  r="1.5" fill="#fff" opacity="0.9"/>
+          <circle cx="580" cy="82"  r="1"   fill="#fff" opacity="0.7"/>
+          <circle cx="610" cy="60"  r="1"   fill="#fff" opacity="0.8"/>
+          <circle cx="595" cy="120" r="1"   fill="#dde" opacity="0.6"/>
+          <circle cx="560" cy="150" r="1.5" fill="#fff" opacity="0.5"/>
+          <circle cx="620" cy="180" r="1"   fill="#fff" opacity="0.7"/>
+          <circle cx="630" cy="240" r="1"   fill="#fff" opacity="0.6"/>
+          <circle cx="570" cy="200" r="1"   fill="#dde" opacity="0.7"/>
+          <circle cx="475" cy="65"  r="1"   fill="#fff" opacity="0.8"/>
+          <circle cx="500" cy="90"  r="1.5" fill="#fff" opacity="0.6"/>
+          <circle cx="535" cy="72"  r="1"   fill="#fff" opacity="0.9"/>
+          <circle cx="460" cy="110" r="1"   fill="#dde" opacity="0.5"/>
+          <circle cx="638" cy="120" r="1"   fill="#fff" opacity="0.6"/>
+          <circle cx="155" cy="295" r="1"   fill="#fff" opacity="0.4"/>
+          <circle cx="88"  cy="295" r="1"   fill="#fff" opacity="0.3"/>
+          <circle cx="625" cy="290" r="1"   fill="#fff" opacity="0.3"/>
+          <!-- Earth atmosphere glow -->
+          <circle cx="418" cy="158" r="100" fill="#2255aa" opacity="0.18"/>
+          <circle cx="418" cy="158" r="95"  fill="#1a4080" opacity="0.12"/>
+          <!-- Earth -->
+          <circle cx="418" cy="158" r="90" fill="url(#earthGrad)"/>
+          <!-- Africa / Eurasia -->
+          <ellipse cx="438" cy="150" rx="18" ry="28" fill="#3a6e38" opacity="0.85"/>
+          <ellipse cx="416" cy="124" rx="22" ry="14" fill="#4a7848" opacity="0.7"/>
+          <!-- Americas -->
+          <ellipse cx="356" cy="148" rx="10" ry="24" fill="#3a6238" opacity="0.75"/>
+          <ellipse cx="363" cy="180" rx="8"  ry="14" fill="#3a5e34" opacity="0.7"/>
+          <!-- Ice caps -->
+          <ellipse cx="418" cy="70"  rx="28" ry="10" fill="#d8e8f0" opacity="0.65"/>
+          <ellipse cx="418" cy="244" rx="22" ry="8"  fill="#d8e8f0" opacity="0.55"/>
+          <!-- Clouds -->
+          <path d="M368,110 Q393,102 428,108 Q453,112 466,106" stroke="#ddf" stroke-width="6" fill="none" opacity="0.5" stroke-linecap="round"/>
+          <path d="M356,142 Q376,136 406,140" stroke="#dde" stroke-width="5" fill="none" opacity="0.4" stroke-linecap="round"/>
+          <path d="M438,187 Q463,180 488,184 Q503,188 510,182" stroke="#ccd" stroke-width="5" fill="none" opacity="0.4" stroke-linecap="round"/>
+          <path d="M388,202 Q413,194 436,199" stroke="#dde" stroke-width="4" fill="none" opacity="0.35" stroke-linecap="round"/>
+          <!-- Moon surface -->
+          <path d="M42,312 Q130,304 230,308 Q330,312 410,305 Q500,298 580,304 Q615,307 638,302 L638,398 L42,398 Z" fill="#6a6a72"/>
+          <path d="M42,312 Q130,304 230,308 Q330,312 410,305 Q500,298 580,304 Q615,307 638,302 Q590,316 470,320 Q360,324 260,320 Q150,316 42,322 Z" fill="#585860" opacity="0.6"/>
+          <rect x="42" y="344" width="596" height="54" fill="#525258"/>
+          <!-- Craters -->
+          <ellipse cx="168" cy="332" rx="22" ry="6"  fill="#7a7a82" opacity="0.5"/>
+          <ellipse cx="572" cy="352" rx="16" ry="4"  fill="#7a7a82" opacity="0.4"/>
+          <ellipse cx="358" cy="356" rx="30" ry="5"  fill="#4c4c52" opacity="0.4"/>
+          <!-- Astronaut — Artemis-style suit, lit from back-left -->
+          <!-- Arms (base) -->
+          <path d="M216,266 L200,288" stroke="#2c2c40" stroke-width="11" stroke-linecap="round"/>
+          <path d="M272,266 L288,288" stroke="#2c2c40" stroke-width="11" stroke-linecap="round"/>
+          <!-- Left arm red ID stripe -->
+          <path d="M212,272 L206,279" stroke="#8b1a1a" stroke-width="4" stroke-linecap="round"/>
+          <!-- Wrist rings -->
+          <path d="M201,285 L197,291" stroke="#424258" stroke-width="7" stroke-linecap="round"/>
+          <path d="M287,285 L291,291" stroke="#424258" stroke-width="7" stroke-linecap="round"/>
 
-      <!-- Horizon glow -->
-      <ellipse cx="310" cy="300" rx="320" ry="60" fill="#f08020" opacity="0.35"/>
-      <ellipse cx="310" cy="308" rx="210" ry="34" fill="#f4a030" opacity="0.25"/>
+          <!-- PLSS backpack — multi-panel -->
+          <rect x="224" y="256" width="40" height="38" rx="3" fill="#1e1e2e"/>
+          <!-- Radiator panel (top) -->
+          <rect x="226" y="257" width="36" height="10" rx="2" fill="#3a3a52"/>
+          <!-- Radiator fins -->
+          <rect x="229" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
+          <rect x="233" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
+          <rect x="237" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
+          <rect x="241" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
+          <rect x="245" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
+          <rect x="249" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
+          <rect x="253" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
+          <!-- Mid housing -->
+          <rect x="227" y="268" width="34" height="16" rx="1" fill="#272738"/>
+          <!-- Control panel inset -->
+          <rect x="230" y="270" width="14" height="11" rx="1" fill="#161622"/>
+          <!-- Indicator lights -->
+          <rect x="231" y="272" width="3" height="3" rx="1" fill="#22c55e" opacity="0.85"/>
+          <rect x="236" y="272" width="3" height="3" rx="1" fill="#c8850e" opacity="0.85"/>
+          <!-- Lower section -->
+          <rect x="227" y="285" width="34" height="8" rx="1" fill="#222232"/>
+          <!-- Side handles -->
+          <rect x="224" y="260" width="4" height="30" rx="1" fill="#323248"/>
+          <rect x="260" y="260" width="4" height="30" rx="1" fill="#323248"/>
 
-      <!-- Far hill ridge -->
-      <path d="M42,288 C110,270 200,262 290,268 C360,272 420,260 490,256 C545,253 595,260 638,266 L638,398 L42,398 Z" fill="#2e5228"/>
+          <!-- Shoulders -->
+          <rect x="214" y="258" width="60" height="16" rx="5" fill="#303044"/>
+          <!-- Shoulder joint rings -->
+          <rect x="214" y="260" width="9" height="12" rx="3" fill="#3e3e56"/>
+          <rect x="265" y="260" width="9" height="12" rx="3" fill="#3e3e56"/>
+          <!-- Red shoulder patch (left) -->
+          <rect x="215" y="263" width="7" height="4" rx="1" fill="#8b1a1a" opacity="0.9"/>
 
-      <!-- Main near hill -->
-      <path d="M42,322 C90,304 170,292 250,296 C310,300 365,284 425,280 C472,277 520,283 568,278 C598,275 622,280 638,286 L638,398 L42,398 Z" fill="#223e1c"/>
+          <!-- Helmet -->
+          <circle cx="244" cy="242" r="18" fill="#262638"/>
+          <!-- Neck ring -->
+          <rect x="232" y="256" width="24" height="5" rx="2" fill="#3e3e56"/>
+          <!-- Antenna -->
+          <rect x="243" y="222" width="2" height="9" fill="#4a4a62"/>
 
-      <!-- Ground base -->
-      <rect x="42" y="358" width="596" height="40" fill="#1a3016"/>
+          <!-- Suit body flanks (visible beside PLSS) -->
+          <rect x="215" y="275" width="9" height="17" rx="2" fill="#343448"/>
+          <rect x="264" y="275" width="9" height="17" rx="2" fill="#343448"/>
 
-      <!-- Person 1 silhouette — WS, right side -->
-      <circle cx="507" cy="265" r="3"    fill="#0a1408"/>
-      <rect   x="505" y="268" width="4"  height="10" fill="#0a1408"/>
-      <line   x1="502" y1="271" x2="512" y2="270" stroke="#0a1408" stroke-width="2"/>
-      <line   x1="507" y1="278" x2="504" y2="285" stroke="#0a1408" stroke-width="2"/>
-      <line   x1="507" y1="278" x2="510" y2="285" stroke="#0a1408" stroke-width="2"/>
+          <!-- Waist ring -->
+          <rect x="226" y="292" width="36" height="10" rx="2" fill="#303044"/>
+          <rect x="231" y="294" width="6" height="6" rx="1" fill="#3e3e56"/>
+          <rect x="251" y="294" width="6" height="6" rx="1" fill="#3e3e56"/>
 
-      <!-- Person 2 silhouette — beside person 1 -->
-      <circle cx="520" cy="265" r="3"    fill="#0a1408"/>
-      <rect   x="518" y="268" width="4"  height="10" fill="#0a1408"/>
-      <line   x1="515" y1="271" x2="525" y2="270" stroke="#0a1408" stroke-width="2"/>
-      <line   x1="520" y1="278" x2="517" y2="285" stroke="#0a1408" stroke-width="2"/>
-      <line   x1="520" y1="278" x2="523" y2="285" stroke="#0a1408" stroke-width="2"/>
+          <!-- Legs -->
+          <rect x="225" y="300" width="15" height="42" rx="2" fill="#2a2a3c"/>
+          <rect x="249" y="300" width="15" height="42" rx="2" fill="#2a2a3c"/>
+          <!-- Knee rings -->
+          <rect x="223" y="320" width="17" height="5" rx="1" fill="#3a3a52"/>
+          <rect x="248" y="320" width="17" height="5" rx="1" fill="#3a3a52"/>
 
-      </g><!-- end landscape clip -->
+          <!-- Boots -->
+          <rect x="219" y="340" width="22" height="8" rx="2" fill="#1e1e2e"/>
+          <rect x="247" y="340" width="22" height="8" rx="2" fill="#1e1e2e"/>
 
-      <!-- Scanlines -->
-      <rect x="42" y="42" width="596" height="356" fill="url(#scan)"/>
+          <!-- Back-left rim lighting -->
+          <ellipse cx="220" cy="282" rx="26" ry="52" fill="#5060a0" opacity="0.10"/>
+          <circle cx="234" cy="242" r="7" fill="#8090c0" opacity="0.34"/>
+          <rect x="224" y="259" width="5" height="34" rx="2" fill="#8090c0" opacity="0.28"/>
+          <rect x="214" y="258" width="16" height="6" rx="2" fill="#8090c0" opacity="0.24"/>
+          <path d="M216,266 L200,288" stroke="#5060a0" stroke-width="5" stroke-linecap="round" opacity="0.42"/>
+          <rect x="225" y="301" width="4" height="40" rx="1" fill="#8090c0" opacity="0.18"/>
+        </g>
+        <rect x="42" y="42" width="596" height="356" fill="url(#scan)"/>
+        <!-- TOP HUD -->
+        <rect x="48" y="47" width="23" height="22" fill="#c8850e"/>
+        <text x="59" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="13" font-weight="700" fill="#000">B</text>
+        <text x="77" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#aaa">SDI 2</text>
+        <text x="116" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">1920×1080</text>
+        <text x="340" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#c8850e">S-Log3 › Rec.709</text>
+        <text x="592" y="63" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#fff">23.98p</text>
+        <rect x="596" y="48" width="9" height="9" fill="#ef4444"/>
+        <text x="609" y="63" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#ef4444">REC</text>
+        <rect x="42" y="78" width="596" height="1" fill="#161616"/>
+        <!-- BOTTOM HUD -->
+        <rect x="42" y="362" width="596" height="1" fill="#161616"/>
+        <rect x="48" y="368" width="96" height="22" fill="#000"/>
+        <text x="53" y="384" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#c8850e">01:02:22:18</text>
+        <text x="340" y="384" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">F 8.0'  ·  T5.6  ·  21mm</text>
+        <text x="630" y="384" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#888">ISO 400  ·  180°  ·  5600K</text>
+      </g>
 
-      <!-- ── TOP HUD band ── -->
-      <!-- Camera label box -->
-      <rect x="48" y="47" width="23" height="22" fill="#c8850e"/>
-      <text x="59" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="13" font-weight="700" fill="#000">A</text>
-
-      <!-- Input + resolution -->
-      <text x="77" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#aaa">SDI 1</text>
-      <text x="116" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">1920×1080</text>
-
-      <!-- LUT / color pipeline (center) -->
-      <text x="340" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#c8850e">S-Log3 › Rec.709</text>
-
-      <!-- Frame rate -->
-      <text x="592" y="63" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#fff">23.98p</text>
-
-      <!-- REC indicator -->
-      <rect x="596" y="48" width="9" height="9" fill="#ef4444"/>
-      <text x="609" y="63" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#ef4444">REC</text>
-
-      <!-- HUD divider (top) -->
-      <rect x="42" y="78" width="596" height="1" fill="#161616"/>
-
-      <!-- ── FRAME CORNER BRACKETS ── -->
-      <!-- 3px thick, 22px arms, amber — pixel art L-shapes -->
-      <!-- Top-left -->
+      <!-- ══ Shared overlays (always on top) ══ -->
+      <!-- Frame corner brackets -->
       <rect x="50" y="86" width="22" height="3" fill="#c8850e"/>
       <rect x="50" y="86" width="3" height="22" fill="#c8850e"/>
-      <!-- Top-right -->
       <rect x="606" y="86" width="22" height="3" fill="#c8850e"/>
       <rect x="625" y="86" width="3" height="22" fill="#c8850e"/>
-      <!-- Bottom-left -->
       <rect x="50" y="357" width="22" height="3" fill="#c8850e"/>
       <rect x="50" y="335" width="3" height="22" fill="#c8850e"/>
-      <!-- Bottom-right -->
       <rect x="606" y="357" width="22" height="3" fill="#c8850e"/>
       <rect x="625" y="335" width="3" height="22" fill="#c8850e"/>
-
-      <!-- Center crosshair (very faint) -->
+      <!-- Crosshair -->
       <rect x="335" y="219" width="10" height="1" fill="#1c1c1c"/>
       <rect x="340" y="214" width="1" height="10" fill="#1c1c1c"/>
-
-      <!-- Vignette overlay -->
+      <!-- Vignette -->
       <rect x="42" y="42" width="596" height="356" fill="url(#vignette)"/>
-
-      <!-- ── BUTTON (centre of frame) ── -->
+      <!-- Enter button -->
       <a href="portfolio.html" class="mon-enter">
         <rect x="268" y="200" width="144" height="44" fill="#c8850e"/>
         <text x="340" y="227" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="15" font-weight="700" fill="#fff" style="letter-spacing:3px">ENTER</text>
       </a>
-
-      <!-- ── BOTTOM HUD divider ── -->
-      <rect x="42" y="362" width="596" height="1" fill="#161616"/>
-
-      <!-- ── BOTTOM HUD band ── -->
-      <!-- Timecode box (left) -->
-      <rect x="48" y="368" width="96" height="22" fill="#000"/>
-      <text x="53" y="384" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#c8850e">01:02:14:07</text>
-
-      <!-- Lens data (center-left) -->
-      <text x="340" y="384" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">F 4.2'  ·  T2.8  ·  35mm</text>
-
-      <!-- Exposure (right) -->
-      <text x="630" y="384" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#888">ISO 800  ·  180°  ·  3200K</text>
 
     </svg>
   </main>
@@ -504,6 +626,27 @@
   </footer>
 
   <script>
+  (function() {
+    var camA = document.getElementById('cam-a');
+    var camB = document.getElementById('cam-b');
+    var label = document.getElementById('cam-toggle-label');
+    document.getElementById('cam-toggle').addEventListener('click', function() {
+      if (camB.style.opacity === '1') {
+        camA.style.opacity = '1';
+        camA.style.pointerEvents = 'auto';
+        camB.style.opacity = '0';
+        camB.style.pointerEvents = 'none';
+        label.textContent = 'B CAM ▶';
+      } else {
+        camA.style.opacity = '0';
+        camA.style.pointerEvents = 'none';
+        camB.style.opacity = '1';
+        camB.style.pointerEvents = 'auto';
+        label.textContent = '◀ A CAM';
+      }
+    });
+  })();
+
   (function() {
     function fitClapperName() {
       var el = document.querySelector('.name-row .clapper-val');
