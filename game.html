@@ -162,8 +162,8 @@
 <script>
 // ═══════════════════════════════════════════════════════════════════
 //  CONTINUITY! — pixel-art film continuity game
-//  Observe TAKE 1 (10s) · Find all 5 changes in TAKE 2 · Submit
-//  3 rounds · +10 per correct find · −5 per wrong click
+//  Observe TAKE 1 (8s) · Find all changes in TAKE 2 · Submit
+//  3 rounds (3, 4, 5 changes) · +10 per correct find · −5 per wrong click
 // ═══════════════════════════════════════════════════════════════════
 
 const canvas = document.getElementById('game');
@@ -492,21 +492,31 @@ const STABLE     = ['frame', 'book', 'plant'];
 const SUBMIT = { x: VW / 2 - 32, y: TOP + SH + 4, w: 64, h: 10 };
 
 // ── Round definitions ─────────────────────────────────────────────
-// All 5 changeable elements flip every round.
+// Rounds have varying numbers of changes: 3, 4, 5.
 const ROUNDS = [
-  {
-    take1: { mugLeft: true,  clipLeft: false, hasJacket: true,  chairLeft: true,  tieRed: true  },
-    take2: { mugLeft: false, clipLeft: true,  hasJacket: false, chairLeft: false, tieRed: false },
+  { // Round 1: 3 changes (mug, jacket, tie)
+    take1: { mugLeft: true,  clipLeft: true,  hasJacket: true,  chairLeft: true,  tieRed: true  },
+    take2: { mugLeft: false, clipLeft: true,  hasJacket: false, chairLeft: true,  tieRed: false },
   },
-  {
-    take1: { mugLeft: false, clipLeft: true,  hasJacket: false, chairLeft: false, tieRed: false },
-    take2: { mugLeft: true,  clipLeft: false, hasJacket: true,  chairLeft: true,  tieRed: true  },
+  { // Round 2: 4 changes (mug, clipboard, jacket, chair)
+    take1: { mugLeft: false, clipLeft: false, hasJacket: false, chairLeft: false, tieRed: true  },
+    take2: { mugLeft: true,  clipLeft: true,  hasJacket: true,  chairLeft: true,  tieRed: true  },
   },
-  {
-    take1: { mugLeft: true,  clipLeft: true,  hasJacket: true,  chairLeft: false, tieRed: true  },
-    take2: { mugLeft: false, clipLeft: false, hasJacket: false, chairLeft: true,  tieRed: false },
+  { // Round 3: 5 changes (all)
+    take1: { mugLeft: true,  clipLeft: false, hasJacket: true,  chairLeft: false, tieRed: false },
+    take2: { mugLeft: false, clipLeft: true,  hasJacket: false, chairLeft: true,  tieRed: true  },
   },
 ];
+
+function getChangedZones(round) {
+  const changed = [];
+  if (round.take1.mugLeft   !== round.take2.mugLeft)   changed.push('mug');
+  if (round.take1.clipLeft  !== round.take2.clipLeft)  changed.push('clipboard');
+  if (round.take1.hasJacket !== round.take2.hasJacket) changed.push('jacket');
+  if (round.take1.chairLeft !== round.take2.chairLeft) changed.push('chair');
+  if (round.take1.tieRed    !== round.take2.tieRed)    changed.push('tie');
+  return changed;
+}
 
 // ── UI helpers ────────────────────────────────────────────────────
 function filmStrip(vy) {
@@ -650,23 +660,21 @@ function drawTitle(frame) {
   // ── Main title text ──
   txt('CONTINUITY!', VW / 2, 83, 8, C.uiGold);
   txt('A FILM SET PUZZLE', VW / 2, 99, 3, '#3a5888');
-  txt('FIND ALL 5 CHANGES', VW / 2, 111, 3, C.uiDim);
+  txt('FIND ALL THE CHANGES', VW / 2, 111, 3, C.uiDim);
   txt('BETWEEN TAKES', VW / 2, 119, 3, C.uiDim);
   if (Math.floor(frame / 28) % 2 === 0)
     txt('CLICK TO START', VW / 2, 135, 3, C.uiText);
-  filmStrip(VH - 8);
 }
 
 function drawIntro(roundIdx, frame) {
   r(0, 0, VW, VH, C.uiBg);
   txt(`SCENE ${roundIdx + 1} OF ${ROUNDS.length}`, VW / 2, 52, 3, '#383858');
   txt('WATCH CAREFULLY', VW / 2, 72, 4.5, C.uiText);
-  txt('FIVE THINGS WILL CHANGE', VW / 2, 88, 3, C.uiDim);
+  txt('THINGS WILL CHANGE', VW / 2, 88, 3, C.uiDim);
   for (let i = 0; i < ROUNDS.length; i++) {
     const col = i < roundIdx ? C.uiGold : (i === roundIdx ? C.uiAccent : '#1e1e36');
     r(VW / 2 - ROUNDS.length * 6 + i * 12, 108, 5, 5, col);
   }
-  filmStrip(VH - 8);
 }
 
 function drawCut(t, total) {
@@ -679,7 +687,7 @@ function drawCut(t, total) {
   txt('CUT!', VW / 2, VH / 2, 12, '#ffffff');
 }
 
-function drawEnd(win, totalScore, frame) {
+function drawEnd(win, totalScore, totalMax, frame) {
   r(0, 0, VW, VH, C.uiBg);
   if (win) {
     txt('WRAPPED!',       VW / 2, 46, 7,   C.uiGold);
@@ -690,31 +698,33 @@ function drawEnd(win, totalScore, frame) {
     txt('THE EDITOR NOTICED.', VW / 2, 68, 3, '#806050');
   }
   txt(`FINAL SCORE: ${totalScore}`, VW / 2, 88, 3.5, C.uiGold);
-  txt(`OUT OF ${ROUNDS.length * 50}`,     VW / 2, 98, 3,   C.uiDim);
+  txt(`OUT OF ${totalMax}`,          VW / 2, 98, 3,   C.uiDim);
   if (Math.floor(frame / 28) % 2 === 0)
     txt('CLICK TO PLAY AGAIN', VW / 2, 118, 3, C.uiText);
-  filmStrip(VH - 8);
 }
 
 // ── Result overlay ────────────────────────────────────────────────
-function drawResult(roundState, selected, roundScore, correct, wrong) {
-  // Highlight all zones
+function drawResult(roundState, selected, roundScore, correct, wrong, totalChanged, maxForRound) {
   const z = getZones(roundState.take2);
-  for (const key of CHANGEABLE) {
+  const changedZones = getChangedZones(roundState);
+  // Green = found, amber dashed = missed
+  for (const key of changedZones) {
     if (selected.has(key)) outline(z[key], 'rgba(30,180,40,0.95)',  false);  // found ✓
     else                   outline(z[key], 'rgba(200,130,0,0.9)',   true);   // missed !
   }
-  for (const key of STABLE) {
-    if (selected.has(key)) outline(z[key], 'rgba(190,30,20,0.95)', false);  // wrong ✗
+  // Red = wrong click (stable OR non-changed changeable)
+  for (const key of Object.keys(z)) {
+    if (!changedZones.includes(key) && selected.has(key))
+      outline(z[key], 'rgba(190,30,20,0.95)', false);  // wrong ✗
   }
   // Top bar
-  const topMsg = `${correct}/5 FOUND  ${wrong > 0 ? '· ' + wrong + ' WRONG' : ''}`;
+  const topMsg = `${correct}/${totalChanged} FOUND  ${wrong > 0 ? '· ' + wrong + ' WRONG' : ''}`;
   drawTopBar(topMsg);
   // Bottom bar
   const by = TOP + SH;
   r(0, by, VW, BOT, C.uiBg);
   const scoreCol = roundScore > 0 ? C.uiGold : C.uiDim;
-  txt(`ROUND SCORE: +${roundScore}`, VW / 2, by + BOT / 2, 3.5, scoreCol);
+  txt(`ROUND: ${roundScore}/${maxForRound} PTS`, VW / 2, by + BOT / 2, 3.5, scoreCol);
 }
 
 // ── Game state ────────────────────────────────────────────────────
@@ -736,14 +746,16 @@ let lastResult = { correct: 0, wrong: 0, roundScore: 0 };
 function rnd() { return ROUNDS[roundIdx]; }
 
 function processSubmit() {
+  const changedZones = getChangedZones(rnd());
   let correct = 0, wrong = 0;
   for (const k of selected) {
-    if (CHANGEABLE.includes(k)) correct++;
-    else                         wrong++;
+    if (changedZones.includes(k)) correct++;
+    else                           wrong++;
   }
+  const maxForRound = changedZones.length * 10;
   const roundScore = Math.max(0, correct * 10 - wrong * 5);
   score += roundScore;
-  lastResult = { correct, wrong, roundScore };
+  lastResult = { correct, wrong, roundScore, maxForRound, totalChanged: changedZones.length };
   timer = 0;
   state = 'RESULT';
 }
@@ -830,12 +842,12 @@ function loop() {
 
   } else if (state === 'RESULT') {
     drawScene(rnd().take2);
-    drawResult(rnd(), selected, lastResult.roundScore, lastResult.correct, lastResult.wrong);
+    drawResult(rnd(), selected, lastResult.roundScore, lastResult.correct, lastResult.wrong, lastResult.totalChanged, lastResult.maxForRound);
     if (++timer >= RESULT_F) advanceFromResult();
 
   } else if (state === 'END') {
-    const perfect = score >= ROUNDS.length * 50;
-    drawEnd(perfect || score >= ROUNDS.length * 30, score, frame);
+    const totalMax = ROUNDS.reduce((sum, round) => sum + getChangedZones(round).length * 10, 0);
+    drawEnd(score >= Math.ceil(totalMax * 0.6), score, totalMax, frame);
   }
 
   requestAnimationFrame(loop);
