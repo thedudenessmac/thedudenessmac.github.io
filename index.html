@@ -233,7 +233,8 @@
       .monitor-svg { display: none; }
       .stripe { background: repeating-linear-gradient(-45deg, #000 0px, #000 28px, #fff 28px, #fff 56px); height: 28px; border-bottom: 3px solid #000; }
 
-      .mobile-clapper { display: flex; flex-direction: column; flex: 1; background: #f7f5f0; text-decoration: none; border-top: 3px solid #111; }
+      /* Clear the base border (which has border: 1px solid #2a2a2a), set top only */
+      .mobile-clapper { display: flex; flex-direction: column; flex: 1; background: #f7f5f0; text-decoration: none; border: none; border-top: 3px solid #111; }
       .clapper-stripe-top { display: none; }
       .clapper-divider { display: none; }
 
@@ -255,7 +256,7 @@
       .clapper-row:not(.name-row) {
         grid-column: 2;
         display: flex;
-        min-height: 48px;
+        min-height: 54px;
         border-bottom: 3px solid #111;
       }
       .clapper-row.enter-row { border-bottom: none; }
@@ -265,13 +266,14 @@
       .clapper-cell.wide { flex: 2; }
       .name-row .clapper-cell { justify-content: center; border-right: none; padding: 12px 18px; }
 
-      .clapper-label { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; color: #888; text-transform: uppercase; }
-      .clapper-val { font-size: 20px; font-weight: 700; color: #111; line-height: 1.1; text-transform: uppercase; }
-      .clapper-val.amber { color: #c8850e; font-size: 18px; }
-      .clapper-val.small { font-size: 15px; }
-      .name-row .clapper-val { letter-spacing: -1px; white-space: nowrap; }
+      .clapper-label { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; color: #888; text-transform: uppercase; }
+      .clapper-val { font-size: 26px; font-weight: 700; color: #111; line-height: 1.1; text-transform: uppercase; }
+      .clapper-val.amber { color: #c8850e; font-size: 24px; }
+      .clapper-val.small { font-size: 20px; }
+      /* Name: two lines, large — JS fit disabled in landscape */
+      .name-row .clapper-val { font-size: 46px; letter-spacing: -1px; white-space: normal; line-height: 1.0; }
 
-      .clapper-enter { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 700; letter-spacing: 8px; color: #c8850e; text-transform: uppercase; }
+      .clapper-enter { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #c8850e; text-transform: uppercase; }
       .clapper-enter-btn { border: 3px solid #c8850e; padding: 6px 24px; }
       .mobile-clapper:hover .clapper-enter { color: #a86c0a; }
       .mobile-clapper:hover .clapper-enter-btn { border-color: #a86c0a; }
@@ -651,6 +653,7 @@
 
   (function() {
     function fitClapperName() {
+      if (window.innerWidth > window.innerHeight) return; // landscape handled by CSS
       var el = document.querySelector('.name-row .clapper-val');
       if (!el) return;
       var cell = el.closest('.clapper-cell');
