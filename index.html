@@ -167,8 +167,10 @@
 
     /* SVG button hover states */
     .mon-enter { cursor: pointer; }
-    .mon-enter rect { transition: fill 0.15s; }
-    .mon-enter:hover rect { fill: #a86c0a; }
+    .mon-enter rect { transition: stroke 0.15s; }
+    .mon-enter text { transition: fill 0.15s; }
+    .mon-enter:hover rect { stroke: #a86c0a; }
+    .mon-enter:hover text { fill: #a86c0a; }
 
     /* Cam fade transition */
     #cam-a, #cam-b { transition: opacity 0.5s ease; }
@@ -201,6 +203,7 @@
         flex: 1;
         background: #f7f5f0;
         text-decoration: none;
+        border: none;
         border-top: 3px solid #111;
       }
       .clapper-stripe-top { display: none; }
@@ -422,11 +425,18 @@
           <circle cx="152" cy="130" r="22" fill="white"/>
           <circle cx="164" cy="130" r="20" fill="black"/>
         </mask>
-        <radialGradient id="earthGrad" cx="38%" cy="35%" r="65%">
+        <radialGradient id="earthGrad" cx="65%" cy="28%" r="65%">
           <stop offset="0%"   stop-color="#4a9ae0"/>
           <stop offset="55%"  stop-color="#1a5099"/>
           <stop offset="100%" stop-color="#081830"/>
         </radialGradient>
+        <linearGradient id="earthShadow" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%"   stop-color="#010508" stop-opacity="0.96"/>
+          <stop offset="32%"  stop-color="#010508" stop-opacity="0.88"/>
+          <stop offset="50%"  stop-color="#010508" stop-opacity="0.42"/>
+          <stop offset="64%"  stop-color="#010508" stop-opacity="0.05"/>
+          <stop offset="100%" stop-color="#010508" stop-opacity="0"/>
+        </linearGradient>
       </defs>
 
       <!-- ── Monitor housing ── -->
@@ -576,6 +586,8 @@
           <path d="M356,142 Q376,136 406,140" stroke="#dde" stroke-width="5" fill="none" opacity="0.4" stroke-linecap="round"/>
           <path d="M438,187 Q463,180 488,184 Q503,188 510,182" stroke="#ccd" stroke-width="5" fill="none" opacity="0.4" stroke-linecap="round"/>
           <path d="M388,202 Q413,194 436,199" stroke="#dde" stroke-width="4" fill="none" opacity="0.35" stroke-linecap="round"/>
+          <!-- Shadow — sun upper-right, terminator at 45° -->
+          <circle cx="418" cy="158" r="90" fill="url(#earthShadow)"/>
           <!-- Moon surface -->
           <path d="M42,312 Q130,304 230,308 Q330,312 410,305 Q500,298 580,304 Q615,307 638,302 L638,398 L42,398 Z" fill="#6a6a72"/>
           <path d="M42,312 Q130,304 230,308 Q330,312 410,305 Q500,298 580,304 Q615,307 638,302 Q590,316 470,320 Q360,324 260,320 Q150,316 42,322 Z" fill="#585860" opacity="0.6"/>
@@ -698,8 +710,8 @@
       <rect x="42" y="42" width="596" height="356" fill="url(#vignette)"/>
       <!-- Enter button -->
       <a href="portfolio.html" class="mon-enter">
-        <rect x="268" y="200" width="144" height="44" fill="#c8850e"/>
-        <text x="340" y="227" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="15" font-weight="700" fill="#fff" style="letter-spacing:3px">ENTER</text>
+        <rect x="268" y="200" width="144" height="44" fill="#0a0a14" stroke="#c8850e" stroke-width="3"/>
+        <text x="340" y="227" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="15" font-weight="700" fill="#c8850e" style="letter-spacing:3px">▶ ENTER</text>
       </a>
 
     </svg>
