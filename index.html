@@ -111,7 +111,7 @@
     .monitor-svg {
       /* Scale with viewport height, fixed margin handled by main padding */
       /* 310px ≈ stripe + header + footer + 2×24px padding */
-      height: clamp(280px, calc(100vh - 310px), 720px);
+      height: clamp(280px, calc(100vh - 310px), calc((100vw - 36px) * 0.647));
       width: auto;
       max-width: calc(100vw - 36px);
     }
@@ -513,7 +513,7 @@
         <!-- BOTTOM HUD -->
         <rect x="42" y="362" width="596" height="1" fill="#161616"/>
         <rect x="48" y="368" width="96" height="22" fill="#000"/>
-        <text x="53" y="384" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#c8850e">01:02:14:07</text>
+        <text id="tc-a" x="53" y="384" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#c8850e">01:02:14:07</text>
         <text x="340" y="384" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">F 4.2'  ·  T2.8  ·  35mm</text>
         <text x="630" y="384" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#888">ISO 800  ·  180°  ·  3200K</text>
       </g>
@@ -676,7 +676,7 @@
         <!-- BOTTOM HUD -->
         <rect x="42" y="362" width="596" height="1" fill="#161616"/>
         <rect x="48" y="368" width="96" height="22" fill="#000"/>
-        <text x="53" y="384" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#c8850e">01:02:22:18</text>
+        <text id="tc-b" x="53" y="384" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#c8850e">01:02:14:07</text>
         <text x="340" y="384" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">F 8.0'  ·  T5.6  ·  21mm</text>
         <text x="630" y="384" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#888">ISO 400  ·  180°  ·  5600K</text>
       </g>
@@ -710,6 +710,30 @@
   </footer>
 
   <script>
+  (function() {
+    const FPS = 24;
+    // Start: 01:02:14:07
+    const startFrames = ((1 * 3600) + (2 * 60) + 14) * FPS + 7;
+    const startTime = performance.now();
+    const tcA = document.getElementById('tc-a');
+    const tcB = document.getElementById('tc-b');
+
+    function formatTC(f) {
+      const ff = f % FPS;
+      const s  = Math.floor(f / FPS);
+      const pad = n => String(n).padStart(2, '0');
+      return `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(ff)}`;
+    }
+
+    function tick() {
+      const tc = formatTC(startFrames + Math.floor((performance.now() - startTime) / 1000 * FPS));
+      if (tcA) tcA.textContent = tc;
+      if (tcB) tcB.textContent = tc;
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+
   (function() {
     var camA = document.getElementById('cam-a');
     var camB = document.getElementById('cam-b');
