@@ -459,7 +459,8 @@
       .name { font-size: 42px; letter-spacing: -1px; }
       .header-role { font-size: 16px; }
       nav { width: 100%; left: 0; right: 0; }
-      .tab-bar { padding: 0; width: 100%; justify-content: space-evenly; overflow: hidden; }
+      .tab-bar { padding: 0; width: 100%; overflow: hidden; }
+      .tab-bar.spaced { justify-content: space-evenly; }
       .tab { flex: none; padding: 15px 4px 13px; font-size: 12px; text-align: center; letter-spacing: 0; }
       .content { padding: 0 22px; }
       .about-layout { flex-direction: column; gap: 28px; }
@@ -949,17 +950,21 @@
       moreBtn.style.display = 'none';
       dropdown.innerHTML = '';
       dropdown.classList.remove('open');
+      bar.classList.remove('spaced');
 
-      // Use scrollWidth vs offsetWidth to reliably detect overflow
-      if (bar.scrollWidth <= bar.offsetWidth) return;
+      // With flex-start, scrollWidth reliably reflects true content width
+      if (bar.scrollWidth <= bar.clientWidth) {
+        bar.classList.add('spaced'); // all fit — restore even spacing
+        return;
+      }
 
-      // Show more button and force reflow before measuring it
+      // Show more button and force reflow before measuring
       moreBtn.style.display = '';
       void moreBtn.offsetWidth;
 
-      const barWidth  = bar.offsetWidth;
-      const moreBtnW  = moreBtn.offsetWidth;
-      let usedWidth   = moreBtnW;
+      const barWidth   = bar.clientWidth;
+      const moreBtnW   = moreBtn.offsetWidth;
+      let usedWidth    = moreBtnW;
       let overflowFrom = tabEls.length;
 
       for (let i = 0; i < tabEls.length; i++) {
@@ -967,7 +972,7 @@
         usedWidth += tabEls[i].offsetWidth;
       }
 
-      if (overflowFrom >= tabEls.length) { moreBtn.style.display = 'none'; return; }
+      if (overflowFrom >= tabEls.length) { moreBtn.style.display = 'none'; bar.classList.add('spaced'); return; }
 
       for (let i = overflowFrom; i < tabEls.length; i++) {
         tabEls[i].style.display = 'none';
