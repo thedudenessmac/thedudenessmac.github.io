@@ -510,7 +510,7 @@
       <button type="button" class="tab" data-tab="skills">Services</button>
       <button type="button" class="tab" data-tab="gallery">Gallery</button>
       <button type="button" class="tab" data-tab="contact">Contact</button>
-      <button type="button" class="tab-more">▾</button>
+      <button type="button" class="tab-more"><svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 6,7 11,1"/></svg></button>
     </div>
     <div class="tab-dropdown"></div>
   </nav>
@@ -959,12 +959,12 @@
       }
 
       // Show more button and force reflow before measuring
-      moreBtn.style.display = '';
+      moreBtn.style.display = 'block';
       void moreBtn.offsetWidth;
 
       const barWidth   = bar.clientWidth;
       const moreBtnW   = moreBtn.offsetWidth;
-      let usedWidth    = moreBtnW;
+      let usedWidth    = moreBtnW + 40; // +40px breathing room for spacing
       let overflowFrom = tabEls.length;
 
       for (let i = 0; i < tabEls.length; i++) {
@@ -984,6 +984,8 @@
         btn.addEventListener('click', e => { e.stopPropagation(); activateTab(btn.dataset.tab); closeDropdown(); });
         dropdown.appendChild(btn);
       }
+
+      bar.classList.add('spaced'); // space out visible tabs + ▾ evenly
 
       const hasActiveOverflow = dropdown.querySelector('.tab-dropdown-item.active');
       moreBtn.style.borderBottomColor = hasActiveOverflow ? '#c8850e' : 'transparent';
