@@ -160,13 +160,30 @@
     .cv-link { color: #c8850e; text-underline-offset: 3px; }
 
     /* Photo inside About panel */
+    .photo-cube {
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+      margin-top: 10px;
+    }
+    .photo-cube::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 10px;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #7a7268;
+      background: transparent;
+    }
     .about-photo {
       width: 300px;
       height: 346px;
-      flex-shrink: 0;
       object-fit: cover;
       object-position: center 80%;
       display: block;
+      border: 1px solid #7a7268;
+      position: relative;
     }
 
     /* ── Credits ─────────────────────────────────── */
@@ -395,7 +412,9 @@
       .tab { flex: 1; padding: 15px 4px 13px; font-size: 12px; text-align: center; }
       .content { padding: 0 22px; }
       .about-layout { flex-direction: column; gap: 28px; }
-      .about-photo-placeholder, .about-photo { width: calc(100% + 44px); margin-left: -22px; margin-right: -22px; height: 420px; object-position: center 80%; }
+      .about-photo-placeholder, .about-photo { width: 100%; height: 420px; object-position: center 80%; }
+      .photo-cube { width: calc(100% + 44px); margin-left: -22px; margin-right: -22px; margin-top: 0; display: block; }
+      .photo-cube::before { display: none; }
       .footer-inner { padding: 20px 22px; flex-direction: column; gap: 10px; text-align: center; }
       .credits-table thead { display: none; }
       .credits-table, .credits-table tbody { display: block; }
@@ -456,7 +475,9 @@
           <p>Truth be told, these are really two sides of the same coin!</p>
           <p>Please find a copy of my CV <a href="marko-balac-cv.pdf" class="cv-link" target="_blank" rel="noopener noreferrer">here</a>.</p>
         </div>
-        <img src="headshot.jpg" alt="Marko Balac" class="about-photo">
+        <div class="photo-cube">
+          <img src="headshot.jpg" alt="Marko Balac" class="about-photo">
+        </div>
       </div>
     </section>
 
