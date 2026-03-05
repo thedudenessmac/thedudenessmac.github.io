@@ -9,6 +9,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="favicon.png">
+  <script>if (location.hash) document.documentElement.classList.add('has-hash');</script>
+  <style>
+    .has-hash .panel { display: none !important; }
+    .has-hash .tab { border-bottom-color: transparent !important; color: #aaa !important; }
+  </style>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1006,6 +1011,7 @@
       const hashTab = document.querySelector(`.tab[data-tab="${initHash}"]`);
       if (hashTab) activateTab(initHash);
     }
+    document.documentElement.classList.remove('has-hash');
   </script>
 
 </body>
