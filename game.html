@@ -128,10 +128,54 @@
       image-rendering: crisp-edges;
       cursor: crosshair;
     }
+
+    /* ── Mobile portrait ── */
+    @media (max-width: 800px) {
+      body { padding: 12px 8px 24px; }
+      .back-link { margin-bottom: 12px; }
+      .hud-top, .hud-bot { height: 28px; font-size: 11px; padding: 0 7px; gap: 6px; }
+      .hud-data, .hud-sep { display: none; }
+      .hud-cam { font-size: 11px; }
+      .hud-tc { font-size: 11px; padding: 2px 5px; }
+    }
+
+    /* ── Mobile landscape: fit entire game in viewport height ── */
+    @media (max-height: 500px) and (orientation: landscape) {
+      body { padding: 8px; justify-content: center; }
+      .back-link { display: none; }
+      .hud-top, .hud-bot { height: 28px; font-size: 11px; padding: 0 7px; gap: 6px; }
+      .hud-data, .hud-sep { display: none; }
+      .hud-cam { font-size: 11px; }
+      .hud-tc { font-size: 11px; padding: 2px 5px; }
+      .monitor-housing { width: min(720px, calc((100vh - 80px) * 1.5)); }
+    }
+
+    /* ── Portrait nudge ── */
+    .rotate-prompt {
+      display: none;
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(6,6,14,0.92);
+      color: #c8850e;
+      font-family: 'Courier Prime', Courier, monospace;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      padding: 8px 16px;
+      border: 1px solid #c8850e;
+      white-space: nowrap;
+      z-index: 100;
+      pointer-events: none;
+    }
+    @media (max-width: 800px) and (max-height: 500px) and (orientation: portrait) {
+      .rotate-prompt { display: block; }
+    }
   </style>
 </head>
 <body>
   <a class="back-link" href="portfolio.html">← BACK</a>
+  <div class="rotate-prompt">↻ ROTATE FOR BEST EXPERIENCE</div>
   <div class="monitor-housing">
     <div class="hud-top">
       <span class="hud-cam">A</span>
@@ -854,6 +898,49 @@ function loop() {
 }
 
 // ── Input ─────────────────────────────────────────────────────────
+function getTouch(e) {
+  const touch = e.changedTouches[0];
+  const rect  = canvas.getBoundingClientRect();
+  return {
+    mx: (touch.clientX - rect.left) * (canvas.width  / rect.width)  / S,
+    my: (touch.clientY - rect.top)  * (canvas.height / rect.height) / S,
+  };
+}
+
+function handleInteract(mx, my) {
+  if (state === 'TITLE') {
+    roundIdx = 0; score = 0; timer = 0; frame = 0;
+    selected.clear();
+    state = 'INTRO';
+    return;
+  }
+  if (state === 'END') {
+    roundIdx = 0; score = 0; timer = 0; frame = 0;
+    selected.clear();
+    state = 'TITLE';
+    return;
+  }
+  if (state === 'RESULT') {
+    advanceFromResult();
+    return;
+  }
+  if (state !== 'SPOT') return;
+
+  if (inZ(mx, my, SUBMIT)) {
+    processSubmit();
+    return;
+  }
+
+  const z = getZones(rnd().take2);
+  for (const [k, zn] of Object.entries(z)) {
+    if (inZ(mx, my, zn)) {
+      if (selected.has(k)) selected.delete(k);
+      else selected.add(k);
+      break;
+    }
+  }
+}
+
 canvas.addEventListener('mousemove', e => {
   const { mx, my } = getMouse(e);
   hovered   = null;
@@ -875,41 +962,27 @@ canvas.addEventListener('mousemove', e => {
 
 canvas.addEventListener('click', e => {
   const { mx, my } = getMouse(e);
+  handleInteract(mx, my);
+});
 
-  if (state === 'TITLE') {
-    roundIdx = 0; score = 0; timer = 0; frame = 0;
-    selected.clear();
-    state = 'INTRO';
-    return;
-  }
-  if (state === 'END') {
-    roundIdx = 0; score = 0; timer = 0; frame = 0;
-    selected.clear();
-    state = 'TITLE';
-    return;
-  }
-  if (state === 'RESULT') {
-    advanceFromResult();
-    return;
-  }
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const { mx, my } = getTouch(e);
+  hovered = null; submitHov = false;
+  handleInteract(mx, my);
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
   if (state !== 'SPOT') return;
-
-  // Submit button
-  if (inZ(mx, my, SUBMIT)) {
-    processSubmit();
-    return;
-  }
-
-  // Scene zones — toggle selection
+  const { mx, my } = getTouch(e);
+  hovered = null; submitHov = false;
+  if (inZ(mx, my, SUBMIT)) { submitHov = true; return; }
   const z = getZones(rnd().take2);
   for (const [k, zn] of Object.entries(z)) {
-    if (inZ(mx, my, zn)) {
-      if (selected.has(k)) selected.delete(k);
-      else selected.add(k);
-      break;
-    }
+    if (inZ(mx, my, zn)) { hovered = k; break; }
   }
-});
+}, { passive: false });
 
 // ── Boot ──────────────────────────────────────────────────────────
 document.fonts.ready.then(() => requestAnimationFrame(loop));
