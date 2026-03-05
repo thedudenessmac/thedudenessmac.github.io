@@ -98,6 +98,17 @@
       margin: 0 auto;
       padding: 0 0 0 18px;
       display: flex;
+      position: relative;
+    }
+
+    .tab-indicator {
+      position: absolute;
+      bottom: 0;
+      height: 3px;
+      background: #c8850e;
+      pointer-events: none;
+      transition: left 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  width 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .tab {
@@ -119,7 +130,7 @@
     .tab:hover { color: #555; }
     .tab.active {
       color: #111111;
-      border-bottom-color: #c8850e;
+      border-bottom-color: transparent; /* indicator handles this on desktop */
     }
 
     /* ── Overflow "more" button & dropdown ──────── */
@@ -469,6 +480,8 @@
       nav { width: 100%; left: 0; right: 0; }
       .tab-bar { padding: 0; width: 100%; overflow: hidden; }
       .tab-bar.spaced { justify-content: space-evenly; }
+      .tab-indicator { display: none; }
+      .tab.active { border-bottom-color: #c8850e; }
       .tab { flex: none; padding: 15px 4px 13px; font-size: 12px; text-align: center; letter-spacing: 0; }
       .content { padding: 0 22px; }
       .about-layout { flex-direction: column; gap: 28px; }
@@ -520,6 +533,7 @@
       <button type="button" class="tab" data-tab="skills">Services</button>
       <button type="button" class="tab" data-tab="gallery">Gallery</button>
       <button type="button" class="tab" data-tab="contact">Contact</button>
+      <div class="tab-indicator"></div>
       <button type="button" class="tab-more"><svg width="12" height="8" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1,1 6,7 11,1"/></svg></button>
     </div>
     <div class="tab-dropdown"></div>
@@ -923,10 +937,28 @@
   </footer>
 
   <script>
-    const allTabs  = document.querySelectorAll('.tab');
-    const panels   = document.querySelectorAll('.panel');
-    const moreBtn  = document.querySelector('.tab-more');
-    const dropdown = document.querySelector('.tab-dropdown');
+    const allTabs   = document.querySelectorAll('.tab');
+    const panels    = document.querySelectorAll('.panel');
+    const moreBtn   = document.querySelector('.tab-more');
+    const dropdown  = document.querySelector('.tab-dropdown');
+    const indicator = document.querySelector('.tab-indicator');
+
+    function updateIndicator(snap) {
+      if (!indicator) return;
+      const activeTab = document.querySelector('.tab-bar > .tab.active');
+      if (!activeTab || activeTab.offsetWidth === 0) { indicator.style.opacity = '0'; return; }
+      if (snap) {
+        indicator.style.transition = 'none';
+        indicator.style.left  = activeTab.offsetLeft + 'px';
+        indicator.style.width = activeTab.offsetWidth + 'px';
+        indicator.style.opacity = '1';
+        requestAnimationFrame(() => { indicator.style.transition = ''; });
+      } else {
+        indicator.style.left  = activeTab.offsetLeft + 'px';
+        indicator.style.width = activeTab.offsetWidth + 'px';
+        indicator.style.opacity = '1';
+      }
+    }
 
     function activateTab(name) {
       allTabs.forEach(t => t.classList.remove('active'));
@@ -937,6 +969,7 @@
       const panel = document.getElementById(name);
       if (panel) panel.classList.add('active');
       history.replaceState(null, '', '#' + name);
+      updateIndicator(false);
     }
 
     allTabs.forEach(tab => {
@@ -1003,7 +1036,8 @@
     }
 
     updateOverflow();
-    window.addEventListener('resize', updateOverflow);
+    updateIndicator(true);
+    window.addEventListener('resize', () => { updateOverflow(); updateIndicator(true); });
 
     // Activate from URL hash
     const initHash = window.location.hash.slice(1);
@@ -1012,6 +1046,7 @@
       if (hashTab) activateTab(initHash);
     }
     document.documentElement.classList.remove('has-hash');
+    updateIndicator(true);
   </script>
 
 </body>
