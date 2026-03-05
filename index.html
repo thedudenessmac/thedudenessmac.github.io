@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Marko Balac — Script Supervisor</title>
+  <meta name="description" content="Marko Balac — Script Supervisor based in Toronto, ON. Portfolio, credits, and contact.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -192,7 +193,6 @@
     /* ── Responsive ── */
     @media (max-width: 600px) {
       .home-header { display: none; }
-      body { background: #f7f5f0; }
       main { background: #f7f5f0; padding: 0; flex: 1; align-items: stretch; }
       footer { background: #f7f5f0; color: #999; padding: 14px 20px; }
       .monitor-svg { display: none; }
@@ -747,9 +747,11 @@
     }
 
     function tick() {
-      const tc = formatTC(startFrames + Math.floor((performance.now() - startTime) / 1000 * FPS));
-      if (tcA) tcA.textContent = tc;
-      if (tcB) tcB.textContent = tc;
+      if (!document.hidden) {
+        const tc = formatTC(startFrames + Math.floor((performance.now() - startTime) / 1000 * FPS));
+        if (tcA) tcA.textContent = tc;
+        if (tcB) tcB.textContent = tc;
+      }
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Continuity! — A Film Set Puzzle</title>
+  <meta name="description" content="Continuity! — A pixel-art film set puzzle game. Observe take 1, then spot all the changes in take 2.">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -168,7 +169,7 @@
       z-index: 100;
       pointer-events: none;
     }
-    @media (max-width: 800px) and (max-height: 500px) and (orientation: portrait) {
+    @media (max-width: 800px) and (orientation: portrait) {
       .rotate-prompt { display: block; }
     }
   </style>
@@ -815,12 +816,14 @@ function advanceFromResult() {
   }
 }
 
+// ── HUD elements (cached once) ────────────────────────────────────
+const phaseEl = document.getElementById('hud-phase');
+const scoreEl = document.getElementById('hud-score');
+const roundEl = document.getElementById('hud-round');
+const tcEl    = document.getElementById('hud-tc');
+
 // ── HUD updater ───────────────────────────────────────────────────
 function updateHUD() {
-  const phaseEl = document.getElementById('hud-phase');
-  const scoreEl = document.getElementById('hud-score');
-  const roundEl = document.getElementById('hud-round');
-  const tcEl    = document.getElementById('hud-tc');
 
   const phaseMap = {
     TITLE:   'STANDBY',
@@ -848,6 +851,8 @@ function updateHUD() {
 
 // ── Main loop ─────────────────────────────────────────────────────
 function loop() {
+  requestAnimationFrame(loop);
+  if (document.hidden) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   frame++;
   updateHUD();
@@ -893,8 +898,6 @@ function loop() {
     const totalMax = ROUNDS.reduce((sum, round) => sum + getChangedZones(round).length * 10, 0);
     drawEnd(score >= Math.ceil(totalMax * 0.6), score, totalMax, frame);
   }
-
-  requestAnimationFrame(loop);
 }
 
 // ── Input ─────────────────────────────────────────────────────────
