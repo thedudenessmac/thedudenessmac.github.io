@@ -727,6 +727,8 @@
 
       /* Instantly hide all labels at the start of a mobile content transition */
       .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: opacity 0.15s ease !important; }
+      /* Snap label positions instantly before fade-in (used during goHome step 4) */
+      .frame.mobile-snap-positions .frame-label { transition: none !important; }
       /* Completely suppress bars (height, opacity, border) until mobile-bars-visible fires —
          overrides the desktop content-mode rule that would otherwise show them during the slide */
       .frame.content-mode .frame-bar { height: 0 !important; opacity: 0 !important; border: none !important; }
@@ -748,7 +750,7 @@
       /* FPS+REC top-right */
       .frame.content-mode .frame-label.tr { top: 20px; right: 16px; opacity: 0; }
       .frame.mobile-bars-visible.content-mode .frame-label.tr { opacity: 1; transition: opacity 0.4s ease 0.5s; }
-      /* Hide individual BC and BR — replaced by mobile-bot */
+      /* Hide individual BC and BR on mobile content pages */
       .frame.content-mode .frame-label.bc { display: none; }
       .frame.content-mode .frame-label.br { display: none; }
       /* Combined bottom row */
@@ -1466,6 +1468,7 @@
         if (tabsTimer)        { clearTimeout(tabsTimer);        tabsTimer        = null; }
         if (mobileBarsTimer)  { clearTimeout(mobileBarsTimer);  mobileBarsTimer  = null; }
         frame.classList.remove('mobile-bar-exit');
+        frame.classList.remove('mobile-snap-positions');
         const alreadyInContent = frame.classList.contains('content-mode');
         const isMobile = window.matchMedia('(max-width: 640px)').matches;
         // Hide tabs and back button immediately
@@ -1529,10 +1532,27 @@
               goHomeSlideTimer = null;
               // Step 4: after slide (~0.9s), reveal homepage startup animation
               goHomeTimer = setTimeout(() => {
+                // Snap all labels to prominent positions while still hidden,
+                // then fade them all in together in the next frame
+                frame.classList.add('mobile-snap-positions');
                 frame.classList.remove('content-mode');
-                frame.classList.remove('mobile-labels-out');
                 frame.classList.add('prominent');
                 goHomeTimer = null;
+                requestAnimationFrame(() => {
+                  requestAnimationFrame(() => {
+                    frame.classList.remove('mobile-snap-positions');
+                    // Reset label-fade animation on all labels so they replay
+                    // exactly like initial page load — all in sync
+                    frame.querySelectorAll('.frame-label').forEach(el => {
+                      el.style.animation = 'none';
+                    });
+                    frame.offsetHeight; // force reflow
+                    frame.querySelectorAll('.frame-label').forEach(el => {
+                      el.style.animation = '';
+                    });
+                    frame.classList.remove('mobile-labels-out');
+                  });
+                });
               }, 920);
             }, 450);
           }, 350);
