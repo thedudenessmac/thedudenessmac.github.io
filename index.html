@@ -8,7 +8,7 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Faculty+Glyphic&family=PT+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caudex:ital,wght@0,400;0,700;1,400&family=PT+Mono&display=swap" rel="stylesheet">
 
   <style>
     /* ── Reset ── */
@@ -131,6 +131,7 @@
     .frame-label.bl { bottom: 16px; left: 86px;  transform-origin: bottom left; font-variant-numeric: tabular-nums; }
     .frame-label.bc { bottom: 16px; left: 50%;   transform: translateX(-50%); transform-origin: bottom center; text-align: center; }
     .frame-label.br { bottom: 16px; right: 86px; transform-origin: bottom right; text-align: right; }
+    .frame-label.mobile-bot { display: none; }
     @keyframes rec-blink {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.25; }
@@ -138,13 +139,13 @@
     .rec-dot { color: #ef4444; animation: rec-blink 2s ease-in-out infinite; }
 
     /* Prominent: shift outward via translateY + scale — pure transform, zero reflow */
-    .frame.prominent .frame-label      { color: rgba(237,234,228,0.85); }
-    .frame.prominent .frame-label.tl { transform: translateY(22px) scale(1.9); }
-    .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(22px) scale(1.9); }
-    .frame.prominent .frame-label.tr { transform: translateY(22px) scale(1.9); }
-    .frame.prominent .frame-label.bl { transform: translateY(-22px) scale(1.9); }
-    .frame.prominent .frame-label.bc { transform: translateX(-50%) translateY(-22px) scale(1.9); }
-    .frame.prominent .frame-label.br { transform: translateY(-22px) scale(1.9); }
+    .frame.prominent .frame-label      { color: rgba(237,234,228,0.85); font-size: clamp(10px, 1.6vw, 22px); }
+    .frame.prominent .frame-label.tl { transform: translateY(22px); }
+    .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(22px); }
+    .frame.prominent .frame-label.tr { transform: translateY(22px); }
+    .frame.prominent .frame-label.bl { transform: translateY(-22px); }
+    .frame.prominent .frame-label.bc { transform: translateX(-50%) translateY(-22px); }
+    .frame.prominent .frame-label.br { transform: translateY(-22px); }
     .fps-val  { color: rgba(237,234,228,0.85); }
     .rec-text { color: #ef4444; }
 
@@ -163,7 +164,7 @@
 
     /* ── Section eyebrow ── */
     .section-eyebrow {
-      font-family: 'Faculty Glyphic', Georgia, serif;
+      font-family: 'Caudex', Georgia, serif;
       font-size: clamp(24px, 4.5vw, 52px);
       font-weight: 400;
       letter-spacing: -0.01em;
@@ -188,7 +189,7 @@
     }
 
     .hero-name {
-      font-family: 'Faculty Glyphic', Georgia, serif;
+      font-family: 'Caudex', Georgia, serif;
       font-size: clamp(48px, 5vw, 72px);
       font-weight: 400;
       line-height: 0.92;
@@ -629,16 +630,6 @@
     .mobile-nav-btn  { display: none; }
     .mobile-nav-menu { display: none; }
 
-    /* ── Tablet (641–1024px): smaller font to prevent single-row overlap ── */
-    @media (min-width: 641px) and (max-width: 1024px) {
-      .frame-label { font-size: 10.5px; }
-      .frame.prominent .frame-label.tl { transform: translateY(16px) scale(1.35); }
-      .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(16px) scale(1.35); }
-      .frame.prominent .frame-label.tr { transform: translateY(16px) scale(1.35); }
-      .frame.prominent .frame-label.bl { transform: translateY(-16px) scale(1.35); }
-      .frame.prominent .frame-label.bc { transform: translateX(-50%) translateY(-16px) scale(1.35); }
-      .frame.prominent .frame-label.br { transform: translateY(-16px) scale(1.35); }
-    }
 
     /* ── Mobile: monitor frame labels ── */
     @media (max-width: 640px) {
@@ -666,13 +657,14 @@
       /* BC always right-anchored on mobile so position can transition cleanly */
       .frame-label.bc { left: auto; right: 30px; transform-origin: bottom right; text-align: right; }
 
-      /* Prominent: two-row layout — TL/TR/BL/BR outer row, TC/BC inner row */
-      .frame.prominent .frame-label.tl { transform: translateY(6px) scale(1.4); }
-      .frame.prominent .frame-label.tr { transform: translateY(6px) scale(1.4); }
-      .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(46px) scale(1.4); }
-      .frame.prominent .frame-label.bl { transform: translateY(-6px) scale(1.4); }
-      .frame.prominent .frame-label.br { transform: translateY(-6px) scale(1.4); }
-      .frame.prominent .frame-label.bc { transform: translateY(-32px) scale(1.4); }
+      /* Prominent: two-row layout — fluid font-size, translateY for row positioning */
+      .frame.prominent .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
+      .frame.prominent .frame-label.tl { transform: translateY(6px); }
+      .frame.prominent .frame-label.tr { transform: translateY(6px); }
+      .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(46px); }
+      .frame.prominent .frame-label.bl { transform: translateY(-6px); }
+      .frame.prominent .frame-label.br { transform: translateY(-6px); }
+      .frame.prominent .frame-label.bc { transform: translateY(-32px); }
 
       /* Frame corners and lines — half the edge margin */
       .corner.tl { top: 8px;    left: 12px; }
@@ -732,16 +724,33 @@
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
 
-      /* Content-mode label positions for 68px bars
-         Top bar  — single row: TL after chevron (left), TR far right
-         Bot bar  — two rows: BL/BR upper row, BC lower row
-         Row centres: upper = 2×68/3 ≈ 45px from bottom, lower = 68/3 ≈ 23px */
+      /* Content-mode label positions for 52px bars
+         Top bar  — timecode (BL) left, fps+rec (TR) right
+         Bot bar  — single combined row centred */
       .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
-      .frame.content-mode .frame-label.tl { top: 20px; left: 95px; right: auto; transform: none; text-align: left; }
+      /* Hide A·SDI-1·4.5K on mobile content pages */
+      .frame.content-mode .frame-label.tl { display: none; }
+      /* Timecode moves from bottom-left to top-left */
+      .frame.content-mode .frame-label.bl { bottom: auto; top: 20px; left: 30px; right: auto; transform: none; opacity: 0; transition: opacity 0.45s ease; }
+      .frame.mobile-bars-visible.content-mode .frame-label.bl { opacity: 1; }
+      /* TR stays in top bar, unchanged */
       .frame.content-mode .frame-label.tr { top: 20px; right: 16px; }
-      .frame.content-mode .frame-label.bl { bottom: 29px; }
-      .frame.content-mode .frame-label.br { bottom: 11px; }
-      .frame.content-mode .frame-label.bc { bottom: 29px; right: 30px; transform: none; }
+      /* Hide individual BC and BR — replaced by mobile-bot */
+      .frame.content-mode .frame-label.bc { display: none; }
+      .frame.content-mode .frame-label.br { display: none; }
+      /* Combined bottom row */
+      .frame.content-mode .frame-label.mobile-bot {
+        display: block;
+        bottom: 17px; left: 0; right: 0;
+        text-align: center;
+        font-size: clamp(8px, 3.2vw, 11px);
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.45s ease;
+        transform: none;
+        color: rgba(237,234,228,0.7);
+      }
+      .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot { opacity: 1; }
 
       /* Hide desktop nav on mobile content pages */
       .frame.content-mode .frame-back { display: none !important; }
@@ -872,6 +881,7 @@
     <span class="frame-label bl"><span id="frame-tc">01:02:14:07</span></span>
     <span class="frame-label bc">F 4.2'  ·  T2.8  ·  35mm</span>
     <span class="frame-label br">ISO 800  ·  180°  ·  3200K</span>
+    <span class="frame-label mobile-bot">F 4.2'  ·  T2.8  ·  35mm  ·  ISO 800  ·  180°  ·  3200K</span>
     <button class="frame-back" id="frame-back">
       <div class="back-inner">
         <div class="back-face back-face-home"><span class="back-chevron">&#8249;</span> Home</div>
