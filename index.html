@@ -674,6 +674,27 @@
       .frame.prominent .frame-label.br { transform: translateY(-26px) scale(1.4); }
       .frame.prominent .frame-label.bc { left: auto; right: 42px; transform-origin: bottom right; text-align: right; transform: translateY(-26px) scale(1.4); }
 
+      /* Frame corners and lines — half the edge margin */
+      .corner.tl { top: 12px;    left: 12px; }
+      .corner.tr { top: 12px;    right: 12px; }
+      .corner.bl { bottom: 12px; left: 12px; }
+      .corner.br { bottom: 12px; right: 12px; }
+      .frame-line.top    { top: 12px;    left: 12px; right: 12px; }
+      .frame-line.bottom { bottom: 12px; left: 12px; right: 12px; }
+      .frame-line.left   { left: 12px;   top: 12px;  bottom: 12px; }
+      .frame-line.right  { right: 12px;  top: 12px;  bottom: 12px; }
+      .frame-label.tl { top: 24px;    left: 30px; }
+      .frame-label.tr { top: 24px;    right: 30px; }
+      .frame-label.bl { bottom: 24px; left: 30px; }
+      .frame-label.br { bottom: 24px; right: 30px; }
+
+      /* Hero: centre content, account for 68px bars top + bottom */
+      #hero { align-items: center; padding: calc(var(--bar-h) + 24px) 0; box-sizing: border-box; }
+      .hero-grid { text-align: center; }
+      .hero-meta { align-items: center; }
+      .hero-nav { justify-content: center; }
+      .hero-name { font-size: 56px; }
+
       /* Content page headers */
       .section-eyebrow { font-size: 38px; }
 
