@@ -643,7 +643,7 @@
     /* ── Mobile: monitor frame labels ── */
     @media (max-width: 640px) {
       /* Slimmer bars: top bar is single-row, bottom bar keeps two rows */
-      :root { --bar-h: 68px; }
+      :root { --bar-h: 52px; }
 
       /* Smaller base font; push all labels inside the 24px frame boundary */
       .frame-label {
@@ -737,11 +737,11 @@
          Bot bar  — two rows: BL/BR upper row, BC lower row
          Row centres: upper = 2×68/3 ≈ 45px from bottom, lower = 68/3 ≈ 23px */
       .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
-      .frame.content-mode .frame-label.tl { top: 28px; left: 95px; right: auto; transform: none; text-align: left; }
-      .frame.content-mode .frame-label.tr { top: 28px; right: 16px; }
-      .frame.content-mode .frame-label.bl { bottom: 39px; }
-      .frame.content-mode .frame-label.br { bottom: 39px; }
-      .frame.content-mode .frame-label.bc { bottom: 17px; right: 30px; transform: none; }
+      .frame.content-mode .frame-label.tl { top: 20px; left: 95px; right: auto; transform: none; text-align: left; }
+      .frame.content-mode .frame-label.tr { top: 20px; right: 16px; }
+      .frame.content-mode .frame-label.bl { bottom: 29px; }
+      .frame.content-mode .frame-label.br { bottom: 29px; }
+      .frame.content-mode .frame-label.bc { bottom: 11px; right: 30px; transform: none; }
 
       /* Hide desktop nav on mobile content pages */
       .frame.content-mode .frame-back { display: none !important; }
