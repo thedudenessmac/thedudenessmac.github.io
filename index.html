@@ -1438,6 +1438,14 @@
           closeMobileMenu(); openContent(btn.dataset.page);
         });
       });
+      // ── Animation timing constants (keep in sync with CSS transitions) ──
+      const SLIDE_MS        = 920;  // 0.9s CSS slide + 20ms buffer
+      const MOBILE_BARS_MS  = 900;  // mobile: delay before bars pop in (after slide)
+      const MOBILE_NAV_MS   = 1550; // mobile: delay before nav appears (after bars+labels)
+      const GOHO_CHEVRON_MS = 350;  // goHome step 2: chevron retract duration
+      const GOHO_BARS_MS    = 450;  // goHome step 3: bar retract duration (0.45s CSS)
+      const DESKTOP_BARS_MS = 300;  // desktop: bars appear after this delay
+
       const pages     = ['about', 'credits', 'services', 'gallery', 'contact'];
       let   activePage = null;
       let   goHomeTimer      = null;
@@ -1465,7 +1473,7 @@
         });
       }
 
-      function openContent(id) {
+      function openContent(id, pushHistory = true) {
         if (goHomeTimer)      { clearTimeout(goHomeTimer);      goHomeTimer      = null; }
         if (goHomeBarsTimer)  { clearTimeout(goHomeBarsTimer);  goHomeBarsTimer  = null; }
         if (goHomeSlideTimer) { clearTimeout(goHomeSlideTimer); goHomeSlideTimer = null; }
@@ -1487,18 +1495,18 @@
         app.classList.add('content-open');
         frame.classList.remove('prominent');
         frame.classList.add('content-mode');
-        history.pushState(null, '', '#' + id);
+        if (pushHistory) history.pushState(null, '', '#' + id);
         // Mobile: bars pop in after slide completes (step 2); desktop: bars appear immediately
         if (!alreadyInContent) {
           mobileBarsTimer = setTimeout(() => {
             frame.classList.remove('mobile-labels-out');
             frame.classList.add('mobile-bars-visible');
             mobileBarsTimer = null;
-          }, isMobile ? 900 : 300);
+          }, isMobile ? MOBILE_BARS_MS : DESKTOP_BARS_MS);
         }
         // Mobile fresh entry: chevron pops in after bars + labels settle (step 3)
-        // Desktop / page-switching: everything at 920ms (slide duration)
-        const navDelay = (isMobile && !alreadyInContent) ? 1550 : 920;
+        // Desktop / page-switching: everything at SLIDE_MS (slide duration)
+        const navDelay = (isMobile && !alreadyInContent) ? MOBILE_NAV_MS : SLIDE_MS;
         tabsTimer = setTimeout(() => {
           tabsEl.classList.add('tabs-ready');
           frameBack.classList.add('back-ready');
@@ -1507,7 +1515,7 @@
         }, navDelay);
       }
 
-      function goHome() {
+      function goHome(pushHistory = true) {
         const isMobile = window.matchMedia('(max-width: 640px)').matches;
         // Step 1: chevron pops left, tabs/back retract immediately
         tabsEl.classList.remove('tabs-ready');
@@ -1528,14 +1536,14 @@
             frame.classList.add('mobile-bar-exit');    // restore bar size so translateY can animate
             frame.classList.remove('mobile-bars-visible'); // triggers slide-away
             goHomeBarsTimer = null;
-            // Step 3: after bars retract (~0.45s), slide home panel in
+            // Step 3: after bars retract, slide home panel in
             goHomeSlideTimer = setTimeout(() => {
               frame.classList.remove('mobile-bar-exit');
               app.classList.remove('content-open');
               activePage = null;
-              history.pushState(null, '', location.pathname);
+              if (pushHistory) history.pushState(null, '', location.pathname);
               goHomeSlideTimer = null;
-              // Step 4: after slide (~0.9s), reveal homepage startup animation
+              // Step 4: after slide completes, reveal homepage startup animation
               goHomeTimer = setTimeout(() => {
                 // Snap all labels to prominent positions while still hidden,
                 // then fade them all in together in the next frame
@@ -1553,22 +1561,22 @@
                     frame.classList.remove('mobile-labels-out');
                   });
                 });
-              }, 920);
-            }, 450);
-          }, 350);
+              }, SLIDE_MS);
+            }, GOHO_BARS_MS);
+          }, GOHO_CHEVRON_MS);
         } else {
           // Desktop: bars retract simultaneously with the slide
           frame.classList.add('bars-retracting');
           app.classList.remove('content-open');
           activePage = null;
-          history.pushState(null, '', location.pathname);
+          if (pushHistory) history.pushState(null, '', location.pathname);
           goHomeTimer = setTimeout(() => {
             frame.classList.remove('content-mode');
             frame.classList.remove('mobile-bars-visible');
             frame.classList.remove('bars-retracting');
             frame.classList.add('prominent');
             goHomeTimer = null;
-          }, 920);
+          }, SLIDE_MS);
         }
       }
 
@@ -1607,6 +1615,7 @@
         gameOpen = false;
         gamePanel.classList.remove('active');
         frameBack.classList.remove('showing-return');
+        gameIframe.src = 'about:blank'; // free iframe memory on close
         setTimeout(() => {
           frame.classList.remove('game-mode');
         }, 900);
@@ -1623,6 +1632,21 @@
       frameBack.addEventListener('click', () => {
         if (gameOpen) closeGame();
         else goHome();
+      });
+
+      // ── Browser back/forward button support ──────────────
+      window.addEventListener('popstate', () => {
+        closeMobileMenu();
+        const hash = location.hash.replace('#', '');
+        if (pages.includes(hash)) {
+          // Navigating forward to a content page
+          openContent(hash, false); // false = don't push history, browser already did
+        } else {
+          // Navigating back to home
+          if (frame.classList.contains('content-mode')) {
+            goHome(false); // false = don't push history, browser already did
+          }
+        }
       });
 
       // Restore page on load/refresh — skip all transitions, jump straight to content state
