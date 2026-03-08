@@ -120,10 +120,10 @@
       color: var(--accent);
       opacity: 0;
       animation: label-fade 0.4s ease 0.88s forwards;
-      /* Only transition GPU-composited props — no reflow */
-      transition: transform 0.9s cubic-bezier(0.87, 0, 0.13, 1),
-                  opacity  0.9s ease,
-                  color    0.9s ease;
+      transition: transform   0.9s cubic-bezier(0.87, 0, 0.13, 1),
+                  font-size  0.9s cubic-bezier(0.87, 0, 0.13, 1),
+                  opacity    0.9s ease,
+                  color      0.9s ease;
     }
     .frame-label.tl { top: 16px;    left: 86px;  transform-origin: top left; }
     .frame-label.tc { top: 16px;    left: 50%;   transform: translateX(-50%); transform-origin: top center; text-align: center; color: rgba(200,133,14,0.55); letter-spacing: 0.2em; }
@@ -527,6 +527,8 @@
 
     /* ── Frame: content mode ── */
     .frame.content-mode .frame-bar   { height: var(--bar-h); opacity: 1; }
+    /* Desktop goHome: retract bars simultaneously with the slide */
+    .frame.bars-retracting .frame-bar { height: 0 !important; opacity: 0 !important; }
 
     /* Bar inner edge lines — crisp separation from content */
     .frame-bar.top    { border-bottom: 1px solid rgba(200,133,14,0.35); }
@@ -729,6 +731,8 @@
       .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: opacity 0.15s ease !important; }
       /* Snap label positions instantly before fade-in (used during goHome step 4) */
       .frame.mobile-snap-positions .frame-label { transition: none !important; }
+      /* Reset label-fade animation via class (avoids leaving inline styles on elements) */
+      .frame.labels-animation-reset .frame-label { animation: none !important; }
       /* Completely suppress bars (height, opacity, border) until mobile-bars-visible fires —
          overrides the desktop content-mode rule that would otherwise show them during the slide */
       .frame.content-mode .frame-bar { height: 0 !important; opacity: 0 !important; border: none !important; }
@@ -1469,6 +1473,7 @@
         if (mobileBarsTimer)  { clearTimeout(mobileBarsTimer);  mobileBarsTimer  = null; }
         frame.classList.remove('mobile-bar-exit');
         frame.classList.remove('mobile-snap-positions');
+        frame.classList.remove('bars-retracting');
         const alreadyInContent = frame.classList.contains('content-mode');
         const isMobile = window.matchMedia('(max-width: 640px)').matches;
         // Hide tabs and back button immediately
@@ -1541,15 +1546,10 @@
                 requestAnimationFrame(() => {
                   requestAnimationFrame(() => {
                     frame.classList.remove('mobile-snap-positions');
-                    // Reset label-fade animation on all labels so they replay
-                    // exactly like initial page load — all in sync
-                    frame.querySelectorAll('.frame-label').forEach(el => {
-                      el.style.animation = 'none';
-                    });
-                    frame.offsetHeight; // force reflow
-                    frame.querySelectorAll('.frame-label').forEach(el => {
-                      el.style.animation = '';
-                    });
+                    // Reset label-fade via class (no inline styles left on elements)
+                    frame.classList.add('labels-animation-reset');
+                    frame.offsetHeight; // force reflow so browser sees animation reset
+                    frame.classList.remove('labels-animation-reset');
                     frame.classList.remove('mobile-labels-out');
                   });
                 });
@@ -1557,13 +1557,15 @@
             }, 450);
           }, 350);
         } else {
-          // Desktop: original behaviour — slide + dissolve bars simultaneously
+          // Desktop: bars retract simultaneously with the slide
+          frame.classList.add('bars-retracting');
           app.classList.remove('content-open');
           activePage = null;
           history.pushState(null, '', location.pathname);
           goHomeTimer = setTimeout(() => {
             frame.classList.remove('content-mode');
             frame.classList.remove('mobile-bars-visible');
+            frame.classList.remove('bars-retracting');
             frame.classList.add('prominent');
             goHomeTimer = null;
           }, 920);
