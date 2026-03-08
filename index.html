@@ -732,6 +732,9 @@
       .frame.content-mode .frame-bar { height: 0 !important; opacity: 0 !important; border: none !important; }
       .frame.mobile-bars-visible.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
       .frame.mobile-bars-visible.content-mode .frame-bar.bottom { height: var(--bar-h) !important; opacity: 1 !important; }
+      /* Restore bar size during goHome so bars can animate away via translateY */
+      .frame.mobile-bar-exit.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
+      .frame.mobile-bar-exit.content-mode .frame-bar.bottom { height: var(--bar-h) !important; opacity: 1 !important; }
 
       /* Content-mode label positions for 52px bars
          Top bar  — timecode (BL) left, fps+rec (TR) right
@@ -1431,9 +1434,11 @@
       });
       const pages     = ['about', 'credits', 'services', 'gallery', 'contact'];
       let   activePage = null;
-      let   goHomeTimer    = null;
-      let   tabsTimer      = null;
-      let   mobileBarsTimer = null;
+      let   goHomeTimer      = null;
+      let   goHomeBarsTimer  = null;
+      let   goHomeSlideTimer = null;
+      let   tabsTimer        = null;
+      let   mobileBarsTimer  = null;
 
       function showPage(id) {
         // Deactivate all pages
@@ -1455,9 +1460,12 @@
       }
 
       function openContent(id) {
-        if (goHomeTimer)    { clearTimeout(goHomeTimer);    goHomeTimer    = null; }
-        if (tabsTimer)      { clearTimeout(tabsTimer);      tabsTimer      = null; }
-        if (mobileBarsTimer){ clearTimeout(mobileBarsTimer); mobileBarsTimer = null; }
+        if (goHomeTimer)      { clearTimeout(goHomeTimer);      goHomeTimer      = null; }
+        if (goHomeBarsTimer)  { clearTimeout(goHomeBarsTimer);  goHomeBarsTimer  = null; }
+        if (goHomeSlideTimer) { clearTimeout(goHomeSlideTimer); goHomeSlideTimer = null; }
+        if (tabsTimer)        { clearTimeout(tabsTimer);        tabsTimer        = null; }
+        if (mobileBarsTimer)  { clearTimeout(mobileBarsTimer);  mobileBarsTimer  = null; }
+        frame.classList.remove('mobile-bar-exit');
         const alreadyInContent = frame.classList.contains('content-mode');
         const isMobile = window.matchMedia('(max-width: 640px)').matches;
         // Hide tabs and back button immediately
@@ -1492,24 +1500,54 @@
       }
 
       function goHome() {
-        // Retract tabs and back button immediately
+        const isMobile = window.matchMedia('(max-width: 640px)').matches;
+        // Step 1: chevron pops left, tabs/back retract immediately
         tabsEl.classList.remove('tabs-ready');
         frameBack.classList.remove('back-ready');
         mobileNavBtn.classList.remove('nav-ready');
         closeMobileMenu();
-        if (tabsTimer)       { clearTimeout(tabsTimer);       tabsTimer       = null; }
-        if (mobileBarsTimer) { clearTimeout(mobileBarsTimer); mobileBarsTimer = null; }
-        // Slide the home panel back in — bars stay visible during the 0.9s transition
-        app.classList.remove('content-open');
-        activePage = null;
-        history.pushState(null, '', location.pathname);
-        // After slide completes, dissolve bars and expand frame labels
-        goHomeTimer = setTimeout(() => {
-          frame.classList.remove('content-mode');
-          frame.classList.remove('mobile-bars-visible');
-          frame.classList.add('prominent');
-          goHomeTimer = null;
-        }, 920);
+        if (tabsTimer)        { clearTimeout(tabsTimer);        tabsTimer        = null; }
+        if (mobileBarsTimer)  { clearTimeout(mobileBarsTimer);  mobileBarsTimer  = null; }
+        if (goHomeTimer)      { clearTimeout(goHomeTimer);      goHomeTimer      = null; }
+        if (goHomeBarsTimer)  { clearTimeout(goHomeBarsTimer);  goHomeBarsTimer  = null; }
+        if (goHomeSlideTimer) { clearTimeout(goHomeSlideTimer); goHomeSlideTimer = null; }
+
+        if (isMobile) {
+          // Hide labels immediately so they don't float during bar retraction
+          frame.classList.add('mobile-labels-out');
+          // Step 2: after chevron animation (~0.35s), retract bars
+          goHomeBarsTimer = setTimeout(() => {
+            frame.classList.add('mobile-bar-exit');    // restore bar size so translateY can animate
+            frame.classList.remove('mobile-bars-visible'); // triggers slide-away
+            goHomeBarsTimer = null;
+            // Step 3: after bars retract (~0.45s), slide home panel in
+            goHomeSlideTimer = setTimeout(() => {
+              frame.classList.remove('mobile-bar-exit');
+              app.classList.remove('content-open');
+              activePage = null;
+              history.pushState(null, '', location.pathname);
+              goHomeSlideTimer = null;
+              // Step 4: after slide (~0.9s), reveal homepage startup animation
+              goHomeTimer = setTimeout(() => {
+                frame.classList.remove('content-mode');
+                frame.classList.remove('mobile-labels-out');
+                frame.classList.add('prominent');
+                goHomeTimer = null;
+              }, 920);
+            }, 450);
+          }, 350);
+        } else {
+          // Desktop: original behaviour — slide + dissolve bars simultaneously
+          app.classList.remove('content-open');
+          activePage = null;
+          history.pushState(null, '', location.pathname);
+          goHomeTimer = setTimeout(() => {
+            frame.classList.remove('content-mode');
+            frame.classList.remove('mobile-bars-visible');
+            frame.classList.add('prominent');
+            goHomeTimer = null;
+          }, 920);
+        }
       }
 
       // Hero nav links
