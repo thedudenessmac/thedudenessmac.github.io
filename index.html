@@ -4,801 +4,1545 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Marko Balac — Script Supervisor</title>
-  <meta name="description" content="Marko Balac — Script Supervisor based in Toronto, ON. Portfolio, credits, and contact.">
+  <meta name="description" content="Marko Balac — Script Supervisor based in Toronto, ON.">
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="favicon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Caudex:ital,wght@0,400;0,700;1,400&family=PT+Mono&display=swap" rel="stylesheet">
+
   <style>
+    /* ── Reset ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── Variables ── */
+    :root {
+      --bg:         #f7f5f0;
+      --text:       #1a1a1a;
+      --muted:      #aaa;
+      --dim:        #c8c2bb;
+      --accent:     #c8850e;
+      --border:     #e0dbd4;
+      --dark:       #0f0f0d;
+      --dark-text:  #edeae4;
+      --bar-h:      52px;
+      --mono:       'PT Mono', 'Courier New', monospace;
+    }
+
+    /* ── Base ── */
     body {
-      background: #f7f5f0;
-      color: #1a1a1a;
-      font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Fixed monitor frame ── */
+    @keyframes corner-draw {
+      from { width: 0; height: 0; }
+      to   { width: 52px; height: 52px; }
+    }
+    @keyframes line-h {
+      from { transform: scaleX(0); }
+      to   { transform: scaleX(1); }
+    }
+    @keyframes line-v {
+      from { transform: scaleY(0); }
+      to   { transform: scaleY(1); }
+    }
+    @keyframes label-fade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes label-fade-out {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+
+    .frame {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200;
+      transition: opacity 0.8s ease;
+    }
+    .frame.receded { opacity: 1; } /* individual elements handle their own fade */
+
+    /* Black HUD bars */
+    .frame-bar {
+      position: absolute;
+      left: 0; right: 0;
+      height: 0;
+      background: var(--dark);
+      opacity: 0;
+      z-index: -1;
+      transition: height 0.9s cubic-bezier(0.87, 0, 0.13, 1), opacity 0.5s ease, transform 0.9s cubic-bezier(0.87, 0, 0.13, 1);
+    }
+    .frame-bar.top    { top: 0; }
+    .frame-bar.bottom { bottom: 0; }
+
+    .corner, .frame-line, .frame-tick { transition: opacity 0.45s ease; }
+
+    /* Corners — bold */
+    .corner {
+      position: absolute;
+      width: 0;
+      height: 0;
+      animation: corner-draw 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+    }
+    .corner.tl { top: 24px;    left: 24px;    border-top: 6px solid var(--accent); border-left: 6px solid var(--accent); }
+    .corner.tr { top: 24px;    right: 24px;   border-top: 6px solid var(--accent); border-right: 6px solid var(--accent); }
+    .corner.bl { bottom: 24px; left: 24px;    border-bottom: 6px solid var(--accent); border-left: 6px solid var(--accent); }
+    .corner.br { bottom: 24px; right: 24px;   border-bottom: 6px solid var(--accent); border-right: 6px solid var(--accent); }
+
+    /* Full-frame edge lines — draw from center outward */
+    .frame-line {
+      position: absolute;
+      background: rgba(200, 133, 14, 0.22);
+    }
+    .frame-line.top    { top: 24px;    left: 24px; right: 24px;  height: 1px; transform: scaleX(0); transform-origin: center; animation: line-h 0.6s cubic-bezier(0.4,0,0.2,1) 0.42s forwards; }
+    .frame-line.bottom { bottom: 24px; left: 24px; right: 24px;  height: 1px; transform: scaleX(0); transform-origin: center; animation: line-h 0.6s cubic-bezier(0.4,0,0.2,1) 0.42s forwards; }
+    .frame-line.left   { left: 24px;   top: 24px;  bottom: 24px; width:  1px; transform: scaleY(0); transform-origin: center; animation: line-v 0.6s cubic-bezier(0.4,0,0.2,1) 0.42s forwards; }
+    .frame-line.right  { right: 24px;  top: 24px;  bottom: 24px; width:  1px; transform: scaleY(0); transform-origin: center; animation: line-v 0.6s cubic-bezier(0.4,0,0.2,1) 0.42s forwards; }
+
+    /* Center tick marks — hidden */
+    .frame-tick { display: none; }
+
+    /* Frame metadata — base positions are the content-mode resting state */
+    .frame-label {
+      position: absolute;
+      font-family: var(--mono);
+      font-size: clamp(10px, 1.5vw, 13px);
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0;
+      animation: label-fade 0.4s ease 0.88s forwards;
+      /* Only transition GPU-composited props — no reflow */
+      transition: transform 0.9s cubic-bezier(0.87, 0, 0.13, 1),
+                  opacity  0.9s ease,
+                  color    0.9s ease;
+    }
+    .frame-label.tl { top: 16px;    left: 86px;  transform-origin: top left; }
+    .frame-label.tc { top: 16px;    left: 50%;   transform: translateX(-50%); transform-origin: top center; text-align: center; color: rgba(200,133,14,0.55); letter-spacing: 0.2em; }
+    .frame-label.tr { top: 16px;    right: 86px; transform-origin: top right; text-align: right; }
+    .frame-label.bl { bottom: 16px; left: 86px;  transform-origin: bottom left; font-variant-numeric: tabular-nums; }
+    .frame-label.bc { bottom: 16px; left: 50%;   transform: translateX(-50%); transform-origin: bottom center; text-align: center; }
+    .frame-label.br { bottom: 16px; right: 86px; transform-origin: bottom right; text-align: right; }
+    @keyframes rec-blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.25; }
+    }
+    .rec-dot { color: #ef4444; animation: rec-blink 2s ease-in-out infinite; }
+
+    /* Prominent: shift outward via translateY + scale — pure transform, zero reflow */
+    .frame.prominent .frame-label      { color: rgba(237,234,228,0.85); }
+    .frame.prominent .frame-label.tl { transform: translateY(22px) scale(1.9); }
+    .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(22px) scale(1.9); }
+    .frame.prominent .frame-label.tr { transform: translateY(22px) scale(1.9); }
+    .frame.prominent .frame-label.bl { transform: translateY(-22px) scale(1.9); }
+    .frame.prominent .frame-label.bc { transform: translateX(-50%) translateY(-22px) scale(1.9); }
+    .frame.prominent .frame-label.br { transform: translateY(-22px) scale(1.9); }
+    .fps-val  { color: rgba(237,234,228,0.85); }
+    .rec-text { color: #ef4444; }
+
+
+    /* ── Layout ── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 64px;
+    }
+
+    section {
+      padding: 96px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Section eyebrow ── */
+    .section-eyebrow {
+      font-family: 'Caudex', Georgia, serif;
+      font-size: clamp(24px, 4.5vw, 52px);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1;
+      color: var(--text);
+      margin-bottom: 52px;
+      text-transform: none;
+    }
+
+    /* ── Hero ── */
+    #hero {
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      padding: 0;
+      border-top: none;
+      background: var(--dark);
     }
 
-    /* ── Clapperboard stripe ── */
-    .stripe {
-      height: 26px;
-      background: repeating-linear-gradient(
-        -45deg,
-        #171717 0px,  #171717 42px,
-        #e8e8e8 42px, #e8e8e8 84px
-      );
-      border-bottom: 3px solid #fff;
-      flex-shrink: 0;
-    }
-
-    /* ── Header slate ── */
-    .home-header {
-      background: #111111;
-      flex-shrink: 0;
-      display: flex;
-      justify-content: center;
-      padding: 0 18px;
-      font-family: 'Courier New', Courier, monospace;
-    }
-
-    .slate-inner {
-      max-width: 980px;
+    .hero-grid {
       width: 100%;
     }
 
-    .slate-row {
-      display: flex;
-      border-bottom: 3px solid #fff;
+    .hero-name {
+      font-family: 'Caudex', Georgia, serif;
+      font-size: clamp(48px, 5vw, 72px);
+      font-weight: 400;
+      line-height: 0.92;
+      letter-spacing: -0.01em;
+      color: var(--dark-text);
+      margin-bottom: 20px;
     }
-    .slate-row:last-child { border-bottom: none; }
 
-    .slate-cell {
-      flex: 1;
-      padding: 12px 24px 10px;
+    .hero-meta {
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      position: relative;
+      gap: 8px;
     }
-    .slate-cell:not(:last-child)::after {
-      content: '';
-      position: absolute;
-      right: 0;
-      top: 0;
-      bottom: 8px;
-      width: 3px;
-      background: #fff;
+    .hero-role {
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .hero-location {
+      font-size: 15px;
+      font-weight: 400;
+      color: rgba(237,234,228,0.5);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
-    .slate-label {
-      font-size: 9px;
-      font-weight: 700;
+    /* Nav — wrapping row */
+    .hero-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .hero-nav a {
+      display: block;
+      padding: 8px 18px;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(237,234,228,0.65);
+      text-decoration: none;
+      border: 1px solid rgba(237,234,228,0.2);
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+    }
+    .hero-nav a:hover { color: var(--dark-text); border-color: rgba(237,234,228,0.55); }
+
+    /* ── About ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .about-text p {
+      font-size: 16px;
+      line-height: 1.72;
+      color: #444;
+    }
+    .about-text p + p { margin-top: 16px; }
+
+    .cv-link {
+      display: inline-block;
+      margin-top: 32px;
+      font-size: 10px;
+      font-weight: 600;
       letter-spacing: 0.2em;
-      color: rgba(255,255,255,0.5);
       text-transform: uppercase;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(200,133,14,0.4);
+      padding-bottom: 3px;
+      transition: border-color 0.2s, opacity 0.2s;
+    }
+    .cv-link:hover { opacity: 0.7; border-color: var(--accent); }
+
+    .about-photo {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      object-position: center 80%;
+      display: block;
     }
 
-    .slate-name {
-      font-size: 52px;
+    /* ── Credits ── */
+    .credits-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .credits-table thead th {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .credits-table tbody td {
+      padding: 18px 0;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      padding-right: 28px;
+    }
+    .credits-table tbody td:last-child { padding-right: 0; }
+    .credits-table tbody tr:last-child td { border-bottom: none; }
+    .credits-table td:first-child { font-weight: 600; }
+    .credits-table td:not(:first-child) { color: #666; }
+
+    .film-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #555;
+      border: 1px solid #aaa;
+      padding: 1px 5px;
+      margin-left: 7px;
+      vertical-align: middle;
+    }
+    .producer {
+      display: block;
+      font-size: 12px;
+      color: #888;
+      font-style: italic;
+      margin-top: 3px;
+    }
+    .fmt {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(200,133,14,0.5);
+      padding: 2px 5px;
+    }
+    .credits-divider td {
+      padding-top: 72px !important;
+      padding-bottom: 14px !important;
+      border-bottom: none !important;
+    }
+    .credits-earlier td { color: #888 !important; }
+    .credits-earlier td:first-child { font-weight: 400 !important; color: #888 !important; }
+    .credits-group { display: none; }
+
+    /* ── Services ── */
+    .services-phase { margin-bottom: 40px; }
+    .services-phase:last-child { margin-bottom: 0; }
+    .phase-label { margin-bottom: 14px; }
+    .phase-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
       font-weight: 700;
-      color: #ffffff;
-      letter-spacing: -1px;
-      line-height: 1.0;
-      padding: 8px 0 4px;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
+      padding: 3px 8px;
     }
+    .phase-yellow { color: #a07800; border: 1px solid #a07800; }
+    .phase-green  { color: #1a8c3a; border: 1px solid #1a8c3a; }
+    .phase-blue   { color: #1a5a9a; border: 1px solid #1a5a9a; }
+    .phase-grey   { color: #888078; border: 1px solid #888078; }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .service-card {
+      border: 1px solid var(--border);
+      padding: 16px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .svc-icon-box {
+      width: 46px; height: 46px;
+      border: 1px solid var(--border);
+      background: #f2f0ec;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .svc-icon-box svg { width: 24px; height: 24px; color: #7a7268; }
+    .svc-text { flex: 1; }
+    .svc-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .svc-note { font-size: 12px; color: var(--muted); line-height: 1.55; }
 
-    .slate-val {
-      font-size: 20px;
-      font-weight: 700;
-      color: #ffffff;
+    /* ── Contact ── */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+    }
+    .contact-note {
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .contact-list { list-style: none; margin-top: 8px; }
+    .contact-item {
+      display: flex;
+      align-items: baseline;
+      gap: 24px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .contact-item:first-child { border-top: 1px solid var(--border); }
+    .contact-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
+      color: var(--muted);
+      min-width: 52px;
+      flex-shrink: 0;
     }
-
-    .slate-amber { color: #c8850e; font-size: 26px; }
-    .slate-dim   { color: #fff; font-size: 20px; }
-
-    /* ── Main ── */
-    main {
-      flex: 1;
+    .gallery-coming-soon {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 24px 18px;
+      min-height: 40vh;
     }
-
-    /* ── Monitor SVG ── */
-    .monitor-svg {
-      /* Scale with viewport height, fixed margin handled by main padding */
-      /* 310px ≈ stripe + header + footer + 2×24px padding */
-      height: clamp(280px, calc(100vh - 310px), calc((100vw - 36px) * 0.647));
-      width: auto;
-      max-width: calc(100vw - 36px);
-    }
-
-    /* ── Mobile clapperboard ── */
-    .mobile-clapper {
-      display: none;
-      text-decoration: none;
-      width: 280px;
-      background: #111;
-      border: 1px solid #2a2a2a;
-    }
-    .clapper-stripe-top {
-      height: 40px;
-      background: repeating-linear-gradient(
-        -45deg,
-        #171717 0px,  #171717 18px,
-        #e8e8e8 18px, #e8e8e8 36px
-      );
-    }
-    .clapper-body { padding: 18px 18px 12px; }
-    .clapper-row { display: flex; gap: 10px; margin-bottom: 14px; }
-    .clapper-cell { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-    .clapper-cell.wide { flex: 3; }
-    .clapper-label {
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      color: #555;
+    .coming-soon-text {
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
+      color: var(--muted);
     }
-    .clapper-val {
-      font-family: 'Courier New', Courier, monospace;
+
+    .contact-value {
       font-size: 15px;
-      font-weight: 700;
-      color: #f0f0f0;
-      text-transform: uppercase;
+      color: var(--text);
+      text-decoration: none;
+      transition: color 0.2s;
     }
-    .clapper-val.small { font-size: 13px; }
-    .clapper-divider { height: 1px; background: #2a2a2a; margin: 4px 0 14px; }
-    .clapper-enter {
-      text-align: center;
-      padding: 14px 0 6px;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 6px;
-      color: #c8850e;
+    .contact-value:hover { color: var(--accent); }
+    .imdb-btn {
+      display: inline-block;
+      margin-top: 0;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid rgba(200,133,14,0.5);
+      padding: 10px 20px;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
-    .mobile-clapper:hover .clapper-enter { color: #a86c0a; }
-
-    /* SVG button hover states */
-    .mon-enter { cursor: pointer; }
-    .mon-enter rect { transition: stroke 0.15s; }
-    .mon-enter text { transition: fill 0.15s; }
-    .mon-enter:hover rect { stroke: #a86c0a; }
-    .mon-enter:hover text { fill: #a86c0a; }
-
-    /* Cam fade transition */
-    #cam-a, #cam-b { transition: opacity 0.5s ease; }
-    #cam-toggle { cursor: pointer; }
-    #cam-toggle:hover text { fill: #f0a030; }
-
+    .imdb-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
     /* ── Footer ── */
     footer {
-      border-top: 1px solid #dbd7d0;
-      padding: 20px 40px;
+      border-top: 1px solid var(--border);
+      padding: 28px 0 72px;
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-size: 11px;
-      color: #c0b8b0;
-      text-align: center;
-      flex-shrink: 0;
+      color: #888;
+    }
+    .footer-left { display: flex; align-items: center; gap: 16px; }
+    .footer-play-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(200,133,14,0.4);
+      background: none;
+      padding: 4px 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .footer-play-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ── App panels ── */
+    body { overflow: hidden; }
+
+    .app { position: fixed; inset: 0; overflow: hidden; }
+
+    .home-panel {
+      position: absolute;
+      inset: 0;
+      background: var(--dark);
+      z-index: 2;
+      transition: transform 0.9s cubic-bezier(0.87, 0, 0.13, 1);
+      will-change: transform;
     }
 
-    /* ── Responsive ── */
-    @media (max-width: 600px) {
-      .home-header { display: none; }
-      main { background: #f7f5f0; padding: 0; flex: 1; align-items: stretch; }
-      footer { background: #f7f5f0; color: #999; padding: 14px 20px; }
-      .monitor-svg { display: none; }
-      .stripe { background: repeating-linear-gradient(-45deg, #000 0px, #000 36px, #fff 36px, #fff 72px); height: 36px; border-bottom: 3px solid #000; }
+    .content-panel {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      transform: translateX(100vw);
+      transition: transform 0.9s cubic-bezier(0.87, 0, 0.13, 1);
+      overflow: hidden;
+      will-change: transform;
+    }
 
-      .mobile-clapper {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        background: #f7f5f0;
-        text-decoration: none;
-        border: none;
-        border-top: 3px solid #111;
+    .app.content-open .home-panel   { transform: translateX(-100%); }
+    .app.content-open .content-panel { transform: translateX(0); }
+
+    /* ── Individual pages ── */
+    .page {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding-top: var(--bar-h);
+      padding-bottom: var(--bar-h);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .page.active { opacity: 1; pointer-events: auto; }
+
+    /* ── Frame: content mode ── */
+    .frame.content-mode .frame-bar   { height: var(--bar-h); opacity: 1; }
+
+    /* Bar inner edge lines — crisp separation from content */
+    .frame-bar.top    { border-bottom: 1px solid rgba(200,133,14,0.35); }
+    .frame-bar.bottom { border-top:    1px solid rgba(200,133,14,0.35); }
+
+    /* Corners vanish; frame lines and ticks hidden in content mode */
+    .frame.content-mode .corner    { opacity: 0; }
+    .frame.content-mode .frame-line { opacity: 0; }
+    .frame.content-mode .frame-tick { opacity: 0; }
+
+    /* Labels in content-mode bars — positions already at 16px, only colour changes */
+    .frame.content-mode .frame-label    { color: rgba(237,234,228,0.7); }
+    .frame.content-mode #frame-tc       { color: var(--accent); }
+    /* Hide S-Log3/Rec.709 in content-mode — tabs occupy top-centre */
+    .frame.content-mode .frame-label.tc { animation: label-fade-out 0.35s ease forwards; pointer-events: none; }
+    /* Shift TL right to clear HOME button via transform (no layout reflow) */
+    .frame.content-mode .frame-label.tl { transform: translateX(44px); }
+    /* Bottom bar: all three labels show at their natural positions */
+    .frame.content-mode .frame-label.bl { color: var(--accent); }
+
+    /* ── Back button in top bar ── */
+    .frame-back {
+      position: absolute;
+      top: 0; left: 0;
+      transform: translateX(-100%);
+      height: var(--bar-h);
+      overflow: hidden;
+      padding: 0 22px;
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(237,234,228,0.75);
+      background: none;
+      border: none;
+      border-right: 1px solid rgba(200,133,14,0.25);
+      cursor: pointer;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.2s;
+      z-index: 1;
+    }
+    .frame-back.back-ready { pointer-events: auto; opacity: 1; transform: translateX(0); }
+    .frame-back:hover { color: var(--accent); }
+    .back-inner {
+      display: flex;
+      flex-direction: column;
+      height: calc(var(--bar-h) * 2);
+      transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .back-face {
+      height: var(--bar-h);
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+    .back-face-return {
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 8px;
+      gap: 0;
+    }
+    .back-chevron      { font-size: 28px; line-height: 1; margin-right: 2px; position: relative; top: -1px; }
+    .back-chevron-down { font-size: 28px; line-height: 1; display: inline-block; transform: rotate(-90deg); margin-top: 2px; }
+    .frame-back.showing-return .back-inner { transform: translateY(calc(-1 * var(--bar-h))); }
+
+    /* ── Page tab nav in top bar ── */
+    .frame-tabs {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%) translateY(-100%);
+      height: var(--bar-h);
+      display: flex;
+      align-items: stretch;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .frame-tabs.tabs-ready {
+      pointer-events: auto;
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .frame-tabs button {
+      background: none;
+      border: none;
+      border-left: 1px solid rgba(200,133,14,0.18);
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(200,133,14,0.65);
+      cursor: pointer;
+      padding: 0 24px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .frame-tabs button:first-child { border-left: none; }
+    .frame-tabs button:hover  { color: rgba(200,133,14,0.75); }
+    .frame-tabs button.active { color: var(--accent); background: rgba(200,133,14,0.07); }
+
+    /* Mobile nav elements — hidden everywhere except mobile media query */
+    .mobile-nav-btn  { display: none; }
+    .mobile-nav-menu { display: none; }
+
+    /* ── Tablet (641–1024px): smaller font to prevent single-row overlap ── */
+    @media (min-width: 641px) and (max-width: 1024px) {
+      .frame-label { font-size: 10.5px; }
+      .frame.prominent .frame-label.tl { transform: translateY(16px) scale(1.35); }
+      .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(16px) scale(1.35); }
+      .frame.prominent .frame-label.tr { transform: translateY(16px) scale(1.35); }
+      .frame.prominent .frame-label.bl { transform: translateY(-16px) scale(1.35); }
+      .frame.prominent .frame-label.bc { transform: translateX(-50%) translateY(-16px) scale(1.35); }
+      .frame.prominent .frame-label.br { transform: translateY(-16px) scale(1.35); }
+    }
+
+    /* ── Mobile: monitor frame labels ── */
+    @media (max-width: 640px) {
+      /* Slimmer bars: top bar is single-row, bottom bar keeps two rows */
+      :root { --bar-h: 68px; }
+
+      /* Smaller base font; push all labels inside the 24px frame boundary */
+      .frame-label {
+        font-size: clamp(8px, 2.3vw, 10px);
+        white-space: nowrap;
+        /* Animate position + scale into bars smoothly */
+        transition: transform  0.85s cubic-bezier(0.87, 0, 0.13, 1),
+                    opacity    0.85s ease,
+                    top        0.85s cubic-bezier(0.87, 0, 0.13, 1),
+                    bottom     0.85s cubic-bezier(0.87, 0, 0.13, 1),
+                    left       0.85s cubic-bezier(0.87, 0, 0.13, 1),
+                    right      0.85s cubic-bezier(0.87, 0, 0.13, 1),
+                    font-size  0.85s ease;
       }
-      .clapper-stripe-top { display: none; }
-      .clapper-body { display: flex; flex-direction: column; flex: 1; justify-content: flex-start; }
-      .clapper-divider { display: none; }
+      .frame-label.tc { display: none; }
+      .frame-label.tl { top: 36px;    left: 42px; }
+      .frame-label.tr { top: 36px;    right: 42px; }
+      .frame-label.bl { bottom: 36px; left: 42px; }
+      .frame-label.br { bottom: 36px; right: 42px; }
+      /* BC always right-anchored on mobile so position can transition cleanly */
+      .frame-label.bc { left: auto; right: 42px; transform-origin: bottom right; text-align: right; }
 
-      .clapper-row { display: flex; min-height: 72px; border-bottom: 3px solid #111; }
-      .clapper-row.name-row { min-height: 120px; }
-      .clapper-row.enter-row { flex: 1; min-height: 90px; border-bottom: none; }
+      /* Prominent: two-row layout — TL/TR/BL/BR outer row, TC/BC inner row */
+      .frame.prominent .frame-label.tl { transform: translateY(6px) scale(1.4); }
+      .frame.prominent .frame-label.tr { transform: translateY(6px) scale(1.4); }
+      .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(46px) scale(1.4); }
+      .frame.prominent .frame-label.bl { transform: translateY(-6px) scale(1.4); }
+      .frame.prominent .frame-label.br { transform: translateY(-26px) scale(1.4); }
+      .frame.prominent .frame-label.bc { left: auto; right: 42px; transform-origin: bottom right; text-align: right; transform: translateY(-26px) scale(1.4); }
 
-      .clapper-cell {
-        flex: 1;
-        padding: 14px 16px 10px;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        gap: 6px;
-        border-right: 3px solid #111;
-      }
-      .clapper-cell:last-child { border-right: none; }
-      .clapper-cell.wide { flex: 2; }
+      /* Content page headers */
+      .section-eyebrow { font-size: 38px; }
 
-      .clapper-label {
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.18em;
-        color: #888;
-        text-transform: uppercase;
-      }
-      .clapper-val {
-        font-size: 28px;
-        font-weight: 700;
-        color: #111;
-        line-height: 1.1;
-        text-transform: uppercase;
-      }
-      .clapper-val.amber { color: #c8850e; font-size: 26px; }
-      .clapper-val.small { font-size: 21px; }
-      .name-row .clapper-val { letter-spacing: -1px; white-space: nowrap; }
+      /* Credits table → stacked cards */
+      .credits-table thead { display: none; }
+      .credits-table, .credits-table tbody { display: block; }
+      .credits-table tr { display: flex; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--border); }
+      .credits-table tr:last-child { border-bottom: none; }
+      .credits-table td { display: block; border-bottom: none !important; padding: 0; padding-right: 0 !important; }
+      /* Col 1: Production — flex-grow, bold */
+      .credits-table td:nth-child(1) { flex: 1; order: 1; font-size: 14px; }
+      /* Col 2: Director — full width, below */
+      .credits-table td:nth-child(2) { width: 100%; order: 3; font-size: 12px; padding-top: 4px; }
+      .credits-table td:nth-child(2):not(:empty)::before { content: "dir. "; color: var(--muted); }
+      .credits-table td:nth-child(2):empty { display: none; }
+      /* Col 3: Role — hidden (group rows replace it) */
+      .credits-table td:nth-child(3) { display: none; }
+      /* Col 4: Format — full width, below director */
+      .credits-table td:nth-child(4) { width: 100%; order: 4; padding-top: 6px; }
+      /* Col 5: Year — right-aligned next to title */
+      .credits-table td:nth-child(5) { order: 2; font-size: 13px; text-align: right; color: #888; }
+      /* Divider rows */
+      .credits-divider { padding-top: 40px !important; padding-bottom: 0 !important; }
+      .credits-divider td { border-bottom: none !important; }
+      /* Role group header rows */
+      .credits-group { display: flex; }
+      .credits-group td { width: 100%; padding: 14px 0 6px; font-size: 10px; font-family: var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: none !important; }
+      .credits-group:first-child td { border-top: 1px solid var(--border); }
 
-      .clapper-enter {
-        flex: 1;
-        display: flex;
-        align-items: flex-start;
-        padding-top: 22px;
+      /* Footer: copyright + Toronto on row 1, play button on row 2 */
+      .footer-inner { display: grid; grid-template-columns: 1fr auto; row-gap: 10px; align-items: center; }
+      .footer-left { display: contents; }
+      .footer-left > span { grid-row: 1; grid-column: 1; }
+      .footer-play-btn   { grid-row: 2; grid-column: 2; justify-self: end; }
+      .footer-inner > span { grid-row: 1; grid-column: 2; }
+
+      /* About page: stack photo below text */
+      .about-grid { grid-template-columns: 1fr; gap: 40px; }
+      .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
+
+      /* Content-mode label positions for 68px bars
+         Top bar  — single row: TL after chevron (left), TR far right
+         Bot bar  — two rows: BL/BR upper row, BC lower row
+         Row centres: upper = 2×68/3 ≈ 45px from bottom, lower = 68/3 ≈ 23px */
+      .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
+      .frame.content-mode .frame-label.tl { top: 28px; left: 95px; right: auto; transform: none; text-align: left; }
+      .frame.content-mode .frame-label.tr { top: 28px; right: 16px; }
+      .frame.content-mode .frame-label.bl { bottom: 39px; }
+      .frame.content-mode .frame-label.br { bottom: 39px; }
+      .frame.content-mode .frame-label.bc { bottom: 17px; transform: none; }
+
+      /* Hide desktop nav on mobile content pages */
+      .frame.content-mode .frame-back { display: none !important; }
+      .frame.content-mode .frame-tabs { display: none !important; }
+
+      /* Mobile dropdown trigger button */
+      .mobile-nav-btn {
+        display: none;
+        position: absolute;
+        top: 0; left: 0;
+        height: var(--bar-h);
+        padding: 0 26px;
+        align-items: center;
         justify-content: center;
-        font-size: 48px;
-        font-weight: 700;
-        letter-spacing: 10px;
-        color: #c8850e;
+        color: rgba(237,234,228,0.75);
+        background: none;
+        border: none;
+        border-right: 1px solid rgba(200,133,14,0.25);
+        cursor: pointer;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateX(-100%);
+        transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.2s;
+        z-index: 210;
+      }
+      .frame.content-mode .mobile-nav-btn { display: flex; }
+      .frame.content-mode .mobile-nav-btn.nav-ready {
+        pointer-events: auto; opacity: 1; transform: translateX(0);
+      }
+      .mobile-nav-btn.menu-open { color: var(--accent); }
+
+      /* Dropdown menu — expands downward from bar bottom edge */
+      .mobile-nav-menu {
+        display: none;
+        position: fixed;
+        top: var(--bar-h); left: 0; right: 0;
+        background: rgba(8,12,20,0.97);
+        border-bottom: 1px solid rgba(200,133,14,0.3);
+        z-index: 205;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        pointer-events: none;
+      }
+      .frame.content-mode .mobile-nav-menu { display: block; }
+      .mobile-nav-menu.menu-open { max-height: 400px; pointer-events: auto; }
+      .mobile-nav-menu button {
+        display: block;
+        width: 100%;
+        padding: 15px 22px 15px 44px;
+        background: none;
+        border: none;
+        border-bottom: 1px solid rgba(200,133,14,0.1);
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
+        color: rgba(200,133,14,0.65);
+        cursor: pointer;
+        text-align: left;
+        transition: color 0.2s, background 0.2s;
       }
-      .clapper-enter-btn {
-        border: 3px solid #c8850e;
-        padding: 10px 32px;
-      }
-      .mobile-clapper:hover .clapper-enter { color: #a86c0a; }
-      .mobile-clapper:hover .clapper-enter-btn { border-color: #a86c0a; }
+      .mobile-nav-menu button:last-child { border-bottom: none; }
+      .mobile-nav-menu button:active { background: rgba(200,133,14,0.08); }
+      .mobile-nav-menu button.active  { color: var(--accent); }
+      .mobile-nav-menu .mobile-nav-home { color: rgba(237,234,228,0.7); padding-left: 22px; }
+      .nav-home-chev { display: inline-block; width: 22px; font-size: 18px; }
+
+      /* Mobile entry animation: bars slide in from edges */
+      .frame-bar.top    { transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
+      .frame-bar.bottom { transform: translateY(100%);  transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
+      .frame.mobile-bars-visible .frame-bar.top    { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
+      .frame.mobile-bars-visible .frame-bar.bottom { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.05s; }
+
     }
 
-    @media (orientation: landscape) and (max-height: 500px) {
-      .home-header { display: none; }
-      body { background: #f7f5f0; }
-      main { background: #f7f5f0; padding: 0; flex: 1; align-items: stretch; }
-      footer { background: #f7f5f0; color: #999; padding: 8px 20px; }
-      .monitor-svg { display: none; }
-      .stripe { background: repeating-linear-gradient(-45deg, #000 0px, #000 28px, #fff 28px, #fff 56px); height: 28px; border-bottom: 3px solid #000; }
-
-      /* Clear the base border (which has border: 1px solid #2a2a2a), set top only */
-      .mobile-clapper { display: flex; flex-direction: column; flex: 1; background: #f7f5f0; text-decoration: none; border: none; border-top: 3px solid #111; }
-      .clapper-stripe-top { display: none; }
-      .clapper-divider { display: none; }
-
-      /* Two-column grid: name on left, rows on right */
-      .clapper-body {
-        display: grid;
-        grid-template-columns: 2fr 3fr;
-        grid-template-rows: auto auto 1fr;
-        flex: 1;
-      }
-      .clapper-row.name-row {
-        grid-column: 1;
-        grid-row: 1 / 4;
-        display: flex;
-        border-bottom: none;
-        border-right: 3px solid #111;
-        min-height: unset;
-      }
-      .clapper-row:not(.name-row) {
-        grid-column: 2;
-        display: flex;
-        min-height: 54px;
-        border-bottom: 3px solid #111;
-      }
-      .clapper-row.enter-row { border-bottom: none; }
-
-      .clapper-cell { flex: 1; padding: 8px 14px 6px; display: flex; flex-direction: column; justify-content: flex-start; gap: 3px; border-right: 3px solid #111; }
-      .clapper-cell:last-child { border-right: none; }
-      .clapper-cell.wide { flex: 2; }
-      .name-row .clapper-cell { justify-content: flex-start; border-right: none; padding: 12px 18px; }
-
-      .clapper-label { font-size: 11px; font-weight: 700; letter-spacing: 0.18em; color: #888; text-transform: uppercase; }
-      .clapper-val { font-size: 24px; font-weight: 700; color: #111; line-height: 1.1; text-transform: uppercase; }
-      .clapper-val.amber { color: #c8850e; font-size: 30px; }
-      .clapper-val.small { font-size: 24px; }
-      /* Name: two lines, large — JS fit disabled in landscape */
-      .name-row .clapper-val { font-size: 80px; letter-spacing: -1px; white-space: normal; line-height: 1.0; }
-
-      .clapper-enter { flex: 1; display: flex; align-items: flex-start; padding-top: 14px; justify-content: center; font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #c8850e; text-transform: uppercase; }
-      .clapper-enter-btn { border: 3px solid #c8850e; padding: 6px 24px; }
-      .mobile-clapper:hover .clapper-enter { color: #a86c0a; }
-      .mobile-clapper:hover .clapper-enter-btn { border-color: #a86c0a; }
+    /* Freeze all transitions/animations during instant state restore */
+    .no-transition, .no-transition * {
+      transition: none !important;
+      animation: none !important;
     }
+
+    /* ── Game panel ── */
+    .game-panel {
+      position: fixed;
+      top: var(--bar-h); left: 0; right: 0; bottom: 0;
+      z-index: 150;
+      background: #000;
+      transform: translateY(100%);
+      transition: transform 0.9s cubic-bezier(0.87, 0, 0.13, 1);
+      pointer-events: none;
+    }
+    .game-panel.active {
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .game-panel iframe {
+      width: 100%; height: 100%;
+      border: none; display: block;
+    }
+    /* Bottom bar retracts, frame labels + tabs fade out */
+    .frame.game-mode .frame-bar.bottom  { transform: translateY(100%); }
+    .frame.game-mode .frame-label       { opacity: 0 !important; transition: opacity 0.5s ease !important; }
+    .frame.game-mode .frame-label.tr    { transition: opacity 0.5s ease 0.1s !important; }
+    .frame.game-mode .frame-label.tl    { transition: opacity 0.5s ease 0.05s !important; }
+    .frame.game-mode .frame-tabs        { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.4s ease !important; }
   </style>
 </head>
 <body>
 
-  <div class="stripe"></div>
+  <!-- ── Monitor frame overlay ── -->
+  <div class="frame prominent" id="frame">
+    <div class="frame-bar top"></div>
+    <div class="frame-bar bottom"></div>
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
 
-  <header class="home-header">
-    <div class="slate-inner">
-      <div class="slate-row">
-        <div class="slate-cell">
-          <span class="slate-label">Production</span>
-          <span class="slate-name">Marko Balac</span>
-        </div>
+    <div class="frame-line top"></div>
+    <div class="frame-line bottom"></div>
+    <div class="frame-line left"></div>
+    <div class="frame-line right"></div>
+
+    <span class="frame-label tl">A · SDI-1 · 4.5K</span>
+    <span class="frame-label tc">S-Log3 › Rec.709</span>
+    <span class="frame-label tr"><span class="fps-val">23.98 FPS</span> · <span class="rec-dot">◆</span> <span class="rec-text">REC</span></span>
+    <span class="frame-label bl"><span id="frame-tc">01:02:14:07</span></span>
+    <span class="frame-label bc">F 4.2'  ·  T2.8  ·  35mm</span>
+    <span class="frame-label br">ISO 800  ·  180°  ·  3200K</span>
+    <button class="frame-back" id="frame-back">
+      <div class="back-inner">
+        <div class="back-face back-face-home"><span class="back-chevron">&#8249;</span> Home</div>
+        <div class="back-face back-face-return">Return<span class="back-chevron-down">&#8249;</span></div>
       </div>
-      <div class="slate-row">
-        <div class="slate-cell">
-          <span class="slate-label">Role</span>
-          <span class="slate-val slate-amber">Script Supervisor</span>
-        </div>
-        <div class="slate-cell">
-          <span class="slate-label">Location</span>
-          <span class="slate-val slate-dim">Based in Toronto, ON</span>
-        </div>
-      </div>
-      <div class="slate-row">
-        <div class="slate-cell">
-          <span class="slate-label">Roll</span>
-          <span class="slate-val">A007</span>
-        </div>
-        <div class="slate-cell">
-          <span class="slate-label">Scene</span>
-          <span class="slate-val">47A</span>
-        </div>
-        <div class="slate-cell">
-          <span class="slate-label">Take</span>
-          <span class="slate-val">9</span>
+    </button>
+    <nav class="frame-tabs" id="frame-tabs">
+      <button data-page="about">About</button>
+      <button data-page="credits">Credits</button>
+      <button data-page="services">Services</button>
+      <button data-page="gallery">Gallery</button>
+      <button data-page="contact">Contact</button>
+    </nav>
+
+    <!-- Mobile-only nav dropdown -->
+    <button class="mobile-nav-btn" id="mobile-nav-btn"><svg width="26" height="13" viewBox="0 0 26 13" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,2 13,11 24,2"/></svg></button>
+    <div class="mobile-nav-menu" id="mobile-nav-menu">
+      <button class="mobile-nav-home" id="mobile-nav-home"><span class="nav-home-chev">&#8249;</span>Home</button>
+      <button data-page="about">About</button>
+      <button data-page="credits">Credits</button>
+      <button data-page="services">Services</button>
+      <button data-page="gallery">Gallery</button>
+      <button data-page="contact">Contact</button>
+    </div>
+  </div>
+
+  <div class="app" id="app">
+
+  <!-- ── Home panel ── -->
+  <div class="home-panel" id="home-panel">
+  <section id="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-left">
+          <h1 class="hero-name">Marko Balac</h1>
+          <div class="hero-meta">
+            <span class="hero-role">Script Supervisor</span>
+            <span class="hero-location">Based in Toronto, ON</span>
+          </div>
+          <nav class="hero-nav">
+            <a href="#about">About</a>
+            <a href="#credits">Credits</a>
+            <a href="#services">Services</a>
+            <a href="#gallery">Gallery</a>
+            <a href="#contact">Contact</a>
+          </nav>
         </div>
       </div>
     </div>
-  </header>
+  </section>
+  </div><!-- /home-panel -->
 
-  <main>
-    <a href="portfolio.html" class="mobile-clapper">
-      <div class="clapper-stripe-top"></div>
-      <div class="clapper-body">
+  <!-- ── Content panel ── -->
+  <div class="content-panel" id="content-panel">
 
-        <div class="clapper-row name-row">
-          <div class="clapper-cell">
-            <span class="clapper-label">Production</span>
-            <span class="clapper-val">Marko Balac</span>
-          </div>
+  <div class="page" id="page-about">
+  <!-- ── About ── -->
+  <section id="about">
+    <div class="container">
+      <p class="section-eyebrow">About</p>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>Hello and welcome. My name is Marko. I'm a musician, a writer, a cook, an educator, a photographer, a tech geek, and a plain-old human being.</p>
+          <p>And I am also a Script Supervisor.</p>
+          <p>My job, most simply put, is to protect the integrity of the artistic vision that sustains every narrative project — be it a short film, feature, or series.</p>
+          <p>Or, put another way: I am a cost-containment measure for the production at large. I solve problems before they become expensive problems days, weeks, or months down the road.</p>
+          <p>Truth be told, these are really two sides of the same coin.</p>
+          <a href="marko-balac-cv.pdf" class="cv-link" target="_blank" rel="noopener noreferrer">Download CV →</a>
         </div>
-
-        <div class="clapper-row">
-          <div class="clapper-cell wide">
-            <span class="clapper-label">Role</span>
-            <span class="clapper-val amber">Script Supervisor</span>
-          </div>
-          <div class="clapper-cell wide">
-            <span class="clapper-label">Location</span>
-            <span class="clapper-val small">Based in Toronto, ON</span>
-          </div>
-        </div>
-
-        <div class="clapper-row">
-          <div class="clapper-cell">
-            <span class="clapper-label">Roll</span>
-            <span class="clapper-val">A007</span>
-          </div>
-          <div class="clapper-cell">
-            <span class="clapper-label">Scene</span>
-            <span class="clapper-val">47A</span>
-          </div>
-          <div class="clapper-cell">
-            <span class="clapper-label">Take</span>
-            <span class="clapper-val">9</span>
-          </div>
-        </div>
-
-        <div class="clapper-row enter-row">
-          <div class="clapper-enter"><span class="clapper-enter-btn">▶ Enter</span></div>
-        </div>
-
+        <img src="headshot.jpg" alt="Marko Balac" class="about-photo">
       </div>
-    </a>
-    <svg class="monitor-svg" viewBox="0 0 680 440" xmlns="http://www.w3.org/2000/svg" aria-label="On-set preview monitor">
+    </div>
+  </section>
+  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div><span>Script Supervisor · Toronto, ON</span></div></div></footer>
+  </div><!-- /page-about -->
 
-      <defs>
-        <pattern id="scan" x="0" y="0" width="1" height="3" patternUnits="userSpaceOnUse">
-          <rect x="0" y="0" width="1" height="1" fill="#000" opacity="0.12"/>
-        </pattern>
-        <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" stop-color="#000" stop-opacity="0"/>
-          <stop offset="100%" stop-color="#000" stop-opacity="0.35"/>
-        </radialGradient>
-        <clipPath id="screenClip">
-          <rect x="42" y="42" width="596" height="356"/>
-        </clipPath>
-        <linearGradient id="skyGrad" x1="0" y1="42" x2="0" y2="320" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stop-color="#1a3060"/>
-          <stop offset="45%"  stop-color="#3a6090"/>
-          <stop offset="78%"  stop-color="#c86818"/>
-          <stop offset="100%" stop-color="#f09020"/>
-        </linearGradient>
-        <mask id="moonMask">
-          <circle cx="152" cy="130" r="22" fill="white"/>
-          <circle cx="164" cy="130" r="20" fill="black"/>
-        </mask>
-        <radialGradient id="earthGrad" cx="65%" cy="28%" r="65%">
-          <stop offset="0%"   stop-color="#4a9ae0"/>
-          <stop offset="55%"  stop-color="#1a5099"/>
-          <stop offset="100%" stop-color="#081830"/>
-        </radialGradient>
-        <linearGradient id="earthShadow" x1="0%" y1="100%" x2="100%" y2="0%">
-          <stop offset="0%"   stop-color="#010508" stop-opacity="0.96"/>
-          <stop offset="32%"  stop-color="#010508" stop-opacity="0.88"/>
-          <stop offset="50%"  stop-color="#010508" stop-opacity="0.42"/>
-          <stop offset="64%"  stop-color="#010508" stop-opacity="0.05"/>
-          <stop offset="100%" stop-color="#010508" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
+  <div class="page" id="page-credits">
+  <!-- ── Credits ── -->
+  <section id="credits">
+    <div class="container">
+      <p class="section-eyebrow">Credits</p>
+      <p class="phase-label"><span class="phase-tag phase-green">Recent Credits</span></p>
+      <table class="credits-table">
+        <thead>
+          <tr>
+            <th>Production</th>
+            <th>Director</th>
+            <th>Role</th>
+            <th>Format</th>
+            <th>Year</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="credits-group"><td colspan="5">Script Supervisor</td></tr>
+          <tr>
+            <td>Matcha Latte <span class="film-tag">16mm</span></td>
+            <td>Andrés Pérez Galicia<span class="producer">prod. Nessa Hallman</span></td>
+            <td>Script Supervisor</td>
+            <td><span class="fmt">Short</span></td>
+            <td>2026</td>
+          </tr>
+          <tr>
+            <td>A Beautiful Lie</td>
+            <td>Pablo de la Chica<span class="producer">prod. Mohaid Sharif</span></td>
+            <td>Script Supervisor</td>
+            <td><span class="fmt">Short</span></td>
+            <td>2025</td>
+          </tr>
 
-      <!-- ── Monitor housing ── -->
-      <rect x="4" y="4" width="672" height="432" fill="#1c1c1c"/>
-      <rect x="4" y="4" width="672" height="2" fill="#2e2e2e"/>
-      <rect x="4" y="4" width="2" height="432" fill="#2e2e2e"/>
-      <rect x="4" y="434" width="672" height="2" fill="#101010"/>
-      <rect x="674" y="4" width="2" height="432" fill="#101010"/>
-      <rect x="649" y="52" width="8" height="8" fill="#242424"/>
-      <rect x="649" y="64" width="8" height="8" fill="#242424"/>
-      <rect x="649" y="76" width="8" height="8" fill="#242424"/>
-      <rect x="649" y="88" width="8" height="8" fill="#242424"/>
-      <rect x="22" y="52" width="2" height="6" fill="#161616"/>
-      <rect x="22" y="62" width="2" height="6" fill="#161616"/>
-      <rect x="22" y="72" width="2" height="6" fill="#161616"/>
-      <rect x="22" y="82" width="2" height="6" fill="#161616"/>
-      <rect x="22" y="92" width="2" height="6" fill="#161616"/>
-      <!-- Status LEDs -->
-      <rect x="652" y="424" width="8" height="6" fill="#22c55e"/>
-      <rect x="640" y="424" width="8" height="6" fill="#252525"/>
-      <!-- Cam toggle button (HUD element, bottom housing) -->
-      <g id="cam-toggle">
-        <rect x="570" y="417" width="62" height="17" fill="#141414" rx="2"/>
-        <rect x="570" y="417" width="62" height="17" fill="none" stroke="#c8850e" stroke-width="1" rx="2" opacity="0.7"/>
-        <text id="cam-toggle-label" x="601" y="429" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="10" font-weight="700" fill="#c8850e">B CAM ▶</text>
-      </g>
+          <tr class="credits-divider">
+            <td colspan="5"><span class="phase-tag phase-grey">Earlier Credits</span></td>
+          </tr>
 
-      <!-- ── Screen bezel ── -->
-      <rect x="22" y="22" width="636" height="396" fill="#0b0b0b"/>
-      <!-- ── Screen base ── -->
-      <rect x="42" y="42" width="596" height="356" fill="#000"/>
+          <tr class="credits-group"><td colspan="5">Set Production Assistant</td></tr>
+          <tr class="credits-earlier">
+            <td>In Character<span class="producer">Canadian Film Centre</span></td>
+            <td></td><td>Set PA<span class="producer">Daily</span></td>
+            <td><span class="fmt">Short</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Mayday<span class="producer">Season 20</span></td>
+            <td></td><td>Set PA<span class="producer">Daily</span></td>
+            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Spinning</td>
+            <td></td><td>Set PA<span class="producer">Daily</span></td>
+            <td><span class="fmt">Short</span></td><td>2019</td>
+          </tr>
 
-      <!-- ══ A CAM ══ -->
-      <g id="cam-a">
-        <g clip-path="url(#screenClip)">
-          <rect x="42" y="42" width="596" height="356" fill="url(#skyGrad)"/>
-          <!-- Dusk stars — sparse, faint, upper sky only -->
-          <circle cx="200" cy="94"  r="1"   fill="#fff" opacity="0.55"/>
-          <circle cx="282" cy="84"  r="1.5" fill="#fff" opacity="0.45"/>
-          <circle cx="354" cy="99"  r="1"   fill="#fff" opacity="0.50"/>
-          <circle cx="422" cy="87"  r="1"   fill="#fff" opacity="0.60"/>
-          <circle cx="492" cy="94"  r="1.5" fill="#fff" opacity="0.40"/>
-          <circle cx="558" cy="81"  r="1"   fill="#fff" opacity="0.55"/>
-          <circle cx="602" cy="108" r="1"   fill="#fff" opacity="0.35"/>
-          <circle cx="242" cy="128" r="1"   fill="#fff" opacity="0.40"/>
-          <circle cx="384" cy="118" r="1"   fill="#fff" opacity="0.35"/>
-          <circle cx="534" cy="107" r="1"   fill="#fff" opacity="0.45"/>
-          <circle cx="468" cy="132" r="1"   fill="#fff" opacity="0.30"/>
-          <circle cx="315" cy="148" r="1"   fill="#fff" opacity="0.25"/>
-          <circle cx="152" cy="130" r="36" fill="#d07010" opacity="0.10"/>
-          <circle cx="152" cy="130" r="28" fill="#e08818" opacity="0.14"/>
-          <!-- Harvest moon crescent with subtle crater texture -->
-          <g mask="url(#moonMask)">
-            <circle cx="152" cy="130" r="22" fill="#f5b040"/>
-            <ellipse cx="143" cy="123" rx="5" ry="4" fill="#c87a10" opacity="0.40"/>
-            <circle cx="149" cy="138" r="3"   fill="#c87a10" opacity="0.35"/>
-            <circle cx="139" cy="132" r="2"   fill="#c87a10" opacity="0.45"/>
-            <circle cx="150" cy="118" r="2.5" fill="#c87a10" opacity="0.30"/>
-            <ellipse cx="144" cy="144" rx="3" ry="2" fill="#c87a10" opacity="0.30"/>
-            <circle cx="155" cy="128" r="1.5" fill="#f8c060" opacity="0.40"/>
-          </g>
-          <ellipse cx="310" cy="300" rx="320" ry="60" fill="#f08020" opacity="0.35"/>
-          <ellipse cx="310" cy="308" rx="210" ry="34" fill="#f4a030" opacity="0.25"/>
-          <path d="M42,288 C110,270 200,262 290,268 C360,272 420,260 490,256 C545,253 595,260 638,266 L638,398 L42,398 Z" fill="#2e5228"/>
-          <path d="M42,322 C90,304 170,292 250,296 C310,300 365,284 425,280 C472,277 520,283 568,278 C598,275 622,280 638,286 L638,398 L42,398 Z" fill="#223e1c"/>
-          <rect x="42" y="358" width="596" height="40" fill="#1a3016"/>
-          <circle cx="507" cy="265" r="3" fill="#0a1408"/>
-          <rect x="505" y="268" width="4" height="10" fill="#0a1408"/>
-          <line x1="502" y1="271" x2="512" y2="270" stroke="#0a1408" stroke-width="2"/>
-          <line x1="507" y1="278" x2="504" y2="285" stroke="#0a1408" stroke-width="2"/>
-          <line x1="507" y1="278" x2="510" y2="285" stroke="#0a1408" stroke-width="2"/>
-        </g>
-        <rect x="42" y="42" width="596" height="356" fill="url(#scan)"/>
-        <!-- TOP HUD -->
-        <rect x="48" y="47" width="23" height="22" fill="#c8850e"/>
-        <text x="59" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="13" font-weight="700" fill="#000">A</text>
-        <text x="77" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#aaa">SDI 1</text>
-        <text x="116" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">1920×1080</text>
-        <text x="340" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#c8850e">S-Log3 › Rec.709</text>
-        <text x="592" y="63" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#fff">23.98p</text>
-        <rect x="596" y="48" width="9" height="9" fill="#ef4444"/>
-        <text x="609" y="63" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#ef4444">REC</text>
-        <rect x="42" y="78" width="596" height="1" fill="#161616"/>
-        <!-- BOTTOM HUD -->
-        <rect x="42" y="362" width="596" height="1" fill="#161616"/>
-        <rect x="48" y="368" width="96" height="22" fill="#000"/>
-        <text id="tc-a" x="53" y="384" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#c8850e">01:02:14:07</text>
-        <text x="340" y="384" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">F 4.2'  ·  T2.8  ·  35mm</text>
-        <text x="630" y="384" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#888">ISO 800  ·  180°  ·  3200K</text>
-      </g>
+          <tr class="credits-group"><td colspan="5">Office Production Assistant</td></tr>
+          <tr class="credits-earlier">
+            <td>Utopia Falls</td>
+            <td></td><td>Office PA<span class="producer">Daily</span></td>
+            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>The Queen's Gambit</td>
+            <td></td><td>Office PA<span class="producer">Daily</span></td>
+            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          </tr>
 
-      <!-- ══ B CAM ══ -->
-      <g id="cam-b" style="opacity:0; pointer-events:none;">
-        <g clip-path="url(#screenClip)">
-          <!-- Deep space -->
-          <rect x="42" y="42" width="596" height="356" fill="#050810"/>
-          <!-- Stars -->
-          <circle cx="78"  cy="58"  r="1"   fill="#fff" opacity="0.9"/>
-          <circle cx="115" cy="72"  r="1.5" fill="#fff" opacity="0.7"/>
-          <circle cx="152" cy="50"  r="1"   fill="#fff" opacity="0.8"/>
-          <circle cx="190" cy="88"  r="1"   fill="#dde" opacity="0.6"/>
-          <circle cx="65"  cy="105" r="1"   fill="#fff" opacity="0.7"/>
-          <circle cx="230" cy="62"  r="1"   fill="#fff" opacity="0.9"/>
-          <circle cx="270" cy="80"  r="1.5" fill="#fff" opacity="0.5"/>
-          <circle cx="300" cy="55"  r="1"   fill="#fff" opacity="0.8"/>
-          <circle cx="350" cy="70"  r="1"   fill="#dde" opacity="0.6"/>
-          <circle cx="90"  cy="140" r="1.5" fill="#fff" opacity="0.7"/>
-          <circle cx="130" cy="180" r="1"   fill="#fff" opacity="0.5"/>
-          <circle cx="60"  cy="200" r="1"   fill="#dde" opacity="0.8"/>
-          <circle cx="72"  cy="250" r="1"   fill="#fff" opacity="0.6"/>
-          <circle cx="170" cy="240" r="1"   fill="#fff" opacity="0.7"/>
-          <circle cx="200" cy="260" r="1.5" fill="#fff" opacity="0.5"/>
-          <circle cx="180" cy="180" r="1"   fill="#dde" opacity="0.6"/>
-          <circle cx="220" cy="50"  r="1"   fill="#fff" opacity="0.7"/>
-          <circle cx="550" cy="58"  r="1.5" fill="#fff" opacity="0.9"/>
-          <circle cx="580" cy="82"  r="1"   fill="#fff" opacity="0.7"/>
-          <circle cx="610" cy="60"  r="1"   fill="#fff" opacity="0.8"/>
-          <circle cx="595" cy="120" r="1"   fill="#dde" opacity="0.6"/>
-          <circle cx="560" cy="150" r="1.5" fill="#fff" opacity="0.5"/>
-          <circle cx="620" cy="180" r="1"   fill="#fff" opacity="0.7"/>
-          <circle cx="630" cy="240" r="1"   fill="#fff" opacity="0.6"/>
-          <circle cx="570" cy="200" r="1"   fill="#dde" opacity="0.7"/>
-          <circle cx="475" cy="65"  r="1"   fill="#fff" opacity="0.8"/>
-          <circle cx="500" cy="90"  r="1.5" fill="#fff" opacity="0.6"/>
-          <circle cx="535" cy="72"  r="1"   fill="#fff" opacity="0.9"/>
-          <circle cx="460" cy="110" r="1"   fill="#dde" opacity="0.5"/>
-          <circle cx="638" cy="120" r="1"   fill="#fff" opacity="0.6"/>
-          <circle cx="155" cy="295" r="1"   fill="#fff" opacity="0.4"/>
-          <circle cx="88"  cy="295" r="1"   fill="#fff" opacity="0.3"/>
-          <circle cx="625" cy="290" r="1"   fill="#fff" opacity="0.3"/>
-          <!-- Earth atmosphere glow -->
-          <circle cx="418" cy="158" r="100" fill="#2255aa" opacity="0.18"/>
-          <circle cx="418" cy="158" r="95"  fill="#1a4080" opacity="0.12"/>
-          <!-- Earth -->
-          <circle cx="418" cy="158" r="90" fill="url(#earthGrad)"/>
-          <!-- Africa / Eurasia -->
-          <ellipse cx="438" cy="150" rx="18" ry="28" fill="#3a6e38" opacity="0.85"/>
-          <ellipse cx="416" cy="124" rx="22" ry="14" fill="#4a7848" opacity="0.7"/>
-          <!-- Americas -->
-          <ellipse cx="356" cy="148" rx="10" ry="24" fill="#3a6238" opacity="0.75"/>
-          <ellipse cx="363" cy="180" rx="8"  ry="14" fill="#3a5e34" opacity="0.7"/>
-          <!-- Ice caps -->
-          <ellipse cx="418" cy="70"  rx="28" ry="10" fill="#d8e8f0" opacity="0.65"/>
-          <ellipse cx="418" cy="244" rx="22" ry="8"  fill="#d8e8f0" opacity="0.55"/>
-          <!-- Clouds -->
-          <path d="M368,110 Q393,102 428,108 Q453,112 466,106" stroke="#ddf" stroke-width="6" fill="none" opacity="0.5" stroke-linecap="round"/>
-          <path d="M356,142 Q376,136 406,140" stroke="#dde" stroke-width="5" fill="none" opacity="0.4" stroke-linecap="round"/>
-          <path d="M438,187 Q463,180 488,184 Q503,188 510,182" stroke="#ccd" stroke-width="5" fill="none" opacity="0.4" stroke-linecap="round"/>
-          <path d="M388,202 Q413,194 436,199" stroke="#dde" stroke-width="4" fill="none" opacity="0.35" stroke-linecap="round"/>
-          <!-- Shadow — sun upper-right, terminator at 45° -->
-          <circle cx="418" cy="158" r="90" fill="url(#earthShadow)"/>
-          <!-- Pinprick city lights — dark side -->
-          <circle cx="375" cy="185" r="1"   fill="#ffe090" opacity="0.75"/>
-          <circle cx="360" cy="170" r="0.8" fill="#ffcf70" opacity="0.65"/>
-          <circle cx="388" cy="202" r="1"   fill="#ffd880" opacity="0.70"/>
-          <circle cx="368" cy="196" r="0.8" fill="#ffbe60" opacity="0.60"/>
-          <circle cx="352" cy="178" r="1"   fill="#ffd070" opacity="0.65"/>
-          <circle cx="380" cy="214" r="0.8" fill="#ffcf70" opacity="0.58"/>
-          <circle cx="394" cy="178" r="0.8" fill="#ffe090" opacity="0.55"/>
-          <!-- Moon surface -->
-          <path d="M42,312 Q130,304 230,308 Q330,312 410,305 Q500,298 580,304 Q615,307 638,302 L638,398 L42,398 Z" fill="#6a6a72"/>
-          <path d="M42,312 Q130,304 230,308 Q330,312 410,305 Q500,298 580,304 Q615,307 638,302 Q590,316 470,320 Q360,324 260,320 Q150,316 42,322 Z" fill="#585860" opacity="0.6"/>
-          <rect x="42" y="344" width="596" height="54" fill="#525258"/>
-          <!-- Craters -->
-          <ellipse cx="168" cy="332" rx="22" ry="6"  fill="#7a7a82" opacity="0.5"/>
-          <ellipse cx="572" cy="352" rx="16" ry="4"  fill="#7a7a82" opacity="0.4"/>
-          <ellipse cx="358" cy="356" rx="30" ry="5"  fill="#4c4c52" opacity="0.4"/>
-          <!-- Astronaut — Artemis-style suit, lit from back-left -->
-          <!-- Arms (base) -->
-          <path d="M216,266 L200,288" stroke="#2c2c40" stroke-width="11" stroke-linecap="round"/>
-          <path d="M272,266 L288,288" stroke="#2c2c40" stroke-width="11" stroke-linecap="round"/>
-          <!-- Left arm red ID stripe -->
-          <path d="M212,272 L206,279" stroke="#8b1a1a" stroke-width="4" stroke-linecap="round"/>
-          <!-- Wrist rings -->
-          <path d="M201,285 L197,291" stroke="#424258" stroke-width="7" stroke-linecap="round"/>
-          <path d="M287,285 L291,291" stroke="#424258" stroke-width="7" stroke-linecap="round"/>
+          <tr class="credits-group"><td colspan="5">Location Support</td></tr>
+          <tr class="credits-earlier">
+            <td>Mrs. America</td>
+            <td></td><td>Location Support<span class="producer">Daily</span></td>
+            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Grand Army</td>
+            <td></td><td>Location Support<span class="producer">Daily</span></td>
+            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Condor<span class="producer">Season 2</span></td>
+            <td></td><td>Location Support<span class="producer">Daily</span></td>
+            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Spiral</td>
+            <td></td><td>Location Support<span class="producer">Daily</span></td>
+            <td><span class="fmt">Feature</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>Ginny &amp; Georgia<span class="producer">Season 1</span></td>
+            <td></td><td>Location Support<span class="producer">Daily</span></td>
+            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          </tr>
+          <tr class="credits-earlier">
+            <td>The Boys<span class="producer">Season 2</span></td>
+            <td></td><td>Location Support<span class="producer">Daily</span></td>
+            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div><span>Script Supervisor · Toronto, ON</span></div></div></footer>
+  </div><!-- /page-credits -->
 
-          <!-- PLSS backpack — multi-panel -->
-          <rect x="224" y="256" width="40" height="38" rx="3" fill="#1e1e2e"/>
-          <!-- Radiator panel (top) -->
-          <rect x="226" y="257" width="36" height="10" rx="2" fill="#3a3a52"/>
-          <!-- Radiator fins -->
-          <rect x="229" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
-          <rect x="233" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
-          <rect x="237" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
-          <rect x="241" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
-          <rect x="245" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
-          <rect x="249" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
-          <rect x="253" y="258" width="1" height="8" fill="#282840" opacity="0.7"/>
-          <!-- Mid housing -->
-          <rect x="227" y="268" width="34" height="16" rx="1" fill="#272738"/>
-          <!-- Control panel inset -->
-          <rect x="230" y="270" width="14" height="11" rx="1" fill="#161622"/>
-          <!-- Indicator lights -->
-          <rect x="231" y="272" width="3" height="3" rx="1" fill="#22c55e" opacity="0.85"/>
-          <rect x="236" y="272" width="3" height="3" rx="1" fill="#c8850e" opacity="0.85"/>
-          <!-- Lower section -->
-          <rect x="227" y="285" width="34" height="8" rx="1" fill="#222232"/>
-          <!-- Side handles -->
-          <rect x="224" y="260" width="4" height="30" rx="1" fill="#323248"/>
-          <rect x="260" y="260" width="4" height="30" rx="1" fill="#323248"/>
+  <div class="page" id="page-services">
+  <!-- ── Services ── -->
+  <section id="services">
+    <div class="container">
+      <p class="section-eyebrow">Services</p>
 
-          <!-- Shoulders -->
-          <rect x="214" y="258" width="60" height="16" rx="5" fill="#303044"/>
-          <!-- Shoulder joint rings -->
-          <rect x="214" y="260" width="9" height="12" rx="3" fill="#3e3e56"/>
-          <rect x="265" y="260" width="9" height="12" rx="3" fill="#3e3e56"/>
-          <!-- Red shoulder patch (left) -->
-          <rect x="215" y="263" width="7" height="4" rx="1" fill="#8b1a1a" opacity="0.9"/>
+      <!-- Pre-Production -->
+      <div class="services-phase">
+        <p class="phase-label"><span class="phase-tag phase-yellow">Pre-Production</span></p>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="2" width="16" height="20" rx="1"/>
+                <line x1="8" y1="7" x2="16" y2="7"/>
+                <line x1="8" y1="11" x2="16" y2="11"/>
+                <line x1="8" y1="15" x2="13" y2="15"/>
+                <line x1="8" y1="19" x2="11" y2="19"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Script Breakdown</p>
+              <p class="svc-note">A complete scene-by-scene analysis</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="9"/>
+                <line x1="12" y1="7" x2="12" y2="12"/>
+                <line x1="12" y1="12" x2="16" y2="14"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Pre-Timing</p>
+              <p class="svc-note">Optional scene-by-scene timings</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                <line x1="18" y1="6" x2="22" y2="6"/>
+                <line x1="20" y1="4" x2="20" y2="8"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Pre-Production Support</p>
+              <p class="svc-note">Discuss and solve problems prior to shooting</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <!-- Helmet -->
-          <circle cx="244" cy="242" r="18" fill="#262638"/>
-          <!-- Neck ring -->
-          <rect x="232" y="256" width="24" height="5" rx="2" fill="#3e3e56"/>
-          <!-- Antenna -->
-          <rect x="243" y="222" width="2" height="9" fill="#4a4a62"/>
+      <!-- On Set -->
+      <div class="services-phase">
+        <p class="phase-label"><span class="phase-tag phase-green">On Set</span></p>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="6" height="6" rx="0.5"/>
+                <rect x="1" y="15" width="6" height="6" rx="0.5"/>
+                <rect x="17" y="3" width="6" height="6" rx="0.5"/>
+                <rect x="17" y="15" width="6" height="6" rx="0.5"/>
+                <path d="M7 18 L10 18 L10 6 L15.5 6"/>
+                <polyline points="13.5,4 15.5,6 13.5,8"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">On-Set Continuity</p>
+              <p class="svc-note">Match action, dialogue, and everything in between</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="2" width="10" height="20" rx="0.5"/>
+                <line x1="5" y1="2"  x2="5"  y2="22"/>
+                <line x1="1" y1="7"  x2="11" y2="7"/>
+                <line x1="1" y1="12" x2="11" y2="12"/>
+                <line x1="1" y1="17" x2="11" y2="17"/>
+                <rect x="13" y="2" width="10" height="20" rx="0.5"/>
+                <line x1="15" y1="7"  x2="21" y2="7"/>
+                <line x1="15" y1="10" x2="21" y2="10"/>
+                <line x1="15" y1="13" x2="21" y2="13"/>
+                <line x1="15" y1="16" x2="21" y2="16"/>
+                <line x1="15" y1="19" x2="19" y2="19"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Facing Pages</p>
+              <p class="svc-note">Detailed take-by-take on-set notes</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="3" width="14" height="18" rx="1"/>
+                <line x1="9" y1="3" x2="9" y2="7"/>
+                <line x1="15" y1="3" x2="15" y2="7"/>
+                <line x1="8" y1="11" x2="16" y2="11"/>
+                <line x1="8" y1="14" x2="16" y2="14"/>
+                <line x1="8" y1="17" x2="12" y2="17"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Editor's Log</p>
+              <p class="svc-note">Daily footage report in shooting order</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="2" width="16" height="20" rx="1"/>
+                <line x1="8" y1="17" x2="8" y2="10"/>
+                <line x1="12" y1="17" x2="12" y2="7"/>
+                <line x1="16" y1="17" x2="16" y2="13"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Daily Report</p>
+              <p class="svc-note">Topsheet with key production information</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="2" width="18" height="20" rx="1"/>
+                <line x1="10" y1="4" x2="10" y2="20"/>
+                <path d="M15 4 C17 7 13 10 15 13 C17 16 13 19 15 21"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Lined Script</p>
+              <p class="svc-note">Digital or hand drawn record of coverage</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="2" width="16" height="20" rx="1"/>
+                <line x1="8" y1="8" x2="16" y2="8"/>
+                <line x1="12" y1="13" x2="12" y2="19"/>
+                <line x1="9" y1="16" x2="15" y2="16"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">As-Read Script</p>
+              <p class="svc-note">With accurate and up-to-date dialogue and changes</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <!-- Suit body flanks (visible beside PLSS) -->
-          <rect x="215" y="275" width="9" height="17" rx="2" fill="#343448"/>
-          <rect x="264" y="275" width="9" height="17" rx="2" fill="#343448"/>
+      <!-- Kit -->
+      <div class="services-phase">
+        <p class="phase-label"><span class="phase-tag phase-blue">Kit</span></p>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 3 21l.5-4.5L17 3z"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Pen &amp; Paper</p>
+              <p class="svc-note">On-set continuity and notes</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <text x="12" y="18" text-anchor="middle" font-family="'Courier New', monospace" font-size="20" font-weight="700" fill="currentColor">E</text>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">ScriptE</p>
+              <p class="svc-note">The latest digital script supervision software</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="1" width="16" height="22" rx="2"/>
+                <line x1="10" y1="21" x2="14" y2="21"/>
+                <line x1="7" y1="7" x2="17" y2="7"/>
+                <line x1="7" y1="10" x2="17" y2="10"/>
+                <line x1="7" y1="13" x2="17" y2="13"/>
+                <line x1="7" y1="16" x2="13" y2="16"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Scriptation</p>
+              <p class="svc-note">Modern digital script workflow and annotation</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="4" width="20" height="13" rx="1"/>
+                <line x1="1" y1="20" x2="23" y2="20"/>
+                <line x1="9" y1="17" x2="15" y2="17"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">MacBook Pro</p>
+              <p class="svc-note">Supporting an efficient digital workflow</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="10" x2="20" y2="6"/>
+                <line x1="4" y1="13" x2="20" y2="9"/>
+                <line x1="4" y1="10" x2="4" y2="13"/>
+                <line x1="20" y1="6" x2="20" y2="9"/>
+                <line x1="12" y1="11" x2="12" y2="19"/>
+                <line x1="12" y1="19" x2="6" y2="23"/>
+                <line x1="12" y1="19" x2="18" y2="23"/>
+                <line x1="6" y1="23" x2="18" y2="23"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Portable Stand</p>
+              <p class="svc-note">Mobile and flexible workflow</p>
+            </div>
+          </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="13" r="8"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="13" x2="15" y2="15"/>
+                <line x1="9" y1="2" x2="15" y2="2"/>
+                <line x1="12" y1="2" x2="12" y2="5"/>
+              </svg>
+            </div>
+            <div class="svc-text">
+              <p class="svc-name">Stopwatch</p>
+              <p class="svc-note">Keeping track of every second</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <!-- Waist ring -->
-          <rect x="226" y="292" width="36" height="10" rx="2" fill="#303044"/>
-          <rect x="231" y="294" width="6" height="6" rx="1" fill="#3e3e56"/>
-          <rect x="251" y="294" width="6" height="6" rx="1" fill="#3e3e56"/>
+    </div>
+  </section>
+  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div><span>Script Supervisor · Toronto, ON</span></div></div></footer>
+  </div><!-- /page-services -->
 
-          <!-- Legs -->
-          <rect x="225" y="300" width="15" height="42" rx="2" fill="#2a2a3c"/>
-          <rect x="249" y="300" width="15" height="42" rx="2" fill="#2a2a3c"/>
-          <!-- Knee rings -->
-          <rect x="223" y="320" width="17" height="5" rx="1" fill="#3a3a52"/>
-          <rect x="248" y="320" width="17" height="5" rx="1" fill="#3a3a52"/>
+  <div class="page" id="page-contact">
+  <!-- ── Contact ── -->
+  <section id="contact">
+    <div class="container">
+      <p class="section-eyebrow">Contact</p>
+      <div class="contact-grid">
+        <div>
+          <p class="contact-note">Available for short films, features, and series.<br>Based in Toronto — open to travel.<br><br>Please don't hesitate to reach out!</p>
+        </div>
+        <ul class="contact-list">
+          <li class="contact-item">
+            <span class="contact-label">Email</span>
+            <a href="mailto:marko.a.balac@gmail.com" class="contact-value">marko.a.balac@gmail.com</a>
+          </li>
+          <li class="contact-item">
+            <span class="contact-label">Phone</span>
+            <a href="tel:+14034006581" class="contact-value">+1 (403) 400-6581</a>
+          </li>
+          <li class="contact-item">
+            <span class="contact-label">IMDb</span>
+            <a href="https://www.imdb.com/name/nm18259375/" class="imdb-btn" target="_blank" rel="noopener noreferrer">View IMDb Profile</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
 
-          <!-- Boots -->
-          <rect x="219" y="340" width="22" height="8" rx="2" fill="#1e1e2e"/>
-          <rect x="247" y="340" width="22" height="8" rx="2" fill="#1e1e2e"/>
-
-          <!-- Back-left rim lighting -->
-          <ellipse cx="220" cy="282" rx="26" ry="52" fill="#5060a0" opacity="0.10"/>
-          <circle cx="234" cy="242" r="7" fill="#8090c0" opacity="0.34"/>
-          <rect x="224" y="259" width="5" height="34" rx="2" fill="#8090c0" opacity="0.28"/>
-          <rect x="214" y="258" width="16" height="6" rx="2" fill="#8090c0" opacity="0.24"/>
-          <path d="M216,266 L200,288" stroke="#5060a0" stroke-width="5" stroke-linecap="round" opacity="0.42"/>
-          <rect x="225" y="301" width="4" height="40" rx="1" fill="#8090c0" opacity="0.18"/>
-        </g>
-        <rect x="42" y="42" width="596" height="356" fill="url(#scan)"/>
-        <!-- TOP HUD -->
-        <rect x="48" y="47" width="23" height="22" fill="#c8850e"/>
-        <text x="59" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="13" font-weight="700" fill="#000">B</text>
-        <text x="77" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#aaa">SDI 2</text>
-        <text x="116" y="63" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">1920×1080</text>
-        <text x="340" y="63" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#c8850e">S-Log3 › Rec.709</text>
-        <text x="592" y="63" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#fff">23.98p</text>
-        <rect x="596" y="48" width="9" height="9" fill="#ef4444"/>
-        <text x="609" y="63" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#ef4444">REC</text>
-        <rect x="42" y="78" width="596" height="1" fill="#161616"/>
-        <!-- BOTTOM HUD -->
-        <rect x="42" y="362" width="596" height="1" fill="#161616"/>
-        <rect x="48" y="368" width="96" height="22" fill="#000"/>
-        <text id="tc-b" x="53" y="384" font-family="'Courier Prime',Courier,monospace" font-size="13" fill="#c8850e">01:02:14:07</text>
-        <text x="340" y="384" text-anchor="middle" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#fff">F 8.0'  ·  T5.6  ·  21mm</text>
-        <text x="630" y="384" text-anchor="end" font-family="'Courier Prime',Courier,monospace" font-size="12" fill="#888">ISO 400  ·  180°  ·  5600K</text>
-      </g>
-
-      <!-- ══ Shared overlays (always on top) ══ -->
-      <!-- Frame corner brackets -->
-      <rect x="50" y="86" width="22" height="3" fill="#c8850e"/>
-      <rect x="50" y="86" width="3" height="22" fill="#c8850e"/>
-      <rect x="606" y="86" width="22" height="3" fill="#c8850e"/>
-      <rect x="625" y="86" width="3" height="22" fill="#c8850e"/>
-      <rect x="50" y="357" width="22" height="3" fill="#c8850e"/>
-      <rect x="50" y="335" width="3" height="22" fill="#c8850e"/>
-      <rect x="606" y="357" width="22" height="3" fill="#c8850e"/>
-      <rect x="625" y="335" width="3" height="22" fill="#c8850e"/>
-      <!-- Crosshair -->
-      <rect x="335" y="219" width="10" height="1" fill="#1c1c1c"/>
-      <rect x="340" y="214" width="1" height="10" fill="#1c1c1c"/>
-      <!-- Vignette -->
-      <rect x="42" y="42" width="596" height="356" fill="url(#vignette)"/>
-      <!-- Enter button -->
-      <a href="portfolio.html" class="mon-enter">
-        <rect x="268" y="200" width="144" height="44" fill="#0a0a14" stroke="#c8850e" stroke-width="3"/>
-        <text x="340" y="227" text-anchor="middle" font-family="'Courier New',Courier,monospace" font-size="20" font-weight="700" fill="#c8850e" style="letter-spacing:3px">▶ ENTER</text>
-      </a>
-
-    </svg>
-  </main>
-
+  <!-- ── Footer ── -->
   <footer>
-    <p>&copy; 2026 Marko Balac</p>
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div>
+        <span>Script Supervisor · Toronto, ON</span>
+      </div>
+    </div>
   </footer>
+  </div><!-- /page-contact -->
+
+  <div class="page" id="page-gallery">
+  <section id="gallery">
+    <div class="container">
+      <p class="section-eyebrow">Gallery</p>
+      <div class="gallery-coming-soon">
+        <p class="coming-soon-text">Photos coming soon.</p>
+      </div>
+    </div>
+  </section>
+  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div><span>Script Supervisor · Toronto, ON</span></div></div></footer>
+  </div><!-- /page-gallery -->
+
+  </div><!-- /content-panel -->
+  </div><!-- /app -->
+
+  <!-- ── Game panel ── -->
+  <div class="game-panel" id="game-panel">
+    <iframe id="game-iframe" src="about:blank" allow="autoplay"></iframe>
+  </div>
 
   <script>
-  (function() {
-    const FPS = 24;
-    // Start: 01:02:14:07
-    const startFrames = ((1 * 3600) + (2 * 60) + 14) * FPS + 7;
-    const startTime = performance.now();
-    const tcA = document.getElementById('tc-a');
-    const tcB = document.getElementById('tc-b');
-
-    function formatTC(f) {
-      const ff = f % FPS;
-      const s  = Math.floor(f / FPS);
-      const pad = n => String(n).padStart(2, '0');
-      return `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(ff)}`;
-    }
-
-    function tick() {
-      if (!document.hidden) {
-        const tc = formatTC(startFrames + Math.floor((performance.now() - startTime) / 1000 * FPS));
-        if (tcA) tcA.textContent = tc;
-        if (tcB) tcB.textContent = tc;
+    // ── Running timecode ──────────────────────────────
+    (function () {
+      const el    = document.getElementById('frame-tc');
+      const FPS   = 24;
+      const start = ((1 * 3600) + (2 * 60) + 14) * FPS + 7;
+      const t0    = performance.now();
+      const pad   = n => String(n).padStart(2, '0');
+      function tick() {
+        if (!document.hidden) {
+          const f  = start + Math.floor((performance.now() - t0) / 1000 * FPS);
+          const s  = Math.floor(f / FPS);
+          el.textContent = `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(f%FPS)}`;
+        }
+        requestAnimationFrame(tick);
       }
       requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  })();
+    })();
 
-  (function() {
-    var camA = document.getElementById('cam-a');
-    var camB = document.getElementById('cam-b');
-    var label = document.getElementById('cam-toggle-label');
-    document.getElementById('cam-toggle').addEventListener('click', function() {
-      if (camB.style.opacity === '1') {
-        camA.style.opacity = '1';
-        camA.style.pointerEvents = 'auto';
-        camB.style.opacity = '0';
-        camB.style.pointerEvents = 'none';
-        label.textContent = 'B CAM ▶';
-      } else {
-        camA.style.opacity = '0';
-        camA.style.pointerEvents = 'none';
-        camB.style.opacity = '1';
-        camB.style.pointerEvents = 'auto';
-        label.textContent = '◀ A CAM';
-      }
-    });
-  })();
+    // ── Page navigation ──────────────────────────────
+    (function () {
+      const app       = document.getElementById('app');
+      const frame     = document.getElementById('frame');
+      const frameBack    = document.getElementById('frame-back');
+      const tabsEl       = document.getElementById('frame-tabs');
+      const tabBtns      = document.querySelectorAll('.frame-tabs button');
+      const mobileNavBtn  = document.getElementById('mobile-nav-btn');
+      const mobileNavMenu = document.getElementById('mobile-nav-menu');
+      const mobileTabBtns = document.querySelectorAll('.mobile-nav-menu [data-page]');
 
-  (function() {
-    function fitClapperName() {
-      if (window.innerWidth > window.innerHeight) return; // landscape handled by CSS
-      var el = document.querySelector('.name-row .clapper-val');
-      if (!el) return;
-      var cell = el.closest('.clapper-cell');
-      if (!cell || cell.offsetWidth === 0) return;
-      var available = cell.offsetWidth - 32;
-      var lo = 10, hi = 120;
-      el.style.fontSize = hi + 'px';
-      while (lo < hi) {
-        var mid = Math.floor((lo + hi + 1) / 2);
-        el.style.fontSize = mid + 'px';
-        if (el.scrollWidth <= available) lo = mid;
-        else hi = mid - 1;
+      function closeMobileMenu() {
+        mobileNavBtn.classList.remove('menu-open');
+        mobileNavMenu.classList.remove('menu-open');
       }
-      el.style.fontSize = lo + 'px';
-    }
-    window.addEventListener('load', fitClapperName);
-    window.addEventListener('resize', fitClapperName);
-  })();
+      mobileNavBtn.addEventListener('click', () => {
+        const isOpen = mobileNavMenu.classList.contains('menu-open');
+        if (isOpen) { closeMobileMenu(); } else {
+          mobileNavBtn.classList.add('menu-open');
+          mobileNavMenu.classList.add('menu-open');
+        }
+      });
+      document.getElementById('mobile-nav-home').addEventListener('click', () => {
+        closeMobileMenu(); goHome();
+      });
+      mobileTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          closeMobileMenu(); openContent(btn.dataset.page);
+        });
+      });
+      const pages     = ['about', 'credits', 'services', 'gallery', 'contact'];
+      let   activePage = null;
+      let   goHomeTimer    = null;
+      let   tabsTimer      = null;
+      let   mobileBarsTimer = null;
+
+      function showPage(id) {
+        // Deactivate all pages
+        pages.forEach(p => {
+          const el = document.getElementById('page-' + p);
+          if (el) { el.classList.remove('active'); el.scrollTop = 0; }
+        });
+        // Activate target
+        const target = document.getElementById('page-' + id);
+        if (target) target.classList.add('active');
+        activePage = id;
+        // Update tab buttons
+        tabBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.page === id);
+        });
+        mobileTabBtns.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.page === id);
+        });
+      }
+
+      function openContent(id) {
+        if (goHomeTimer)    { clearTimeout(goHomeTimer);    goHomeTimer    = null; }
+        if (tabsTimer)      { clearTimeout(tabsTimer);      tabsTimer      = null; }
+        if (mobileBarsTimer){ clearTimeout(mobileBarsTimer); mobileBarsTimer = null; }
+        const alreadyInContent = frame.classList.contains('content-mode');
+        // Hide tabs and back button immediately
+        tabsEl.classList.remove('tabs-ready');
+        frameBack.classList.remove('back-ready');
+        mobileNavBtn.classList.remove('nav-ready');
+        if (!alreadyInContent) frame.classList.remove('mobile-bars-visible');
+        showPage(id);
+        app.classList.add('content-open');
+        frame.classList.remove('prominent');
+        frame.classList.add('content-mode');
+        history.pushState(null, '', '#' + id);
+        // Only animate bars in when coming from home
+        if (!alreadyInContent) {
+          mobileBarsTimer = setTimeout(() => {
+            frame.classList.add('mobile-bars-visible');
+            mobileBarsTimer = null;
+          }, 300);
+        }
+        // Slide tabs and back button in after the 0.9s slide completes
+        tabsTimer = setTimeout(() => {
+          tabsEl.classList.add('tabs-ready');
+          frameBack.classList.add('back-ready');
+          mobileNavBtn.classList.add('nav-ready');
+          tabsTimer = null;
+        }, 920);
+      }
+
+      function goHome() {
+        // Retract tabs and back button immediately
+        tabsEl.classList.remove('tabs-ready');
+        frameBack.classList.remove('back-ready');
+        mobileNavBtn.classList.remove('nav-ready');
+        closeMobileMenu();
+        if (tabsTimer)       { clearTimeout(tabsTimer);       tabsTimer       = null; }
+        if (mobileBarsTimer) { clearTimeout(mobileBarsTimer); mobileBarsTimer = null; }
+        // Slide the home panel back in — bars stay visible during the 0.9s transition
+        app.classList.remove('content-open');
+        activePage = null;
+        history.pushState(null, '', location.pathname);
+        // After slide completes, dissolve bars and expand frame labels
+        goHomeTimer = setTimeout(() => {
+          frame.classList.remove('content-mode');
+          frame.classList.remove('mobile-bars-visible');
+          frame.classList.add('prominent');
+          goHomeTimer = null;
+        }, 920);
+      }
+
+      // Hero nav links
+      document.querySelectorAll('.hero-nav a').forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          openContent(link.getAttribute('href').replace('#', ''));
+        });
+      });
+
+      // Top bar page tabs
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          showPage(btn.dataset.page);
+          history.pushState(null, '', '#' + btn.dataset.page);
+        });
+      });
+
+      // ── Game panel ──────────────────────────────────
+      const gamePanel  = document.getElementById('game-panel');
+      const gameIframe = document.getElementById('game-iframe');
+      let   gameOpen   = false;
+
+      function openGame() {
+        gameOpen = true;
+        if (gameIframe.src === 'about:blank' || !gameIframe.src.includes('game.html')) {
+          gameIframe.src = 'game.html?embedded=1';
+        }
+        frame.classList.add('game-mode');
+        gamePanel.classList.add('active');
+        frameBack.classList.add('showing-return');
+      }
+
+      function closeGame() {
+        gameOpen = false;
+        gamePanel.classList.remove('active');
+        frameBack.classList.remove('showing-return');
+        setTimeout(() => {
+          frame.classList.remove('game-mode');
+        }, 900);
+      }
+
+      document.querySelectorAll('.footer-play-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          openGame();
+        });
+      });
+
+      // Back to home (or close game)
+      frameBack.addEventListener('click', () => {
+        if (gameOpen) closeGame();
+        else goHome();
+      });
+
+      // Restore page on load/refresh — skip all transitions, jump straight to content state
+      const initialHash = location.hash.replace('#', '');
+      if (pages.includes(initialHash)) {
+        document.documentElement.classList.add('no-transition');
+
+        showPage(initialHash);
+        app.classList.add('content-open');
+        frame.classList.remove('prominent');
+        frame.classList.add('content-mode');
+        tabsEl.classList.add('tabs-ready');
+        frameBack.classList.add('back-ready');
+        mobileNavBtn.classList.add('nav-ready');
+        frame.classList.add('mobile-bars-visible');
+
+        // Re-enable transitions after browser paints the static state
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          document.documentElement.classList.remove('no-transition');
+        }));
+      }
+    })();
   </script>
 
 </body>

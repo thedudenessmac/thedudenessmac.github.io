@@ -8,11 +8,11 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500&family=PT+Mono&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: #0c0c18;
+      background: #000;
       color: #e0e0d8;
       font-family: 'Inter', system-ui, sans-serif;
       min-height: 100vh;
@@ -30,7 +30,7 @@
       margin-bottom: 24px;
       opacity: 0.7;
       transition: opacity 0.15s;
-      font-family: 'Courier Prime', Courier, monospace;
+      font-family: 'PT Mono', 'Courier New', monospace;
     }
     .back-link:hover { opacity: 1; }
 
@@ -50,7 +50,7 @@
       padding: 0 10px;
       height: 34px;
       gap: 10px;
-      font-family: 'Courier Prime', Courier, monospace;
+      font-family: 'PT Mono', 'Courier New', monospace;
       font-size: 12px;
     }
     .hud-top { border-bottom: 1px solid #0e0e1c; }
@@ -63,7 +63,7 @@
       font-size: 13px;
       padding: 1px 7px;
       flex-shrink: 0;
-      font-family: 'Courier Prime', Courier, monospace;
+      font-family: 'PT Mono', 'Courier New', monospace;
     }
     .hud-title {
       color: #c8850e;
@@ -160,7 +160,7 @@
       transform: translateX(-50%);
       background: rgba(6,6,14,0.92);
       color: #c8850e;
-      font-family: 'Courier Prime', Courier, monospace;
+      font-family: 'PT Mono', 'Courier New', monospace;
       font-size: 12px;
       letter-spacing: 0.08em;
       padding: 8px 16px;
@@ -175,7 +175,7 @@
   </style>
 </head>
 <body>
-  <a class="back-link" href="portfolio.html">← BACK</a>
+  <a class="back-link" href="index.html">← BACK</a>
   <div class="rotate-prompt">↻ ROTATE FOR BEST EXPERIENCE</div>
   <div class="monitor-housing">
     <div class="hud-top">
@@ -988,6 +988,10 @@ canvas.addEventListener('touchmove', e => {
 }, { passive: false });
 
 // ── Boot ──────────────────────────────────────────────────────────
+if (new URLSearchParams(location.search).has('embedded')) {
+  const bl = document.querySelector('.back-link');
+  if (bl) bl.style.display = 'none';
+}
 document.fonts.ready.then(() => requestAnimationFrame(loop));
 </script>
 </body>
