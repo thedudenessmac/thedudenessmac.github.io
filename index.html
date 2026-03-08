@@ -161,6 +161,7 @@
       padding: 96px 0;
       border-top: 1px solid var(--border);
     }
+    .page > section:first-child { border-top: none; }
 
     /* ── Section eyebrow ── */
     .section-eyebrow {
@@ -724,17 +725,26 @@
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
 
+      /* Instantly hide all labels at the start of a mobile content transition */
+      .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: opacity 0.15s ease !important; }
+      /* Completely suppress bars (height, opacity, border) until mobile-bars-visible fires —
+         overrides the desktop content-mode rule that would otherwise show them during the slide */
+      .frame.content-mode .frame-bar { height: 0 !important; opacity: 0 !important; border: none !important; }
+      .frame.mobile-bars-visible.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
+      .frame.mobile-bars-visible.content-mode .frame-bar.bottom { height: var(--bar-h) !important; opacity: 1 !important; }
+
       /* Content-mode label positions for 52px bars
          Top bar  — timecode (BL) left, fps+rec (TR) right
          Bot bar  — single combined row centred */
       .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
       /* Hide A·SDI-1·4.5K on mobile content pages */
       .frame.content-mode .frame-label.tl { display: none; }
-      /* Timecode moves from bottom-left to top-left */
-      .frame.content-mode .frame-label.bl { bottom: auto; top: 20px; left: 30px; right: auto; transform: none; opacity: 0; transition: opacity 0.45s ease; }
-      .frame.mobile-bars-visible.content-mode .frame-label.bl { opacity: 1; }
-      /* TR stays in top bar, unchanged */
-      .frame.content-mode .frame-label.tr { top: 20px; right: 16px; }
+      /* Timecode top-left, cleared past the chevron button (~80px) */
+      .frame.content-mode .frame-label.bl { bottom: auto; top: 20px; left: 86px; right: auto; transform: none; opacity: 0; }
+      .frame.mobile-bars-visible.content-mode .frame-label.bl { opacity: 1; transition: opacity 0.4s ease 0.5s; }
+      /* FPS+REC top-right */
+      .frame.content-mode .frame-label.tr { top: 20px; right: 16px; opacity: 0; }
+      .frame.mobile-bars-visible.content-mode .frame-label.tr { opacity: 1; transition: opacity 0.4s ease 0.5s; }
       /* Hide individual BC and BR — replaced by mobile-bot */
       .frame.content-mode .frame-label.bc { display: none; }
       .frame.content-mode .frame-label.br { display: none; }
@@ -746,11 +756,10 @@
         font-size: clamp(8px, 3.2vw, 11px);
         white-space: nowrap;
         opacity: 0;
-        transition: opacity 0.45s ease;
         transform: none;
         color: rgba(237,234,228,0.7);
       }
-      .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot { opacity: 1; }
+      .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot { opacity: 1; transition: opacity 0.4s ease 0.5s; }
 
       /* Hide desktop nav on mobile content pages */
       .frame.content-mode .frame-back { display: none !important; }
@@ -788,7 +797,6 @@
         position: fixed;
         top: var(--bar-h); left: 0; right: 0;
         background: rgba(8,12,20,0.97);
-        border-bottom: 1px solid rgba(200,133,14,0.3);
         z-index: 205;
         max-height: 0;
         overflow: hidden;
@@ -796,7 +804,7 @@
         pointer-events: none;
       }
       .frame.content-mode .mobile-nav-menu { display: block; }
-      .mobile-nav-menu.menu-open { max-height: 400px; pointer-events: auto; }
+      .mobile-nav-menu.menu-open { max-height: 400px; pointer-events: auto; border-bottom: 1px solid rgba(200,133,14,0.3); }
       .mobile-nav-menu button {
         display: block;
         width: 100%;
@@ -1451,30 +1459,36 @@
         if (tabsTimer)      { clearTimeout(tabsTimer);      tabsTimer      = null; }
         if (mobileBarsTimer){ clearTimeout(mobileBarsTimer); mobileBarsTimer = null; }
         const alreadyInContent = frame.classList.contains('content-mode');
+        const isMobile = window.matchMedia('(max-width: 640px)').matches;
         // Hide tabs and back button immediately
         tabsEl.classList.remove('tabs-ready');
         frameBack.classList.remove('back-ready');
         mobileNavBtn.classList.remove('nav-ready');
         if (!alreadyInContent) frame.classList.remove('mobile-bars-visible');
+        // Mobile fresh entry: fade all labels out immediately (step 1)
+        if (isMobile && !alreadyInContent) frame.classList.add('mobile-labels-out');
         showPage(id);
         app.classList.add('content-open');
         frame.classList.remove('prominent');
         frame.classList.add('content-mode');
         history.pushState(null, '', '#' + id);
-        // Only animate bars in when coming from home
+        // Mobile: bars pop in after slide completes (step 2); desktop: bars appear immediately
         if (!alreadyInContent) {
           mobileBarsTimer = setTimeout(() => {
+            frame.classList.remove('mobile-labels-out');
             frame.classList.add('mobile-bars-visible');
             mobileBarsTimer = null;
-          }, 300);
+          }, isMobile ? 900 : 300);
         }
-        // Slide tabs and back button in after the 0.9s slide completes
+        // Mobile fresh entry: chevron pops in after bars + labels settle (step 3)
+        // Desktop / page-switching: everything at 920ms (slide duration)
+        const navDelay = (isMobile && !alreadyInContent) ? 1550 : 920;
         tabsTimer = setTimeout(() => {
           tabsEl.classList.add('tabs-ready');
           frameBack.classList.add('back-ready');
           mobileNavBtn.classList.add('nav-ready');
           tabsTimer = null;
-        }, 920);
+        }, navDelay);
       }
 
       function goHome() {
