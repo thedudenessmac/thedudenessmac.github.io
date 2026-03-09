@@ -768,27 +768,38 @@
       /* Content page headers */
       .section-eyebrow { font-size: 38px; }
 
-      /* Credits table → stacked cards */
+      /* Credits table → 2-column grid cards */
       .credits-table thead { display: none; }
       .credits-table, .credits-table tbody { display: block; }
-      .credits-table tr { display: flex; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--border); }
+      .credits-table tr {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto auto;
+        column-gap: 12px;
+        row-gap: 0;
+        align-items: baseline;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+      }
       .credits-table tr:last-child { border-bottom: none; }
-      .credits-table td { display: block; border-bottom: none !important; padding: 0; padding-right: 0 !important; }
-      /* Col 1: Production — fills available space */
-      .credits-table td:nth-child(1) { flex: 1; order: 1; font-size: 14px; }
-      /* Col 3: Role — centred between title and year, wraps to 2 lines */
-      .credits-table td:nth-child(3) { display: block; order: 2; flex: 1; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: #777; line-height: 1.4; text-align: center; align-self: center; }
-      .credits-table td:nth-child(3) .producer { font-size: 10px; }
-      /* Col 5: Year — right edge of top row */
-      .credits-table td:nth-child(5) { order: 3; font-size: 13px; text-align: right; color: #888; }
-      /* Col 2: Director — full width, second row */
-      .credits-table td:nth-child(2) { width: 100%; order: 4; font-size: 12px; padding-top: 4px; }
+      .credits-table td { border-bottom: none !important; padding: 0 !important; }
+      /* Col 1: Production — top-left */
+      .credits-table td:nth-child(1) { grid-column: 1; grid-row: 1; font-size: 14px; }
+      /* Col 3: Role — top-right */
+      .credits-table td:nth-child(3) { grid-column: 2; grid-row: 1; font-size: 12px; letter-spacing: 0.05em; color: #777; line-height: 1.4; text-align: right; }
+      /* Col 2: Director + Producer — mid-left */
+      .credits-table td:nth-child(2) { grid-column: 1; grid-row: 2; font-size: 12px; }
       .credits-table td:nth-child(2):not(:empty)::before { content: "dir. "; color: var(--muted); }
       .credits-table td:nth-child(2):empty { display: none; }
-      /* Col 4: Format — full width, third row */
-      .credits-table td:nth-child(4) { width: 100%; order: 5; padding-top: 2px; }
+      /* When director is absent, pull format up to row 2 alongside year */
+      .credits-table tr:has(td:nth-child(2):empty) td:nth-child(4) { grid-row: 2; }
+      .credits-table td:nth-child(2) .producer { display: block; font-size: 11px; color: var(--muted); }
+      /* Col 5: Year — mid-right, tight against role */
+      .credits-table td:nth-child(5) { grid-column: 2; grid-row: 2; font-size: 13px; text-align: right; color: #888; }
+      /* Col 4: Format — full width, bottom row */
+      .credits-table td:nth-child(4) { grid-column: 1 / -1; grid-row: 3; padding-top: 5px !important; }
       /* Divider rows */
-      .credits-divider { padding-top: 40px !important; padding-bottom: 0 !important; }
+      .credits-divider { padding-top: 40px !important; padding-bottom: 14px !important; }
       .credits-divider td { border-bottom: none !important; }
       /* Role group header rows — hidden on mobile (role shown inline per row) */
       .credits-table .credits-group { display: none; }
@@ -801,8 +812,8 @@
       .container { padding: 0 26px; }
       section { padding-top: 60px; font-size: 14px; }
 
-      /* Services: 2 columns on mobile */
-      .services-grid { grid-template-columns: repeat(2, 1fr); }
+      /* Services: single full-width column on mobile */
+      .services-grid { grid-template-columns: 1fr; }
 
       /* Contact: stack text above contact list */
       .contact-grid { grid-template-columns: 1fr; gap: 24px; }
