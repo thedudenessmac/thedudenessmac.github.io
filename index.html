@@ -617,11 +617,13 @@
 
     /* Labels in content-mode bars — positions already at 16px, only colour changes */
     .frame.content-mode .frame-label    { color: rgba(237,234,228,0.7); }
-    .frame.content-mode #frame-tc       { color: var(--accent); }
+    .frame.content-mode #frame-tc       { color: rgba(237,234,228,0.85); }
     /* Hide S-Log3/Rec.709 in content-mode — tabs occupy top-centre */
-    .frame.content-mode .frame-label.tc { animation: label-fade-out 0.35s ease forwards; pointer-events: none; }
+    .frame.content-mode .frame-label.tc { animation: none; opacity: 0; pointer-events: none; }
+    /* Only fade out during actual home→content navigation, not on restore */
+    .frame.content-mode.content-transitioning .frame-label.tc { animation: label-fade-out 0.35s ease forwards; }
     /* Shift TL right to clear HOME button via transform (no layout reflow) */
-    .frame.content-mode .frame-label.tl { transform: translateX(44px); }
+    .frame.content-mode .frame-label.tl { transform: translateX(44px); color: rgba(237,234,228,0.85); }
     /* Bottom bar: all three labels show at their natural positions */
     .frame.content-mode .frame-label.bl { color: var(--accent); }
 
@@ -637,7 +639,7 @@
       font-size: 13px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: rgba(237,234,228,0.75);
+      color: rgba(200,133,14,0.65);
       background: none;
       border: none;
       border-right: 1px solid rgba(200,133,14,0.25);
@@ -650,30 +652,26 @@
     .frame-back.back-ready { pointer-events: auto; opacity: 1; transform: translateX(0); }
     .frame-back:hover { color: var(--accent); }
     .back-inner {
-      display: flex;
-      flex-direction: column;
-      height: calc(var(--bar-h) * 2);
-      transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    .back-face {
-      height: var(--bar-h);
+      position: relative;
       display: flex;
       align-items: center;
+      height: var(--bar-h);
       white-space: nowrap;
     }
-    .back-face-return {
-      flex-direction: column;
-      justify-content: center;
-      padding-top: 8px;
-      gap: 0;
+    .back-face {
+      display: flex;
+      align-items: center;
+      transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
-    .back-chevron      { font-size: 28px; line-height: 1; margin-right: 2px; position: relative; top: -1px; }
-    .back-chevron-down { font-size: 28px; line-height: 1; display: inline-block; transform: rotate(-90deg); margin-top: 2px; }
-    .frame-back.showing-return .back-inner { transform: translateY(calc(-1 * var(--bar-h))); }
+    .back-face-home   { opacity: 1; transform: translateY(0); }
+    .back-face-return { position: absolute; inset: 0; opacity: 0; transform: translateY(100%); justify-content: center; color: var(--accent); }
+    .back-chevron { font-size: 28px; line-height: 1; margin-right: 2px; position: relative; top: -1px; }
+    .frame-back.showing-return .back-face-home   { opacity: 0; transform: translateY(-100%); }
+    .frame-back.showing-return .back-face-return { opacity: 1; transform: translateY(0); }
     /* Return face exits upward on close; back-instant suppresses all transitions for snap-reset */
-    .frame-back.return-exit  .back-inner { transform: translateY(calc(-2 * var(--bar-h))); }
+    .frame-back.return-exit .back-face-return { opacity: 0; transform: translateY(-100%); }
     .frame-back.back-instant,
-    .frame-back.back-instant .back-inner { transition: none; }
+    .frame-back.back-instant .back-face { transition: none; }
 
     /* ── Page tab nav in top bar ── */
     .frame-tabs {
@@ -707,7 +705,8 @@
     }
     .frame-tabs button:first-child { border-left: none; }
     .frame-tabs button:hover  { color: rgba(200,133,14,0.75); }
-    .frame-tabs button.active { color: var(--accent); background: rgba(200,133,14,0.07); }
+    .frame-tabs button.active { color: var(--accent); }
+    .tab-indicator { position: absolute; bottom: 0; height: 3px; background: var(--accent); transition: left 0.4s cubic-bezier(0.34, 1.37, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.37, 0.64, 1); pointer-events: none; }
 
     /* ── Mobile / tablet nav dropdown — shared base styles ── */
     /* Shown by breakpoint-specific rules; hidden everywhere else          */
@@ -720,6 +719,11 @@
       padding: 0 26px;
       align-items: center;
       justify-content: center;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       color: rgba(237,234,228,0.75);
       background: none;
       border: none;
@@ -763,7 +767,7 @@
     }
     .mobile-nav-menu button:last-child { border-bottom: none; }
     .mobile-nav-menu button:active { background: rgba(200,133,14,0.08); }
-    .mobile-nav-menu button.active  { color: var(--accent); }
+    .mobile-nav-menu button.active  { color: var(--accent); border-left: 3px solid var(--accent); padding-left: 41px; }
     .mobile-nav-menu .mobile-nav-home { color: rgba(237,234,228,0.7); padding-left: 22px; }
     .nav-home-chev { display: inline-block; width: 22px; font-size: 18px; }
 
@@ -911,7 +915,7 @@
       /* Hide A·SDI-1·4.5K on mobile content pages */
       .frame.content-mode .frame-label.tl { display: none; }
       /* Timecode top-left, cleared past the chevron button (~80px) */
-      .frame.content-mode .frame-label.bl { bottom: auto; top: calc(var(--bar-h) / 2); left: 86px; right: auto; transform: translateY(-50%); opacity: 0; animation: none; }
+      .frame.content-mode .frame-label.bl { bottom: auto; top: calc(var(--bar-h) / 2); left: 110px; right: auto; transform: translateY(-50%); opacity: 0; animation: none; }
       .frame.mobile-bars-visible.content-mode .frame-label.bl { opacity: 1; transition: opacity 0.4s ease 0.65s; }
       /* FPS+REC top-right */
       .frame.content-mode .frame-label.tr { top: calc(var(--bar-h) / 2); right: 16px; transform: translateY(-50%); opacity: 0; animation: none; }
@@ -929,7 +933,7 @@
         opacity: 0;
         animation: none;
         transform: none;
-        color: rgba(237,234,228,0.7);
+        color: rgba(237,234,228,0.85);
       }
       .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot { opacity: 1; transition: opacity 0.4s ease 0.65s; }
 
@@ -975,6 +979,7 @@
     }
     /* Bottom bar retracts, frame labels + tabs fade out */
     .mobile-nav-face-default {
+      color: var(--accent);
       transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
     .mobile-nav-face-return {
@@ -984,12 +989,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding-top: 8px;
+      padding-top: 0;
       gap: 0;
       font-family: var(--mono);
-      font-size: 13px;
+      font-size: 14px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
+      color: var(--accent);
       opacity: 0;
       transform: translateY(100%);
       transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -1031,7 +1037,7 @@
     <button class="frame-back" id="frame-back">
       <div class="back-inner">
         <div class="back-face back-face-home"><span class="back-chevron">&#8249;</span> Home</div>
-        <div class="back-face back-face-return">Return<span class="back-chevron-down">&#8249;</span></div>
+        <div class="back-face back-face-return">Return</div>
       </div>
     </button>
     <nav class="frame-tabs" id="frame-tabs">
@@ -1040,12 +1046,13 @@
       <button data-page="services">Services</button>
       <button data-page="gallery">Gallery</button>
       <button data-page="contact">Contact</button>
+      <div class="tab-indicator" id="tab-indicator"></div>
     </nav>
 
     <!-- Mobile-only nav dropdown -->
     <button class="mobile-nav-btn" id="mobile-nav-btn">
-      <div class="mobile-nav-face-default"><svg width="26" height="13" viewBox="0 0 26 13" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,2 13,11 24,2"/></svg></div>
-      <div class="mobile-nav-face-return">Return<span class="mobile-nav-return-chev">&#8249;</span></div>
+      <div class="mobile-nav-face-default">MENU</div>
+      <div class="mobile-nav-face-return">Return</div>
     </button>
     <div class="mobile-nav-menu" id="mobile-nav-menu">
       <button class="mobile-nav-home" id="mobile-nav-home"><span class="nav-home-chev">&#8249;</span>Home</button>
@@ -1096,7 +1103,7 @@
           <p>Hello and welcome. My name is Marko. I'm a musician, a writer, a cook, an educator, a photographer, a tech geek, and a plain old human being.</p>
           <p>I am also a Script Supervisor.</p>
           <p>My job is to protect the integrity of the artistic vision that sustains every narrative project, be it a short film, feature, or series.</p>
-          <p>Or, put more dispassionately, I am a cost-containment measure for the production at large. I solve problems BEFORE they become EXPENSIVE problems day, weeks, or months down the road.</p>
+          <p>Or, put more dispassionately, I am a cost-containment measure for the production at large. I solve problems BEFORE they become EXPENSIVE problems days, weeks, or months down the road.</p>
           <p>Please find a copy of my CV <a href="marko-balac-cv.pdf" class="cv-link" target="_blank" rel="noopener noreferrer"><strong>here</strong></a>.</p>
         </div>
         <img src="headshot.jpg" alt="Marko Balac" class="about-photo">
@@ -1556,6 +1563,14 @@
       const frameBack    = document.getElementById('frame-back');
       const tabsEl       = document.getElementById('frame-tabs');
       const tabBtns      = document.querySelectorAll('.frame-tabs button');
+      const tabIndicator = document.getElementById('tab-indicator');
+
+      function updateTabIndicator(id) {
+        const btn = tabsEl.querySelector(`button[data-page="${id}"]`);
+        if (!btn) return;
+        tabIndicator.style.left  = btn.offsetLeft + 'px';
+        tabIndicator.style.width = btn.offsetWidth + 'px';
+      }
       const mobileNavBtn  = document.getElementById('mobile-nav-btn');
       const mobileNavMenu = document.getElementById('mobile-nav-menu');
       const mobileTabBtns = document.querySelectorAll('.mobile-nav-menu [data-page]');
@@ -1623,6 +1638,7 @@
         tabBtns.forEach(btn => {
           btn.classList.toggle('active', btn.dataset.page === id);
         });
+        updateTabIndicator(id);
         mobileTabBtns.forEach(btn => {
           btn.classList.toggle('active', btn.dataset.page === id);
         });
@@ -1654,6 +1670,10 @@
         app.classList.add('content-open');
         frame.classList.remove('prominent');
         frame.classList.add('content-mode');
+        if (!alreadyInContent) {
+          frame.classList.add('content-transitioning');
+          setTimeout(() => frame.classList.remove('content-transitioning'), 400);
+        }
         if (pushHistory) history.pushState(null, '', '#' + id);
         // Mobile: bars pop in after slide completes (step 2); desktop: bars appear immediately
         if (!alreadyInContent) {
