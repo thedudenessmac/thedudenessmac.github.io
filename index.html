@@ -670,6 +670,10 @@
     .back-chevron      { font-size: 28px; line-height: 1; margin-right: 2px; position: relative; top: -1px; }
     .back-chevron-down { font-size: 28px; line-height: 1; display: inline-block; transform: rotate(-90deg); margin-top: 2px; }
     .frame-back.showing-return .back-inner { transform: translateY(calc(-1 * var(--bar-h))); }
+    /* Return face exits upward on close; back-instant suppresses all transitions for snap-reset */
+    .frame-back.return-exit  .back-inner { transform: translateY(calc(-2 * var(--bar-h))); }
+    .frame-back.back-instant,
+    .frame-back.back-instant .back-inner { transition: none; }
 
     /* ── Page tab nav in top bar ── */
     .frame-tabs {
@@ -771,6 +775,7 @@
       .frame.content-mode .frame-back { display: none !important; }
       .frame.content-mode .mobile-nav-btn  { display: flex; }
       .frame.content-mode .mobile-nav-menu { display: block; }
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
 
@@ -1772,22 +1777,30 @@
       function closeGame(pushHistory = true) {
         gameOpen = false;
         gamePanel.classList.remove('active');
-        frameBack.classList.remove('showing-return');
         mobileNavBtn.classList.remove('game-return');
         gameIframe.src = 'about:blank'; // free iframe memory on close
-        if (pushHistory) {
-          if (gameReturnPage) {
-            // Replace #game with the return page in history, then navigate there
-            history.replaceState(null, '', '#' + gameReturnPage);
-            openContent(gameReturnPage, false);
-          } else {
-            history.replaceState(null, '', location.pathname);
-            goHome(false);
-          }
-        }
+        // Phase 1: return face exits upward — button stays still
+        frameBack.classList.add('return-exit');
         setTimeout(() => {
-          frame.classList.remove('game-mode');
-        }, 900);
+          // Phase 2: instantly hide button + snap inner to home face, then navigate
+          // back-instant kills button + inner transitions so nothing flashes
+          frameBack.classList.add('back-instant');
+          frameBack.classList.remove('back-ready', 'showing-return', 'return-exit');
+          frameBack.offsetHeight; // force reflow
+          frameBack.classList.remove('back-instant');
+          // Button is now invisible (opacity:0, translateX(-100%)) with no transition
+          // openContent/goHome will re-add back-ready with its normal slide-in animation
+          if (pushHistory) {
+            if (gameReturnPage) {
+              history.replaceState(null, '', '#' + gameReturnPage);
+              openContent(gameReturnPage, false);
+            } else {
+              history.replaceState(null, '', location.pathname);
+              goHome(false);
+            }
+          }
+        }, 400);
+        setTimeout(() => { frame.classList.remove('game-mode'); }, 900);
       }
 
 
