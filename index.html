@@ -667,8 +667,8 @@
       }
       .mobile-nav-btn.menu-open { color: var(--accent); }
 
-      .frame.content-mode .mobile-nav-menu {
-        display: block;
+      /* Base menu styles on low-specificity selector so .menu-open (0,2,0) can override */
+      .mobile-nav-menu {
         position: fixed;
         top: var(--bar-h); left: 0; right: 0;
         background: rgba(8,12,20,0.97);
@@ -678,6 +678,7 @@
         transition: max-height 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         pointer-events: none;
       }
+      .frame.content-mode .mobile-nav-menu { display: block; }
       .mobile-nav-menu.menu-open {
         max-height: 400px;
         pointer-events: auto;
