@@ -630,83 +630,71 @@
     .frame-tabs button:hover  { color: rgba(200,133,14,0.75); }
     .frame-tabs button.active { color: var(--accent); background: rgba(200,133,14,0.07); }
 
-    /* Mobile nav elements — hidden everywhere except mobile media query */
-    .mobile-nav-btn  { display: none; }
-    .mobile-nav-menu { display: none; }
+    /* ── Mobile / tablet nav dropdown — shared base styles ── */
+    /* Shown by breakpoint-specific rules; hidden everywhere else          */
+    .mobile-nav-btn {
+      display: none;
+      position: absolute;
+      top: 0; left: 0;
+      height: var(--bar-h);
+      padding: 0 26px;
+      align-items: center;
+      justify-content: center;
+      color: rgba(237,234,228,0.75);
+      background: none;
+      border: none;
+      border-right: 1px solid rgba(200,133,14,0.25);
+      cursor: pointer;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateX(-100%);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.2s;
+      z-index: 210;
+    }
+    .mobile-nav-menu {
+      display: none;
+      position: fixed;
+      top: var(--bar-h); left: 0; right: 0;
+      background: rgba(8,12,20,0.97);
+      z-index: 205;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      pointer-events: none;
+    }
+    .frame.content-mode .mobile-nav-btn.nav-ready { pointer-events: auto; opacity: 1; transform: translateX(0); }
+    .mobile-nav-btn.menu-open { color: var(--accent); }
+    .mobile-nav-menu.menu-open { max-height: 400px; pointer-events: auto; border-bottom: 1px solid rgba(200,133,14,0.3); }
+    .mobile-nav-menu button {
+      display: block;
+      width: 100%;
+      padding: 15px 22px 15px 44px;
+      background: none;
+      border: none;
+      border-bottom: 1px solid rgba(200,133,14,0.1);
+      font-family: var(--mono);
+      font-size: 14px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(200,133,14,0.65);
+      cursor: pointer;
+      text-align: left;
+      transition: color 0.2s, background 0.2s;
+    }
+    .mobile-nav-menu button:last-child { border-bottom: none; }
+    .mobile-nav-menu button:active { background: rgba(200,133,14,0.08); }
+    .mobile-nav-menu button.active  { color: var(--accent); }
+    .mobile-nav-menu .mobile-nav-home { color: rgba(237,234,228,0.7); padding-left: 22px; }
+    .nav-home-chev { display: inline-block; width: 22px; font-size: 18px; }
 
 
     /* ── Intermediate breakpoint: narrow desktop / tablet (641px–1100px) ── */
-    /* Shows mobile dropdown nav in content mode; no mobile bar/label CSS    */
+    /* Hides desktop tab bar; shows shared dropdown nav instead             */
     @media (min-width: 641px) and (max-width: 1100px) {
       .frame.content-mode .frame-tabs { display: none !important; }
       .frame.content-mode .frame-back { display: none !important; }
-
-      .frame.content-mode .mobile-nav-btn {
-        display: flex;
-        position: absolute;
-        top: 0; left: 0;
-        height: var(--bar-h);
-        padding: 0 26px;
-        align-items: center;
-        justify-content: center;
-        color: rgba(237,234,228,0.75);
-        background: none;
-        border: none;
-        border-right: 1px solid rgba(200,133,14,0.25);
-        cursor: pointer;
-        pointer-events: none;
-        opacity: 0;
-        transform: translateX(-100%);
-        transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.2s;
-        z-index: 210;
-      }
-      .frame.content-mode .mobile-nav-btn.nav-ready {
-        pointer-events: auto;
-        opacity: 1;
-        transform: translateX(0);
-      }
-      .mobile-nav-btn.menu-open { color: var(--accent); }
-
-      /* Base menu styles on low-specificity selector so .menu-open (0,2,0) can override */
-      .mobile-nav-menu {
-        position: fixed;
-        top: var(--bar-h); left: 0; right: 0;
-        background: rgba(8,12,20,0.97);
-        z-index: 205;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        pointer-events: none;
-      }
+      .frame.content-mode .mobile-nav-btn  { display: flex; }
       .frame.content-mode .mobile-nav-menu { display: block; }
-      .mobile-nav-menu.menu-open {
-        max-height: 400px;
-        pointer-events: auto;
-        border-bottom: 1px solid rgba(200,133,14,0.3);
-      }
-
-      /* Dropdown menu item styles (mirrored from mobile query) */
-      .mobile-nav-menu button {
-        display: block;
-        width: 100%;
-        padding: 15px 22px 15px 44px;
-        background: none;
-        border: none;
-        border-bottom: 1px solid rgba(200,133,14,0.1);
-        font-family: var(--mono);
-        font-size: 14px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: rgba(200,133,14,0.65);
-        cursor: pointer;
-        text-align: left;
-        transition: color 0.2s, background 0.2s;
-      }
-      .mobile-nav-menu button:last-child { border-bottom: none; }
-      .mobile-nav-menu button:active { background: rgba(200,133,14,0.08); }
-      .mobile-nav-menu button.active  { color: var(--accent); }
-      .mobile-nav-menu .mobile-nav-home { color: rgba(237,234,228,0.7); padding-left: 22px; }
-      .nav-home-chev { display: inline-block; width: 22px; font-size: 18px; }
     }
 
 
@@ -729,10 +717,6 @@
                     font-size  0.85s ease;
       }
       .frame-label.tc { display: none; }
-      .frame-label.tl { top: 36px;    left: 42px; }
-      .frame-label.tr { top: 36px;    right: 42px; }
-      .frame-label.bl { bottom: 36px; left: 42px; }
-      .frame-label.br { bottom: 36px; right: 42px; }
       /* BC always right-anchored on mobile so position can transition cleanly */
       .frame-label.bc { left: auto; right: 30px; transform-origin: bottom right; text-align: right; }
 
@@ -870,67 +854,9 @@
       .frame.content-mode .frame-back { display: none !important; }
       .frame.content-mode .frame-tabs { display: none !important; }
 
-      /* Mobile dropdown trigger button */
-      .mobile-nav-btn {
-        display: none;
-        position: absolute;
-        top: 0; left: 0;
-        height: var(--bar-h);
-        padding: 0 26px;
-        align-items: center;
-        justify-content: center;
-        color: rgba(237,234,228,0.75);
-        background: none;
-        border: none;
-        border-right: 1px solid rgba(200,133,14,0.25);
-        cursor: pointer;
-        pointer-events: none;
-        opacity: 0;
-        transform: translateX(-100%);
-        transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), color 0.2s;
-        z-index: 210;
-      }
-      .frame.content-mode .mobile-nav-btn { display: flex; }
-      .frame.content-mode .mobile-nav-btn.nav-ready {
-        pointer-events: auto; opacity: 1; transform: translateX(0);
-      }
-      .mobile-nav-btn.menu-open { color: var(--accent); }
-
-      /* Dropdown menu — expands downward from bar bottom edge */
-      .mobile-nav-menu {
-        display: none;
-        position: fixed;
-        top: var(--bar-h); left: 0; right: 0;
-        background: rgba(8,12,20,0.97);
-        z-index: 205;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        pointer-events: none;
-      }
+      /* Show shared dropdown nav on mobile content pages */
+      .frame.content-mode .mobile-nav-btn  { display: flex; }
       .frame.content-mode .mobile-nav-menu { display: block; }
-      .mobile-nav-menu.menu-open { max-height: 400px; pointer-events: auto; border-bottom: 1px solid rgba(200,133,14,0.3); }
-      .mobile-nav-menu button {
-        display: block;
-        width: 100%;
-        padding: 15px 22px 15px 44px;
-        background: none;
-        border: none;
-        border-bottom: 1px solid rgba(200,133,14,0.1);
-        font-family: var(--mono);
-        font-size: 14px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: rgba(200,133,14,0.65);
-        cursor: pointer;
-        text-align: left;
-        transition: color 0.2s, background 0.2s;
-      }
-      .mobile-nav-menu button:last-child { border-bottom: none; }
-      .mobile-nav-menu button:active { background: rgba(200,133,14,0.08); }
-      .mobile-nav-menu button.active  { color: var(--accent); }
-      .mobile-nav-menu .mobile-nav-home { color: rgba(237,234,228,0.7); padding-left: 22px; }
-      .nav-home-chev { display: inline-block; width: 22px; font-size: 18px; }
 
       /* Mobile entry animation: bars slide in from edges */
       .frame-bar.top    { transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
@@ -1492,15 +1418,19 @@
       const start = ((1 * 3600) + (2 * 60) + 14) * FPS + 7;
       const t0    = performance.now();
       const pad   = n => String(n).padStart(2, '0');
+      let rafId;
       function tick() {
-        if (!document.hidden) {
-          const f  = start + Math.floor((performance.now() - t0) / 1000 * FPS);
-          const s  = Math.floor(f / FPS);
-          el.textContent = `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(f%FPS)}`;
-        }
-        requestAnimationFrame(tick);
+        const f = start + Math.floor((performance.now() - t0) / 1000 * FPS);
+        const s = Math.floor(f / FPS);
+        el.textContent = `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(f%FPS)}`;
+        rafId = requestAnimationFrame(tick);
       }
-      requestAnimationFrame(tick);
+      // Pause loop when tab is hidden; resume when visible again
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { cancelAnimationFrame(rafId); }
+        else                  { rafId = requestAnimationFrame(tick); }
+      });
+      rafId = requestAnimationFrame(tick);
     })();
 
     // ── Page navigation ──────────────────────────────
@@ -1537,7 +1467,9 @@
       if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
       // ── Animation timing constants (keep in sync with CSS transitions) ──
-      const SLIDE_MS        = 920;  // 0.9s CSS slide + 20ms buffer
+      // SLIDE_MS is 920 (not 900) — intentional 20ms buffer after the 0.9s CSS
+      // transition to ensure it has fully completed before classes are toggled.
+      const SLIDE_MS        = 920;
       const MOBILE_BARS_MS  = 900;  // mobile: delay before bars pop in (after slide)
       const MOBILE_NAV_MS   = 1550; // mobile: delay before nav appears (after bars+labels)
       const GOHO_CHEVRON_MS = 350;  // goHome step 2: chevron retract duration
