@@ -1068,7 +1068,7 @@
 
   <!-- ── Home panel ── -->
   <div class="home-panel" id="home-panel">
-  <section id="hero">
+  <section id="hero" class="hero-intro">
     <div class="container">
       <div class="hero-grid">
         <div class="hero-left">
@@ -1869,6 +1869,7 @@
       if (initialHash === 'game') {
         // Restore game directly — open without transition
         document.documentElement.classList.add('no-transition');
+        document.getElementById('hero').classList.remove('hero-intro');
         gameOpen = true;
         gameReturnPage = 'about'; // default return destination after a refresh
         gameIframe.src = 'game.html?embedded=1';
@@ -1884,6 +1885,7 @@
         }));
       } else if (pages.includes(initialHash)) {
         document.documentElement.classList.add('no-transition');
+        document.getElementById('hero').classList.remove('hero-intro');
 
         showPage(initialHash);
         app.classList.add('content-open');
@@ -1908,8 +1910,7 @@
           setTimeout(() => pageEl.removeEventListener('scroll', forceTop), 500);
         }
       } else {
-        // Fresh homepage load — trigger hero text + button intro animations
-        document.getElementById('hero').classList.add('hero-intro');
+        // Fresh homepage load — hero-intro already on element, just trigger btn-visible
         // After border draw completes (0.5s delay + 0.5s draw), add btn-visible to
         // trigger the colour transition. Uses transition not animation so hover works normally.
         setTimeout(() => {
