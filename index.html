@@ -604,7 +604,7 @@
     /* ── Frame: content mode ── */
     .frame.content-mode .frame-bar   { height: var(--bar-h); opacity: 1; }
     /* Desktop goHome: retract bars simultaneously with the slide */
-    .frame.bars-retracting .frame-bar { height: 0 !important; opacity: 0 !important; }
+    .frame.bars-retracting .frame-bar { height: 0 !important; opacity: 1 !important; transition: height 0.9s cubic-bezier(0.87, 0, 0.13, 1), transform 0.9s cubic-bezier(0.87, 0, 0.13, 1); }
 
     /* Bar inner edge lines — crisp separation from content */
     .frame-bar.top    { border-bottom: 1px solid rgba(200,133,14,0.35); }
@@ -890,7 +890,7 @@
 
 
       /* Instantly hide all labels at the start of a mobile content transition */
-      .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: opacity 0.15s ease !important; }
+      .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: none !important; }
       /* Snap label positions instantly before fade-in (used during goHome step 4) */
       .frame.mobile-snap-positions .frame-label { transition: none !important; }
       /* Reset label-fade animation via class (avoids leaving inline styles on elements) */
@@ -911,11 +911,11 @@
       /* Hide A·SDI-1·4.5K on mobile content pages */
       .frame.content-mode .frame-label.tl { display: none; }
       /* Timecode top-left, cleared past the chevron button (~80px) */
-      .frame.content-mode .frame-label.bl { bottom: auto; top: 20px; left: 86px; right: auto; transform: none; opacity: 0; }
-      .frame.mobile-bars-visible.content-mode .frame-label.bl { opacity: 1; transition: opacity 0.4s ease 0.5s; }
+      .frame.content-mode .frame-label.bl { bottom: auto; top: calc(var(--bar-h) / 2); left: 86px; right: auto; transform: translateY(-50%); opacity: 0; animation: none; }
+      .frame.mobile-bars-visible.content-mode .frame-label.bl { opacity: 1; transition: opacity 0.4s ease 0.65s; }
       /* FPS+REC top-right */
-      .frame.content-mode .frame-label.tr { top: 20px; right: 16px; opacity: 0; }
-      .frame.mobile-bars-visible.content-mode .frame-label.tr { opacity: 1; transition: opacity 0.4s ease 0.5s; }
+      .frame.content-mode .frame-label.tr { top: calc(var(--bar-h) / 2); right: 16px; transform: translateY(-50%); opacity: 0; animation: none; }
+      .frame.mobile-bars-visible.content-mode .frame-label.tr { opacity: 1; transition: opacity 0.4s ease 0.65s; }
       /* Hide individual BC and BR on mobile content pages */
       .frame.content-mode .frame-label.bc { display: none; }
       .frame.content-mode .frame-label.br { display: none; }
@@ -927,10 +927,11 @@
         font-size: clamp(8px, 3.2vw, 11px);
         white-space: nowrap;
         opacity: 0;
+        animation: none;
         transform: none;
         color: rgba(237,234,228,0.7);
       }
-      .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot { opacity: 1; transition: opacity 0.4s ease 0.5s; }
+      .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot { opacity: 1; transition: opacity 0.4s ease 0.65s; }
 
       /* Hide desktop nav on mobile content pages */
       .frame.content-mode .frame-back { display: none !important; }
