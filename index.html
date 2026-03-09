@@ -135,10 +135,10 @@
                   color      0.9s ease;
     }
     .frame-label.tl { top: 16px;    left: 86px;  transform-origin: top left; }
-    .frame-label.tc { top: 16px;    left: 50%;   transform: translateX(-50%); transform-origin: top center; text-align: center; color: rgba(200,133,14,0.55); letter-spacing: 0.2em; transition: transform 0.9s cubic-bezier(0.87, 0, 0.13, 1), opacity 0.9s ease, color 0.9s ease; }
+    .frame-label.tc { top: 16px;    left: 0; right: 0; text-align: center; transform-origin: top center; color: rgba(200,133,14,0.55); letter-spacing: 0.2em; }
     .frame-label.tr { top: 16px;    right: 86px; transform-origin: top right; text-align: right; }
     .frame-label.bl { bottom: 16px; left: 86px;  transform-origin: bottom left; font-variant-numeric: tabular-nums; }
-    .frame-label.bc { bottom: 16px; left: 50%;   transform: translateX(-50%); transform-origin: bottom center; text-align: center; transition: transform 0.9s cubic-bezier(0.87, 0, 0.13, 1), opacity 0.9s ease, color 0.9s ease; }
+    .frame-label.bc { bottom: 16px; left: 0; right: 0; text-align: center; transform-origin: bottom center; }
     .frame-label.br { bottom: 16px; right: 86px; transform-origin: bottom right; text-align: right; }
     .frame-label.mobile-bot { display: none; }
     @keyframes rec-blink {
@@ -151,10 +151,10 @@
     /* Prominent: shift outward via translateY + scale — pure transform, zero reflow */
     .frame.prominent .frame-label      { color: rgba(237,234,228,0.85); font-size: clamp(10px, 1.6vw, 22px); }
     .frame.prominent .frame-label.tl { transform: translateY(22px); }
-    .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(22px); }
+    .frame.prominent .frame-label.tc { transform: translateY(22px); }
     .frame.prominent .frame-label.tr { transform: translateY(22px); }
     .frame.prominent .frame-label.bl { transform: translateY(-22px); }
-    .frame.prominent .frame-label.bc { transform: translateX(-50%) translateY(-22px); }
+    .frame.prominent .frame-label.bc { transform: translateY(-22px); }
     .frame.prominent .frame-label.br { transform: translateY(-22px); }
     .fps-val  { color: rgba(237,234,228,0.85); }
     .rec-text { color: #ef4444; }
@@ -810,7 +810,7 @@
       .frame.prominent .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
       .frame.prominent .frame-label.tl { transform: translateY(6px); }
       .frame.prominent .frame-label.tr { transform: translateY(6px); }
-      .frame.prominent .frame-label.tc { transform: translateX(-50%) translateY(46px); }
+      .frame.prominent .frame-label.tc { transform: translateY(46px); }
       .frame.prominent .frame-label.bl { transform: translateY(-6px); }
       .frame.prominent .frame-label.br { transform: translateY(-6px); }
       .frame.prominent .frame-label.bc { transform: translateY(-32px); }
