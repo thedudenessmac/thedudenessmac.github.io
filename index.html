@@ -605,15 +605,17 @@
     /* ── Frame: content mode ── */
     .frame.content-mode .frame-bar   { height: var(--bar-h); opacity: 1; }
     /* Desktop goHome: retract bars simultaneously with the slide */
-    .frame.bars-retracting .frame-bar { height: 0 !important; opacity: 1 !important; transition: height 0.9s cubic-bezier(0.87, 0, 0.13, 1), transform 0.9s cubic-bezier(0.87, 0, 0.13, 1); }
+    .frame.bars-retracting .frame-bar { height: 0 !important; opacity: 0 !important; transition: height 0.9s cubic-bezier(0.87, 0, 0.13, 1), opacity 0.7s ease, transform 0.9s cubic-bezier(0.87, 0, 0.13, 1); }
 
     /* Bar inner edge lines — crisp separation from content */
     .frame-bar.top    { border-bottom: 1px solid rgba(200,133,14,0.35); }
     .frame-bar.bottom { border-top:    1px solid rgba(200,133,14,0.35); }
 
-    /* Corners vanish; frame lines and ticks hidden in content mode */
-    .frame.content-mode .corner    { opacity: 0; }
-    .frame.content-mode .frame-line { opacity: 0; }
+    /* Corners vanish; frame lines hidden in content mode — instant (no transition) so they
+       don't ghost during bar extension; animation: none cancels forwards-fill so they
+       re-draw cleanly on return home */
+    .frame.content-mode .corner    { opacity: 0; transition: none; animation: none; }
+    .frame.content-mode .frame-line { opacity: 0; transition: none; animation: none; }
 
 
     /* Labels in content-mode bars — positions already at 16px, only colour changes */
