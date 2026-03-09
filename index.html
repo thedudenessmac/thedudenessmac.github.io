@@ -67,7 +67,7 @@
       z-index: 200;
       transition: opacity 0.8s ease;
     }
-    .frame.receded { opacity: 1; } /* individual elements handle their own fade */
+
 
     /* Black HUD bars */
     .frame-bar {
@@ -158,7 +158,7 @@
     }
 
     section {
-      padding: 96px 0;
+      padding: 60px 0 96px;
       border-top: 1px solid var(--border);
     }
     .page > section:first-child { border-top: none; }
@@ -240,7 +240,7 @@
       transition: color 0.2s, border-color 0.2s;
       white-space: nowrap;
     }
-    .hero-nav a:hover { color: var(--dark-text); border-color: rgba(237,234,228,0.55); }
+    .hero-nav a:hover { color: var(--accent); border-color: var(--accent); }
 
     /* ── About ── */
     .about-grid {
@@ -334,6 +334,7 @@
       border: 1px solid rgba(200,133,14,0.5);
       padding: 2px 5px;
     }
+    .credits-subheader { display: table-row; }
     .credits-subheader td {
       font-family: var(--mono);
       font-size: 11px !important;
@@ -647,6 +648,7 @@
       position: absolute;
       top: 0; left: 0;
       height: var(--bar-h);
+      overflow: hidden;
       padding: 0 26px;
       align-items: center;
       justify-content: center;
@@ -902,6 +904,30 @@
       border: none; display: block;
     }
     /* Bottom bar retracts, frame labels + tabs fade out */
+    .mobile-nav-face-default {
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .mobile-nav-face-return {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 8px;
+      gap: 0;
+      font-family: var(--mono);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0;
+      transform: translateY(100%);
+      transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .mobile-nav-return-chev { font-size: 28px; line-height: 1; display: inline-block; transform: rotate(-90deg); margin-top: 2px; }
+    .mobile-nav-btn.game-return .mobile-nav-face-default { opacity: 0; transform: translateY(-100%); }
+    .mobile-nav-btn.game-return .mobile-nav-face-return  { opacity: 1; transform: translateY(0); }
+
     .frame.game-mode .frame-bar.bottom  { transform: translateY(100%); }
     .frame.game-mode .frame-label       { opacity: 0 !important; transition: opacity 0.5s ease !important; }
     .frame.game-mode .frame-label.tr    { transition: opacity 0.5s ease 0.1s !important; }
@@ -947,7 +973,10 @@
     </nav>
 
     <!-- Mobile-only nav dropdown -->
-    <button class="mobile-nav-btn" id="mobile-nav-btn"><svg width="26" height="13" viewBox="0 0 26 13" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,2 13,11 24,2"/></svg></button>
+    <button class="mobile-nav-btn" id="mobile-nav-btn">
+      <div class="mobile-nav-face-default"><svg width="26" height="13" viewBox="0 0 26 13" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,2 13,11 24,2"/></svg></div>
+      <div class="mobile-nav-face-return">Return<span class="mobile-nav-return-chev">&#8249;</span></div>
+    </button>
     <div class="mobile-nav-menu" id="mobile-nav-menu">
       <button class="mobile-nav-home" id="mobile-nav-home"><span class="nav-home-chev">&#8249;</span>Home</button>
       <button data-page="about">About</button>
@@ -1466,6 +1495,7 @@
         mobileNavMenu.classList.remove('menu-open');
       }
       mobileNavBtn.addEventListener('click', () => {
+        if (gameOpen) { closeGame(); return; }
         const isOpen = mobileNavMenu.classList.contains('menu-open');
         if (isOpen) { closeMobileMenu(); } else {
           mobileNavBtn.classList.add('menu-open');
@@ -1540,7 +1570,11 @@
         // Hide tabs and back button immediately
         tabsEl.classList.remove('tabs-ready');
         frameBack.classList.remove('back-ready');
-        mobileNavBtn.classList.remove('nav-ready');
+        // Keep chevron visible when switching between content pages — no re-animation
+        // Clean up game state if navigating away while game was open (e.g. browser back)
+        if (gameOpen) closeGame(false); // navigation handles history; don't double-back
+        mobileNavBtn.classList.remove('game-return');
+        if (!alreadyInContent) mobileNavBtn.classList.remove('nav-ready');
         if (!alreadyInContent) frame.classList.remove('mobile-bars-visible');
         // Mobile fresh entry: fade all labels out immediately (step 1)
         if (isMobile && !alreadyInContent) frame.classList.add('mobile-labels-out');
@@ -1563,7 +1597,7 @@
         tabsTimer = setTimeout(() => {
           tabsEl.classList.add('tabs-ready');
           frameBack.classList.add('back-ready');
-          mobileNavBtn.classList.add('nav-ready');
+          if (!alreadyInContent) mobileNavBtn.classList.add('nav-ready');
           tabsTimer = null;
         }, navDelay);
       }
@@ -1652,27 +1686,46 @@
       // ── Game panel ──────────────────────────────────
       const gamePanel  = document.getElementById('game-panel');
       const gameIframe = document.getElementById('game-iframe');
-      let   gameOpen   = false;
+      let gameOpen       = false;
+      let gameReturnPage = null; // content page to restore when closing the game
 
-      function openGame() {
+      function openGame(pushHistory = true) {
         gameOpen = true;
+        // Remember the current content page so Return can restore it reliably
+        const currentHash = location.hash.replace('#', '');
+        if (pages.includes(currentHash)) gameReturnPage = currentHash;
         if (gameIframe.src === 'about:blank' || !gameIframe.src.includes('game.html')) {
           gameIframe.src = 'game.html?embedded=1';
         }
+        closeMobileMenu();
         frame.classList.add('game-mode');
         gamePanel.classList.add('active');
         frameBack.classList.add('showing-return');
+        mobileNavBtn.classList.add('game-return');
+        if (pushHistory) history.pushState(null, '', '#game');
       }
 
-      function closeGame() {
+      function closeGame(pushHistory = true) {
         gameOpen = false;
         gamePanel.classList.remove('active');
         frameBack.classList.remove('showing-return');
+        mobileNavBtn.classList.remove('game-return');
         gameIframe.src = 'about:blank'; // free iframe memory on close
+        if (pushHistory) {
+          if (gameReturnPage) {
+            // Replace #game with the return page in history, then navigate there
+            history.replaceState(null, '', '#' + gameReturnPage);
+            openContent(gameReturnPage, false);
+          } else {
+            history.replaceState(null, '', location.pathname);
+            goHome(false);
+          }
+        }
         setTimeout(() => {
           frame.classList.remove('game-mode');
         }, 900);
       }
+
 
       document.querySelectorAll('.footer-play-btn').forEach(btn => {
         btn.addEventListener('click', e => {
@@ -1691,20 +1744,37 @@
       window.addEventListener('popstate', () => {
         closeMobileMenu();
         const hash = location.hash.replace('#', '');
-        if (pages.includes(hash)) {
-          // Navigating forward to a content page
+        if (hash === 'game') {
+          openGame(false);
+        } else if (pages.includes(hash)) {
+          // Navigating forward to a content page (also closes game if open)
           openContent(hash, false); // false = don't push history, browser already did
         } else {
           // Navigating back to home
-          if (frame.classList.contains('content-mode')) {
-            goHome(false); // false = don't push history, browser already did
-          }
+          if (gameOpen) { closeGame(false); }
+          else if (frame.classList.contains('content-mode')) { goHome(false); }
         }
       });
 
       // Restore page on load/refresh — skip all transitions, jump straight to content state
       const initialHash = location.hash.replace('#', '');
-      if (pages.includes(initialHash)) {
+      if (initialHash === 'game') {
+        // Restore game directly — open without transition
+        document.documentElement.classList.add('no-transition');
+        gameOpen = true;
+        gameReturnPage = 'about'; // default return destination after a refresh
+        gameIframe.src = 'game.html?embedded=1';
+        app.classList.add('content-open');
+        frame.classList.remove('prominent');
+        frame.classList.add('content-mode', 'game-mode');
+        gamePanel.classList.add('active');
+        frameBack.classList.add('back-ready', 'showing-return');
+        mobileNavBtn.classList.add('nav-ready', 'game-return');
+        frame.classList.add('mobile-bars-visible');
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          document.documentElement.classList.remove('no-transition');
+        }));
+      } else if (pages.includes(initialHash)) {
         document.documentElement.classList.add('no-transition');
 
         showPage(initialHash);
