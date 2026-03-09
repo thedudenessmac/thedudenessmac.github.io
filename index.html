@@ -726,12 +726,13 @@
       .footer-play-btn   { grid-row: 2; grid-column: 2; justify-self: end; }
       .footer-inner > span { grid-row: 1; grid-column: 2; }
 
-      /* About page: stack photo below text, tighter margins, smaller body text */
+      /* All content pages: tighter side margins, top padding, smaller body text */
+      .container { padding: 0 26px; }
+      section { padding-top: 60px; font-size: 14px; }
+
+      /* About page: stack photo below text */
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
-      #page-about .container { padding: 0 26px; }
-      #page-about section { padding-top: 72px; }
-      .about-text p { font-size: 14px; }
 
       /* Instantly hide all labels at the start of a mobile content transition */
       .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: opacity 0.15s ease !important; }
