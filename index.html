@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Marko Balac — Script Supervisor</title>
   <meta name="description" content="Marko Balac — Script Supervisor based in Toronto, ON.">
   <link rel="icon" type="image/png" href="favicon.png">
@@ -91,7 +91,7 @@
     .frame-bar.top    { top: 0; }
     .frame-bar.bottom { bottom: 0; }
 
-    .corner, .frame-line, .frame-tick { transition: opacity 0.45s ease; }
+    .corner, .frame-line { transition: opacity 0.45s ease; }
 
     /* Corners — bold */
     .corner {
@@ -116,7 +116,7 @@
     .frame-line.right  { right: 24px;  top: 24px;  bottom: 24px; width:  1px; transform: scaleY(0); transform-origin: center; animation: line-v 0.6s cubic-bezier(0.4,0,0.2,1) 0.42s forwards; }
 
     /* Center tick marks — hidden */
-    .frame-tick { display: none; }
+
 
     /* Frame metadata — base positions are the content-mode resting state */
     .frame-label {
@@ -614,7 +614,7 @@
     /* Corners vanish; frame lines and ticks hidden in content mode */
     .frame.content-mode .corner    { opacity: 0; }
     .frame.content-mode .frame-line { opacity: 0; }
-    .frame.content-mode .frame-tick { opacity: 0; }
+
 
     /* Labels in content-mode bars — positions already at 16px, only colour changes */
     .frame.content-mode .frame-label    { color: rgba(237,234,228,0.7); }
@@ -1001,7 +1001,7 @@
       transform: translateY(100%);
       transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
-    .mobile-nav-return-chev { font-size: 28px; line-height: 1; display: inline-block; transform: rotate(-90deg); margin-top: 2px; }
+
     .mobile-nav-btn.game-return .mobile-nav-face-default { opacity: 0; transform: translateY(-100%); }
     .mobile-nav-btn.game-return .mobile-nav-face-return  { opacity: 1; transform: translateY(0); }
 
@@ -1538,6 +1538,7 @@
     // ── Running timecode ──────────────────────────────
     (function () {
       const el    = document.getElementById('frame-tc');
+      if (!el) return;
       const FPS   = 24;
       const start = ((1 * 3600) + (2 * 60) + 14) * FPS + 7;
       const t0    = performance.now();
@@ -1567,6 +1568,7 @@
       const tabIndicator = document.getElementById('tab-indicator');
 
       function updateTabIndicator(id) {
+        if (!tabsEl || !tabIndicator) return;
         const btn = tabsEl.querySelector(`button[data-page="${id}"]`);
         if (!btn) return;
         tabIndicator.style.left  = btn.offsetLeft + 'px';
@@ -1588,6 +1590,12 @@
           mobileNavMenu.classList.add('menu-open');
         }
       });
+      document.addEventListener('click', e => {
+        if (!mobileNavMenu.classList.contains('menu-open')) return;
+        if (!mobileNavBtn.contains(e.target) && !mobileNavMenu.contains(e.target)) {
+          closeMobileMenu();
+        }
+      });
       document.getElementById('mobile-nav-home').addEventListener('click', () => {
         closeMobileMenu(); goHome();
       });
@@ -1605,7 +1613,7 @@
       const SLIDE_MS        = 920;
       const MOBILE_BARS_MS  = 900;  // mobile: delay before bars pop in (after slide)
       const MOBILE_NAV_MS   = 1550; // mobile: delay before nav appears (after bars+labels)
-      const GOHO_CHEVRON_MS = 350;  // goHome step 2: chevron retract duration
+      const GOHO_CHEVRON_MS = 450;  // goHome step 2: chevron retract duration (matches 0.45s CSS transform)
       const GOHO_BARS_MS    = 450;  // goHome step 3: bar retract duration (0.45s CSS)
       const DESKTOP_BARS_MS = 300;  // desktop: bars appear after this delay
 
@@ -1785,6 +1793,8 @@
 
       function openGame(pushHistory = true) {
         gameOpen = true;
+        if (tabsTimer)       { clearTimeout(tabsTimer);       tabsTimer       = null; }
+        if (mobileBarsTimer) { clearTimeout(mobileBarsTimer); mobileBarsTimer = null; }
         // Remember the current content page and scroll position
         const currentHash = location.hash.replace('#', '');
         if (pages.includes(currentHash)) {
@@ -1832,7 +1842,7 @@
             }
           }
         }, 400);
-        setTimeout(() => { frame.classList.remove('game-mode'); }, 900);
+        setTimeout(() => { frame.classList.remove('game-mode'); }, 950);
       }
 
 
