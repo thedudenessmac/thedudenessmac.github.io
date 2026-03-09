@@ -257,16 +257,14 @@
     .about-text p + p { margin-top: 16px; }
 
     .cv-link {
-      display: inline-block;
-      margin-top: 32px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
+      font-size: inherit;
+      font-weight: inherit;
+      letter-spacing: inherit;
+      text-transform: none;
       color: var(--accent);
       text-decoration: none;
       border-bottom: 1px solid rgba(200,133,14,0.4);
-      padding-bottom: 3px;
+      padding-bottom: 1px;
       transition: border-color 0.2s, opacity 0.2s;
     }
     .cv-link:hover { opacity: 0.7; border-color: var(--accent); }
@@ -336,6 +334,18 @@
       border: 1px solid rgba(200,133,14,0.5);
       padding: 2px 5px;
     }
+    .credits-subheader td {
+      font-family: var(--mono);
+      font-size: 11px !important;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted) !important;
+      font-weight: 400 !important;
+      padding: 0 28px 16px 0 !important;
+      border-bottom: 1px solid var(--border);
+    }
+    .credits-subheader td:last-child { padding-right: 0 !important; }
+
     .credits-divider td {
       padding-top: 72px !important;
       padding-bottom: 14px !important;
@@ -395,7 +405,7 @@
     }
     .contact-note {
       margin-top: 24px;
-      font-size: 14px;
+      font-size: 16px;
       color: var(--text);
       line-height: 1.6;
     }
@@ -410,7 +420,7 @@
     .contact-item:first-child { border-top: 1px solid var(--border); }
     .contact-label {
       font-family: var(--mono);
-      font-size: 9px;
+      font-size: 11px;
       font-weight: 400;
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -782,9 +792,10 @@
       .credits-table td:nth-child(5) { grid-column: 2; grid-row: 2; font-size: 13px; text-align: right; color: #888; }
       /* Col 4: Format — full width, bottom row */
       .credits-table td:nth-child(4) { grid-column: 1 / -1; grid-row: 3; padding-top: 5px !important; }
-      /* Divider rows */
+      /* Divider and subheader rows */
       .credits-divider { padding-top: 40px !important; padding-bottom: 14px !important; }
       .credits-divider td { border-bottom: none !important; }
+      .credits-subheader { display: none; }
       /* Role group header rows — hidden on mobile (role shown inline per row) */
       .credits-table .credits-group { display: none; }
       .credits-table tbody { border-top: 1px solid var(--border); }
@@ -805,7 +816,7 @@
       /* About page: stack photo below text */
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
-      .cv-link { font-size: 14px; }
+
 
       /* Instantly hide all labels at the start of a mobile content transition */
       .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: opacity 0.15s ease !important; }
@@ -983,12 +994,11 @@
       <p class="section-eyebrow">About</p>
       <div class="about-grid">
         <div class="about-text">
-          <p>Hello and welcome. My name is Marko. I'm a musician, a writer, a cook, an educator, a photographer, a tech geek, and a plain-old human being.</p>
-          <p>And I am also a Script Supervisor.</p>
-          <p>My job, most simply put, is to protect the integrity of the artistic vision that sustains every narrative project — be it a short film, feature, or series.</p>
-          <p>Or, put another way: I am a cost-containment measure for the production at large. I solve problems before they become expensive problems days, weeks, or months down the road.</p>
-          <p>Truth be told, these are really two sides of the same coin.</p>
-          <a href="marko-balac-cv.pdf" class="cv-link" target="_blank" rel="noopener noreferrer">Download CV →</a>
+          <p>Hello and welcome. My name is Marko. I'm a musician, a writer, a cook, an educator, a photographer, a tech geek, and a plain old human being.</p>
+          <p>I am also a Script Supervisor.</p>
+          <p>My job is to protect the integrity of the artistic vision that sustains every narrative project, be it a short film, feature, or series.</p>
+          <p>Or, put more dispassionately, I am a cost-containment measure for the production at large. I solve problems BEFORE they become EXPENSIVE problems day, weeks, or months down the road.</p>
+          <p>Please find a copy of my CV <a href="marko-balac-cv.pdf" class="cv-link" target="_blank" rel="noopener noreferrer"><strong>here</strong></a>.</p>
         </div>
         <img src="headshot.jpg" alt="Marko Balac" class="about-photo">
       </div>
@@ -1032,6 +1042,13 @@
 
           <tr class="credits-divider">
             <td colspan="5"><span class="phase-tag phase-grey">Earlier Credits</span></td>
+          </tr>
+          <tr class="credits-subheader">
+            <td>Production</td>
+            <td></td>
+            <td>Role</td>
+            <td>Format</td>
+            <td>Year</td>
           </tr>
 
           <tr class="credits-group"><td colspan="5">Set Production Assistant</td></tr>
@@ -1360,7 +1377,7 @@
       <p class="section-eyebrow">Contact</p>
       <div class="contact-grid">
         <div>
-          <p class="contact-note">Available for short films, features, and series.<br>Based in Toronto — open to travel.<br><br>Please don't hesitate to reach out!</p>
+          <p class="contact-note">Available for short films, features, and series. Based in Toronto — open to travel.<br><br>Please don't hesitate to reach out!</p>
         </div>
         <ul class="contact-list">
           <li class="contact-item">
