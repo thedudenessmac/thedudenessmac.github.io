@@ -59,6 +59,15 @@
       from { opacity: 1; }
       to   { opacity: 0; }
     }
+    @keyframes hero-fadein {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    /* ::before from top-right, ::after from bottom-left — both grow to meet at opposite corners */
+    @keyframes btn-border-draw {
+      from { width: 0; height: 0; }
+      to   { width: calc(100% + 2px); height: calc(100% + 2px); }
+    }
 
     .frame {
       position: fixed;
@@ -241,6 +250,61 @@
       white-space: nowrap;
     }
     .hero-nav a:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* Hero intro sequence — only active on fresh homepage load (.hero-intro class) */
+    .hero-intro .hero-name     { opacity: 0; animation: hero-fadein 0.65s ease 0.5s  forwards; }
+    .hero-intro .hero-role     { opacity: 0; animation: hero-fadein 0.55s ease 0.75s forwards; }
+    .hero-intro .hero-location { opacity: 0; animation: hero-fadein 0.55s ease 0.95s forwards; }
+
+    /* Nav button border-draw + text fade — all screen sizes */
+    /* All buttons start simultaneously with the name */
+    .hero-intro .hero-nav a { --btn-delay: 0.5s; }
+
+    /* Hide real border and text during draw */
+    .hero-intro .hero-nav a {
+      position: relative;
+      border-color: transparent;
+      color: transparent;
+      transition: color 0.25s ease, border-color 0.2s ease;
+    }
+
+    /* JS adds this class after border draw — triggers the color transition */
+    .hero-intro .hero-nav a.btn-visible {
+      color: rgba(237,234,228,0.65);
+    }
+
+    .hero-intro .hero-nav a:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* ::before from top-right: top edge draws left, right edge draws down */
+    .hero-intro .hero-nav a::before {
+      content: '';
+      position: absolute;
+      top: -1px; right: -1px;
+      width: 0; height: 0;
+      border-top:   1px solid rgba(237,234,228,0.2);
+      border-right: 1px solid rgba(237,234,228,0.2);
+      animation: btn-border-draw 0.5s ease var(--btn-delay) forwards;
+    }
+
+    /* ::after from bottom-left: bottom edge draws right, left edge draws up */
+    .hero-intro .hero-nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: -1px;
+      width: 0; height: 0;
+      border-bottom: 1px solid rgba(237,234,228,0.2);
+      border-left:   1px solid rgba(237,234,228,0.2);
+      animation: btn-border-draw 0.5s ease var(--btn-delay) forwards;
+    }
+
+    /* Pseudo-element border stays permanently — fade out on hover so real accent border shows */
+    .hero-intro .hero-nav a::before,
+    .hero-intro .hero-nav a::after { transition: opacity 0.2s; }
+    .hero-intro .hero-nav a:hover::before,
+    .hero-intro .hero-nav a:hover::after { opacity: 0; }
 
     /* ── About ── */
     .about-grid {
@@ -1799,6 +1863,14 @@
           pageEl.addEventListener('scroll', forceTop);
           setTimeout(() => pageEl.removeEventListener('scroll', forceTop), 500);
         }
+      } else {
+        // Fresh homepage load — trigger hero text + button intro animations
+        document.getElementById('hero').classList.add('hero-intro');
+        // After border draw completes (0.5s delay + 0.5s draw), add btn-visible to
+        // trigger the colour transition. Uses transition not animation so hover works normally.
+        setTimeout(() => {
+          document.querySelectorAll('#hero .hero-nav a').forEach(btn => btn.classList.add('btn-visible'));
+        }, 1050); // 0.5s delay + 0.5s draw + small buffer
       }
     })();
   </script>
