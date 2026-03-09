@@ -517,6 +517,7 @@
       background: var(--bg);
       overflow-y: auto;
       overflow-x: hidden;
+      overscroll-behavior-y: none;
       padding-top: var(--bar-h);
       padding-bottom: var(--bar-h);
       opacity: 0;
@@ -725,9 +726,12 @@
       .footer-play-btn   { grid-row: 2; grid-column: 2; justify-self: end; }
       .footer-inner > span { grid-row: 1; grid-column: 2; }
 
-      /* About page: stack photo below text */
+      /* About page: stack photo below text, tighter margins, smaller body text */
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
+      #page-about .container { padding: 0 26px; }
+      #page-about section { padding-top: 72px; }
+      .about-text p { font-size: 14px; }
 
       /* Instantly hide all labels at the start of a mobile content transition */
       .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: opacity 0.15s ease !important; }
@@ -1440,6 +1444,9 @@
           closeMobileMenu(); openContent(btn.dataset.page);
         });
       });
+      // Prevent browser from restoring scroll position on hash navigation
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
       // ── Animation timing constants (keep in sync with CSS transitions) ──
       const SLIDE_MS        = 920;  // 0.9s CSS slide + 20ms buffer
       const MOBILE_BARS_MS  = 900;  // mobile: delay before bars pop in (after slide)
@@ -1669,6 +1676,13 @@
         requestAnimationFrame(() => requestAnimationFrame(() => {
           document.documentElement.classList.remove('no-transition');
         }));
+
+        // Intercept any browser scroll restoration on the page element
+        const pageEl = document.getElementById('page-' + initialHash);
+        if (pageEl) {
+          pageEl.scrollTop = 0;
+          pageEl.addEventListener('scroll', () => { pageEl.scrollTop = 0; }, { once: true });
+        }
       }
     })();
   </script>
