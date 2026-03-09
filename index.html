@@ -1600,20 +1600,22 @@
       let   tabsTimer        = null;
       let   mobileBarsTimer  = null;
 
-      function showPage(id) {
+      function showPage(id, preserveScroll = false) {
         // Deactivate all pages
         pages.forEach(p => {
           const el = document.getElementById('page-' + p);
-          if (el) { el.classList.remove('active'); el.scrollTop = 0; }
+          if (el) { el.classList.remove('active'); if (!preserveScroll) el.scrollTop = 0; }
         });
-        // Activate target and lock scroll to top for 500ms (blocks browser restoration)
+        // Activate target; reset scroll unless returning from game with saved position
         const target = document.getElementById('page-' + id);
         if (target) {
           target.classList.add('active');
-          target.scrollTop = 0;
-          const forceTop = () => { target.scrollTop = 0; };
-          target.addEventListener('scroll', forceTop);
-          setTimeout(() => target.removeEventListener('scroll', forceTop), 500);
+          if (!preserveScroll) {
+            target.scrollTop = 0;
+            const forceTop = () => { target.scrollTop = 0; };
+            target.addEventListener('scroll', forceTop);
+            setTimeout(() => target.removeEventListener('scroll', forceTop), 500);
+          }
         }
         activePage = id;
         // Update tab buttons
@@ -1625,7 +1627,7 @@
         });
       }
 
-      function openContent(id, pushHistory = true) {
+      function openContent(id, pushHistory = true, preserveScroll = false) {
         if (goHomeTimer)      { clearTimeout(goHomeTimer);      goHomeTimer      = null; }
         if (goHomeBarsTimer)  { clearTimeout(goHomeBarsTimer);  goHomeBarsTimer  = null; }
         if (goHomeSlideTimer) { clearTimeout(goHomeSlideTimer); goHomeSlideTimer = null; }
@@ -1647,7 +1649,7 @@
         if (!alreadyInContent) frame.classList.remove('mobile-bars-visible');
         // Mobile fresh entry: fade all labels out immediately (step 1)
         if (isMobile && !alreadyInContent) frame.classList.add('mobile-labels-out');
-        showPage(id);
+        showPage(id, preserveScroll);
         app.classList.add('content-open');
         frame.classList.remove('prominent');
         frame.classList.add('content-mode');
@@ -1755,14 +1757,19 @@
       // ── Game panel ──────────────────────────────────
       const gamePanel  = document.getElementById('game-panel');
       const gameIframe = document.getElementById('game-iframe');
-      let gameOpen       = false;
-      let gameReturnPage = null; // content page to restore when closing the game
+      let gameOpen        = false;
+      let gameReturnPage  = null; // content page to restore when closing the game
+      let gameReturnScroll = 0;  // scroll position to restore on close
 
       function openGame(pushHistory = true) {
         gameOpen = true;
-        // Remember the current content page so Return can restore it reliably
+        // Remember the current content page and scroll position
         const currentHash = location.hash.replace('#', '');
-        if (pages.includes(currentHash)) gameReturnPage = currentHash;
+        if (pages.includes(currentHash)) {
+          gameReturnPage = currentHash;
+          const pageEl = document.getElementById('page-' + currentHash);
+          gameReturnScroll = pageEl ? pageEl.scrollTop : 0;
+        }
         if (gameIframe.src === 'about:blank' || !gameIframe.src.includes('game.html')) {
           gameIframe.src = 'game.html?embedded=1';
         }
@@ -1793,7 +1800,10 @@
           if (pushHistory) {
             if (gameReturnPage) {
               history.replaceState(null, '', '#' + gameReturnPage);
-              openContent(gameReturnPage, false);
+              openContent(gameReturnPage, false, true); // preserveScroll = true
+              // Restore scroll position after openContent activates the page
+              const returnEl = document.getElementById('page-' + gameReturnPage);
+              if (returnEl) returnEl.scrollTop = gameReturnScroll;
             } else {
               history.replaceState(null, '', location.pathname);
               goHome(false);
