@@ -699,40 +699,43 @@
       .credits-table tr { display: flex; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--border); }
       .credits-table tr:last-child { border-bottom: none; }
       .credits-table td { display: block; border-bottom: none !important; padding: 0; padding-right: 0 !important; }
-      /* Col 1: Production — flex-grow, bold */
+      /* Col 1: Production — fills available space */
       .credits-table td:nth-child(1) { flex: 1; order: 1; font-size: 14px; }
-      /* Col 2: Director — full width, below */
-      .credits-table td:nth-child(2) { width: 100%; order: 3; font-size: 12px; padding-top: 4px; }
+      /* Col 3: Role — centred between title and year, wraps to 2 lines */
+      .credits-table td:nth-child(3) { display: block; order: 2; flex: 1; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: #777; line-height: 1.4; text-align: center; align-self: center; }
+      .credits-table td:nth-child(3) .producer { font-size: 10px; }
+      /* Col 5: Year — right edge of top row */
+      .credits-table td:nth-child(5) { order: 3; font-size: 13px; text-align: right; color: #888; }
+      /* Col 2: Director — full width, second row */
+      .credits-table td:nth-child(2) { width: 100%; order: 4; font-size: 12px; padding-top: 4px; }
       .credits-table td:nth-child(2):not(:empty)::before { content: "dir. "; color: var(--muted); }
       .credits-table td:nth-child(2):empty { display: none; }
-      /* Col 3: Role — hidden (group rows replace it) */
-      .credits-table td:nth-child(3) { display: none; }
-      /* Col 4: Format — full width, below director */
-      .credits-table td:nth-child(4) { width: 100%; order: 4; padding-top: 6px; }
-      /* Col 5: Year — right-aligned next to title */
-      .credits-table td:nth-child(5) { order: 2; font-size: 13px; text-align: right; color: #888; }
+      /* Col 4: Format — full width, third row */
+      .credits-table td:nth-child(4) { width: 100%; order: 5; padding-top: 2px; }
       /* Divider rows */
       .credits-divider { padding-top: 40px !important; padding-bottom: 0 !important; }
       .credits-divider td { border-bottom: none !important; }
-      /* Role group header rows */
-      .credits-group { display: flex; }
-      .credits-group td { width: 100%; padding: 14px 0 6px; font-size: 10px; font-family: var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); border-bottom: none !important; }
-      .credits-group:first-child td { border-top: 1px solid var(--border); }
+      /* Role group header rows — hidden on mobile (role shown inline per row) */
+      .credits-table .credits-group { display: none; }
+      .credits-table tbody { border-top: 1px solid var(--border); }
 
-      /* Footer: copyright + Toronto on row 1, play button on row 2 */
-      .footer-inner { display: grid; grid-template-columns: 1fr auto; row-gap: 10px; align-items: center; }
-      .footer-left { display: contents; }
-      .footer-left > span { grid-row: 1; grid-column: 1; }
-      .footer-play-btn   { grid-row: 2; grid-column: 2; justify-self: end; }
-      .footer-inner > span { grid-row: 1; grid-column: 2; }
+      /* Footer: copyright left, play button right */
+      .footer-left { display: flex; align-items: center; }
 
       /* All content pages: tighter side margins, top padding, smaller body text */
       .container { padding: 0 26px; }
       section { padding-top: 60px; font-size: 14px; }
 
+      /* Services: 2 columns on mobile */
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+
+      /* Contact: stack text above contact list */
+      .contact-grid { grid-template-columns: 1fr; gap: 24px; }
+
       /* About page: stack photo below text */
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
+      .cv-link { font-size: 14px; }
 
       /* Instantly hide all labels at the start of a mobile content transition */
       .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: opacity 0.15s ease !important; }
@@ -829,7 +832,7 @@
         border: none;
         border-bottom: 1px solid rgba(200,133,14,0.1);
         font-family: var(--mono);
-        font-size: 12px;
+        font-size: 14px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         color: rgba(200,133,14,0.65);
@@ -979,7 +982,7 @@
       </div>
     </div>
   </section>
-  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div><span>Script Supervisor · Toronto, ON</span></div></div></footer>
+  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span></div><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div></div></footer>
   </div><!-- /page-about -->
 
   <div class="page" id="page-credits">
@@ -1083,7 +1086,7 @@
       </table>
     </div>
   </section>
-  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div><span>Script Supervisor · Toronto, ON</span></div></div></footer>
+  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span></div><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div></div></footer>
   </div><!-- /page-credits -->
 
   <div class="page" id="page-services">
@@ -1335,7 +1338,7 @@
 
     </div>
   </section>
-  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div><span>Script Supervisor · Toronto, ON</span></div></div></footer>
+  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span></div><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div></div></footer>
   </div><!-- /page-services -->
 
   <div class="page" id="page-contact">
@@ -1369,8 +1372,7 @@
   <footer>
     <div class="container">
       <div class="footer-inner">
-        <div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div>
-        <span>Script Supervisor · Toronto, ON</span>
+        <div class="footer-left"><span>&copy; 2026 Marko Balac</span></div><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a>
       </div>
     </div>
   </footer>
@@ -1385,7 +1387,7 @@
       </div>
     </div>
   </section>
-  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div><span>Script Supervisor · Toronto, ON</span></div></div></footer>
+  <footer><div class="container"><div class="footer-inner"><div class="footer-left"><span>&copy; 2026 Marko Balac</span></div><a href="game.html" class="footer-play-btn">▶ Play Continuity!</a></div></div></footer>
   </div><!-- /page-gallery -->
 
   </div><!-- /content-panel -->
@@ -1470,9 +1472,15 @@
           const el = document.getElementById('page-' + p);
           if (el) { el.classList.remove('active'); el.scrollTop = 0; }
         });
-        // Activate target
+        // Activate target and lock scroll to top for 500ms (blocks browser restoration)
         const target = document.getElementById('page-' + id);
-        if (target) target.classList.add('active');
+        if (target) {
+          target.classList.add('active');
+          target.scrollTop = 0;
+          const forceTop = () => { target.scrollTop = 0; };
+          target.addEventListener('scroll', forceTop);
+          setTimeout(() => target.removeEventListener('scroll', forceTop), 500);
+        }
         activePage = id;
         // Update tab buttons
         tabBtns.forEach(btn => {
@@ -1678,11 +1686,13 @@
           document.documentElement.classList.remove('no-transition');
         }));
 
-        // Intercept any browser scroll restoration on the page element
+        // Block all scroll restoration attempts for 500ms after load
         const pageEl = document.getElementById('page-' + initialHash);
         if (pageEl) {
           pageEl.scrollTop = 0;
-          pageEl.addEventListener('scroll', () => { pageEl.scrollTop = 0; }, { once: true });
+          const forceTop = () => { pageEl.scrollTop = 0; };
+          pageEl.addEventListener('scroll', forceTop);
+          setTimeout(() => pageEl.removeEventListener('scroll', forceTop), 500);
         }
       }
     })();
