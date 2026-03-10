@@ -978,6 +978,15 @@
 
     }
 
+    /* ── Mobile landscape ── */
+    @media (orientation: landscape) and (max-height: 500px) {
+      /* Allow home panel to scroll instead of clipping */
+      .home-panel { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+      /* Let hero be its natural height; top-align so overflow is reachable;
+         pad enough to clear the fixed frame labels and bottom corners */
+      #hero { min-height: unset; align-items: flex-start; padding-top: 64px; padding-bottom: 72px; }
+    }
+
     /* Freeze all transitions/animations during instant state restore */
     .no-transition, .no-transition * {
       transition: none !important;
