@@ -43,6 +43,10 @@
       from { width: 0; height: 0; }
       to   { width: 52px; height: 52px; }
     }
+    @keyframes corner-draw-sm {
+      from { width: 0; height: 0; }
+      to   { width: 22px; height: 22px; }
+    }
     @keyframes line-h {
       from { transform: scaleX(0); }
       to   { transform: scaleX(1); }
@@ -809,27 +813,41 @@
       .frame-label.bc { left: auto; right: 30px; transform-origin: bottom right; text-align: right; }
 
       /* Prominent: two-row layout — fluid font-size, translateY for row positioning */
-      .frame.prominent .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
+      .frame.prominent .frame-label { font-size: var(--mobile-home-fs, clamp(11px, 2.8vw, 13px)); }
       .frame.prominent .frame-label.tl { transform: translateY(6px); }
       .frame.prominent .frame-label.tr { transform: translateY(6px); }
       .frame.prominent .frame-label.tc { transform: translateY(46px); }
       .frame.prominent .frame-label.bl { transform: translateY(-6px); }
       .frame.prominent .frame-label.br { transform: translateY(-6px); }
       .frame.prominent .frame-label.bc { transform: translateY(-32px); }
+      /* Mobile homepage: timecode moves to top-left, SDI hidden */
+      .frame.prominent .frame-label.tl { display: none; }
+      .frame.prominent .frame-label.bl { bottom: auto; top: 20px; transform: translateY(6px); }
+      /* bc and br replaced by mobile-bot in bottom row */
+      .frame.prominent .frame-label.bc { display: none; }
+      .frame.prominent .frame-label.br { display: none; }
+      /* Show all 6 data points centred in the bottom row */
+      .frame.prominent .frame-label.mobile-bot {
+        display: block;
+        top: auto; bottom: 20px;
+        left: 0; right: 0; padding: 0 44px; text-align: center;
+        transform: translateY(-6px);
+      }
 
-      /* Frame corners and lines — half the edge margin */
-      .corner.tl { top: 8px;    left: 12px; }
-      .corner.tr { top: 8px;    right: 12px; }
-      .corner.bl { bottom: 8px; left: 12px; }
-      .corner.br { bottom: 8px; right: 12px; }
-      .frame-line.top    { top: 8px;    left: 12px; right: 12px; }
-      .frame-line.bottom { bottom: 8px; left: 12px; right: 12px; }
-      .frame-line.left   { left: 12px;  top: 8px;  bottom: 8px; }
-      .frame-line.right  { right: 12px; top: 8px;  bottom: 8px; }
-      .frame-label.tl { top: 20px;    left: 30px; }
-      .frame-label.tr { top: 20px;    right: 30px; }
-      .frame-label.bl { bottom: 20px; left: 30px; }
-      .frame-label.br { bottom: 20px; right: 30px; }
+      /* Frame corners and lines — mobile scale */
+      .corner { animation-name: corner-draw-sm; }
+      .corner.tl { top: 8px;    left: 16px; }
+      .corner.tr { top: 8px;    right: 16px; }
+      .corner.bl { bottom: 8px; left: 16px; }
+      .corner.br { bottom: 8px; right: 16px; }
+      .frame-line.top    { top: 8px;    left: 16px; right: 16px; }
+      .frame-line.bottom { bottom: 8px; left: 16px; right: 16px; }
+      .frame-line.left   { left: 16px;  top: 8px;  bottom: 8px; }
+      .frame-line.right  { right: 16px; top: 8px;  bottom: 8px; }
+      .frame-label.tl { top: 20px;    left: 44px; }
+      .frame-label.tr { top: 20px;    right: 44px; }
+      .frame-label.bl { bottom: 20px; left: 44px; }
+      .frame-label.br { bottom: 20px; right: 44px; }
 
       /* Hero: centre content, account for 68px bars top + bottom */
       #hero { min-height: 100dvh; padding: var(--bar-h) 0; }
@@ -896,7 +914,11 @@
       .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
 
 
-      /* Instantly hide all labels at the start of a mobile content transition */
+      /* Phase 1 — fade labels, corners and frame lines out before the slide */
+      .frame.mobile-home-out .frame-label,
+      .frame.mobile-home-out .corner,
+      .frame.mobile-home-out .frame-line { opacity: 0 !important; transition: opacity 0.35s ease !important; }
+      /* Phase 2 — instantly snap labels hidden once content-mode repositions them */
       .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: none !important; }
       /* Snap label positions instantly before fade-in (used during goHome step 4) */
       .frame.mobile-snap-positions .frame-label { transition: none !important; }
@@ -1575,6 +1597,29 @@
     document.getElementById('lbl-br').textContent  = `ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
     document.getElementById('lbl-mob').textContent = `F ${CAM.focus}  ·  ${CAM.tstop}  ·  ${CAM.lens}  ·  ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
 
+    // Dynamic font scaling for mobile homepage prominent labels
+    function fitMobileHomeFontSize() {
+      if (window.innerWidth >= 768) return; // desktop: skip
+      const el = document.getElementById('lbl-mob');
+      if (!el) return;
+      const measure = document.createElement('span');
+      measure.style.cssText = "position:fixed;top:-9999px;left:-9999px;white-space:nowrap;font-family:'PT Mono','Courier New',monospace;letter-spacing:0.06em;visibility:hidden;font-weight:400;";
+      measure.textContent = el.textContent;
+      document.body.appendChild(measure);
+      const availWidth = window.innerWidth - 88;
+      let lo = 10, hi = 28;
+      while (hi - lo > 0.5) {
+        const mid = (lo + hi) / 2;
+        measure.style.fontSize = mid + 'px';
+        if (measure.offsetWidth <= availWidth) { lo = mid; }
+        else { hi = mid; }
+      }
+      document.body.removeChild(measure);
+      frame.style.setProperty('--mobile-home-fs', Math.floor(lo * 10) / 10 + 'px');
+    }
+    fitMobileHomeFontSize();
+    window.addEventListener('resize', fitMobileHomeFontSize);
+
     // Resolve TC epoch — a fixed wall-clock anchor so the timecode continues
     // across content-page refreshes, and only resets on a homepage refresh.
     let _tcEpoch = parseFloat(sessionStorage.getItem('tcEpoch'));
@@ -1674,6 +1719,7 @@
       let   goHomeSlideTimer = null;
       let   tabsTimer        = null;
       let   mobileBarsTimer  = null;
+      let   mobileExitTimer  = null;
 
       function showPage(id, preserveScroll = false) {
         // Deactivate all pages
@@ -1709,48 +1755,63 @@
         if (goHomeSlideTimer) { clearTimeout(goHomeSlideTimer); goHomeSlideTimer = null; }
         if (tabsTimer)        { clearTimeout(tabsTimer);        tabsTimer        = null; }
         if (mobileBarsTimer)  { clearTimeout(mobileBarsTimer);  mobileBarsTimer  = null; }
+        if (mobileExitTimer)  { clearTimeout(mobileExitTimer);  mobileExitTimer  = null; }
         frame.classList.remove('mobile-bar-exit');
         frame.classList.remove('mobile-snap-positions');
         frame.classList.remove('bars-retracting');
+        frame.classList.remove('mobile-home-out');
+        frame.classList.remove('mobile-labels-out');
         const alreadyInContent = frame.classList.contains('content-mode');
         const isMobile = window.matchMedia('(max-width: 640px)').matches;
         // Hide tabs and back button immediately
         tabsEl.classList.remove('tabs-ready');
         frameBack.classList.remove('back-ready');
-        // Keep chevron visible when switching between content pages — no re-animation
-        // Clean up game state if navigating away while game was open (e.g. browser back)
-        if (gameOpen) closeGame(false); // navigation handles history; don't double-back
+        if (gameOpen) closeGame(false);
         mobileNavBtn.classList.remove('game-return');
         if (!alreadyInContent) mobileNavBtn.classList.remove('nav-ready');
         if (!alreadyInContent) frame.classList.remove('mobile-bars-visible');
-        // Mobile fresh entry: fade all labels out immediately (step 1)
-        if (isMobile && !alreadyInContent) frame.classList.add('mobile-labels-out');
-        showPage(id, preserveScroll);
-        app.classList.add('content-open');
-        frame.classList.remove('prominent');
-        frame.classList.add('content-mode');
-        if (!alreadyInContent) {
-          frame.classList.add('content-transitioning');
-          setTimeout(() => frame.classList.remove('content-transitioning'), 400);
+
+        function slide() {
+          // Snap labels hidden before content-mode repositions them
+          if (isMobile && !alreadyInContent) frame.classList.add('mobile-labels-out');
+          showPage(id, preserveScroll);
+          app.classList.add('content-open');
+          frame.classList.remove('prominent');
+          frame.classList.add('content-mode');
+          if (!alreadyInContent) {
+            frame.classList.add('content-transitioning');
+            setTimeout(() => frame.classList.remove('content-transitioning'), 400);
+          }
+          if (pushHistory) history.pushState(null, '', '#' + id);
+          // Mobile: bars pop in after slide completes; desktop: bars appear immediately
+          if (!alreadyInContent) {
+            mobileBarsTimer = setTimeout(() => {
+              frame.classList.remove('mobile-labels-out');
+              frame.classList.add('mobile-bars-visible');
+              mobileBarsTimer = null;
+            }, isMobile ? MOBILE_BARS_MS : DESKTOP_BARS_MS);
+          }
+          // Mobile fresh entry: chevron after bars + labels settle; desktop: at slide end
+          const navDelay = (isMobile && !alreadyInContent) ? MOBILE_NAV_MS : SLIDE_MS;
+          tabsTimer = setTimeout(() => {
+            tabsEl.classList.add('tabs-ready');
+            frameBack.classList.add('back-ready');
+            if (!alreadyInContent) mobileNavBtn.classList.add('nav-ready');
+            tabsTimer = null;
+          }, navDelay);
         }
-        if (pushHistory) history.pushState(null, '', '#' + id);
-        // Mobile: bars pop in after slide completes (step 2); desktop: bars appear immediately
-        if (!alreadyInContent) {
-          mobileBarsTimer = setTimeout(() => {
-            frame.classList.remove('mobile-labels-out');
-            frame.classList.add('mobile-bars-visible');
-            mobileBarsTimer = null;
-          }, isMobile ? MOBILE_BARS_MS : DESKTOP_BARS_MS);
+
+        if (isMobile && !alreadyInContent) {
+          // Phase 1: fade labels, corners, frame lines out (0.35s) before slide
+          frame.classList.add('mobile-home-out');
+          mobileExitTimer = setTimeout(() => {
+            mobileExitTimer = null;
+            frame.classList.remove('mobile-home-out');
+            slide(); // Phase 2: slide content in
+          }, 350);
+        } else {
+          slide();
         }
-        // Mobile fresh entry: chevron pops in after bars + labels settle (step 3)
-        // Desktop / page-switching: everything at SLIDE_MS (slide duration)
-        const navDelay = (isMobile && !alreadyInContent) ? MOBILE_NAV_MS : SLIDE_MS;
-        tabsTimer = setTimeout(() => {
-          tabsEl.classList.add('tabs-ready');
-          frameBack.classList.add('back-ready');
-          if (!alreadyInContent) mobileNavBtn.classList.add('nav-ready');
-          tabsTimer = null;
-        }, navDelay);
       }
 
       function goHome(pushHistory = true) {
