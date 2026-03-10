@@ -1030,13 +1030,13 @@
     <div class="frame-line left"></div>
     <div class="frame-line right"></div>
 
-    <span class="frame-label tl">A · SDI-1 · 4.5K</span>
-    <span class="frame-label tc">S-Log3 › Rec.709</span>
-    <span class="frame-label tr"><span class="fps-val">23.98 FPS</span> · <span class="rec-dot">◆</span> <span class="rec-text">REC</span></span>
-    <span class="frame-label bl"><span id="frame-tc">01:02:14:07</span></span>
-    <span class="frame-label bc">F 4.2'  ·  T2.8  ·  35mm</span>
-    <span class="frame-label br">ISO 800  ·  180°  ·  3200K</span>
-    <span class="frame-label mobile-bot">F 4.2'  ·  T2.8  ·  35mm  ·  ISO 800  ·  180°  ·  3200K</span>
+    <span class="frame-label tl" id="lbl-tl">A · SDI-1 · 4.5K</span>
+    <span class="frame-label tc" id="lbl-tc">S-Log3 › Rec.709</span>
+    <span class="frame-label tr"><span class="fps-val" id="lbl-fps">23.98 FPS</span> · <span class="rec-dot">◆</span> <span class="rec-text">REC</span></span>
+    <span class="frame-label bl"><span id="frame-tc">01:00:00:00</span></span>
+    <span class="frame-label bc" id="lbl-bc">F 4.2'  ·  T2.8  ·  35mm</span>
+    <span class="frame-label br" id="lbl-br">ISO 800  ·  180°  ·  3200K</span>
+    <span class="frame-label mobile-bot" id="lbl-mob">F 4.2'  ·  T2.8  ·  35mm  ·  ISO 800  ·  180°  ·  3200K</span>
     <button class="frame-back" id="frame-back">
       <div class="back-inner">
         <div class="back-face back-face-home"><span class="back-chevron">&#8249;</span> Home</div>
@@ -1537,17 +1537,65 @@
   </div>
 
   <script>
+    // ── Camera presets ────────────────────────────────
+    const CAM_PRESETS = [
+      { sdi:'A · SDI-1 · 6K',   gamma:'S-Log3 › Rec.709', fps:48,    iso:100,  temp:5600, shutter:90,  focus:"18'",  tstop:'T8',   lens:'21mm',  tc:'01:00:00:00' },
+      { sdi:'A · SDI-2 · 4K',   gamma:'Log C › Rec.709',  fps:24,    iso:400,  temp:4700, shutter:180, focus:"10'",  tstop:'T4',   lens:'35mm',  tc:'02:14:33:12' },
+      { sdi:'B · SDI-1 · 4.5K', gamma:'S-Log3 › Rec.709', fps:23.98, iso:800,  temp:3200, shutter:180, focus:"5.5'", tstop:'T2.8', lens:'50mm',  tc:'01:47:22:08' },
+      { sdi:'A · SDI-1 · 4K',   gamma:'S-Log3 › Rec.709', fps:24,    iso:400,  temp:3500, shutter:180, focus:"14'",  tstop:'T2',   lens:'135mm', tc:'03:02:15:21' },
+      { sdi:'B · SDI-2 · 2K',   gamma:'V-Log › Rec.709',  fps:25,    iso:3200, temp:3700, shutter:180, focus:"4'",   tstop:'T1.4', lens:'32mm',  tc:'01:23:44:16' },
+      { sdi:'A · SDI-1 · 4K',   gamma:'Log C › Rec.709',  fps:23.98, iso:400,  temp:4300, shutter:180, focus:"6'",   tstop:'T4',   lens:'40mm',  tc:'02:51:07:04' },
+      { sdi:'B · SDI-2 · 4.5K', gamma:'S-Log3 › Rec.709', fps:24,    iso:1600, temp:2700, shutter:180, focus:"3.5'", tstop:'T1.4', lens:'85mm',  tc:'01:08:19:23' },
+      { sdi:'A · SDI-2 · 6K',   gamma:'Log C › Rec.709',  fps:48,    iso:200,  temp:5600, shutter:90,  focus:"25'",  tstop:'T5.6', lens:'200mm', tc:'04:15:42:09' },
+      { sdi:'A · SDI-1 · 4K',   gamma:'Log C › Rec.709',  fps:25,    iso:200,  temp:5600, shutter:180, focus:"9'",   tstop:'T5.6', lens:'50mm',  tc:'02:33:58:17' },
+      { sdi:'B · SDI-3 · 2K',   gamma:'V-Log › Rec.709',  fps:23.98, iso:2500, temp:3700, shutter:180, focus:"20'",  tstop:'T1.4', lens:'135mm', tc:'01:52:11:03' },
+    ];
+    const _contentPages = ['about','credits','services','gallery','contact','game'];
+    const _onContent    = _contentPages.includes(location.hash.replace('#',''));
+    const _stored       = parseInt(sessionStorage.getItem('camPreset'), 10);
+    let   _idx;
+    if (!_onContent) {
+      // Homepage — always pick a fresh preset and save it
+      _idx = Math.floor(Math.random() * CAM_PRESETS.length);
+      sessionStorage.setItem('camPreset', _idx);
+    } else if (!isNaN(_stored)) {
+      // Content page — reuse the preset from this session
+      _idx = _stored;
+    } else {
+      // Direct URL to content page (no session yet) — pick and save
+      _idx = Math.floor(Math.random() * CAM_PRESETS.length);
+      sessionStorage.setItem('camPreset', _idx);
+    }
+    const CAM   = CAM_PRESETS[_idx];
+    const tcFps = Math.round(CAM.fps);
+    document.getElementById('lbl-tl').textContent  = CAM.sdi;
+    document.getElementById('lbl-tc').textContent  = CAM.gamma;
+    document.getElementById('lbl-fps').textContent = CAM.fps + ' FPS';
+    document.getElementById('lbl-bc').textContent  = `F ${CAM.focus}  ·  ${CAM.tstop}  ·  ${CAM.lens}`;
+    document.getElementById('lbl-br').textContent  = `ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
+    document.getElementById('lbl-mob').textContent = `F ${CAM.focus}  ·  ${CAM.tstop}  ·  ${CAM.lens}  ·  ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
+
+    // Resolve TC epoch — a fixed wall-clock anchor so the timecode continues
+    // across content-page refreshes, and only resets on a homepage refresh.
+    let _tcEpoch = parseFloat(sessionStorage.getItem('tcEpoch'));
+    if (!_onContent || isNaN(_tcEpoch)) {
+      // Homepage (always) or no stored epoch: compute from preset TC start
+      const [th, tm, ts, tf] = CAM.tc.split(':').map(Number);
+      const startFrame = ((th * 3600) + (tm * 60) + ts) * tcFps + tf;
+      _tcEpoch = Date.now() - (startFrame / tcFps * 1000);
+      sessionStorage.setItem('tcEpoch', _tcEpoch);
+    }
+
     // ── Running timecode ──────────────────────────────
     (function () {
       const el    = document.getElementById('frame-tc');
       if (!el) return;
-      const FPS   = 24;
-      const start = ((1 * 3600) + (2 * 60) + 14) * FPS + 7;
-      const t0    = performance.now();
+      const FPS   = tcFps;
+      const epoch = _tcEpoch; // wall-clock ms when TC was at frame 0
       const pad   = n => String(n).padStart(2, '0');
       let rafId;
       function tick() {
-        const f = start + Math.floor((performance.now() - t0) / 1000 * FPS);
+        const f = Math.floor((Date.now() - epoch) / 1000 * FPS);
         const s = Math.floor(f / FPS);
         el.textContent = `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(f%FPS)}`;
         rafId = requestAnimationFrame(tick);
@@ -1931,6 +1979,8 @@
         }, 1050); // 0.5s delay + 0.5s draw + small buffer
       }
     })();
+
+
   </script>
 
 </body>
