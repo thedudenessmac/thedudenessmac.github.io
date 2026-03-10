@@ -146,6 +146,7 @@
     .frame-label.br { bottom: 16px; right: 86px; transform-origin: bottom right; text-align: right; }
     .frame-label.mobile-bot { display: none; }
     .ls-frame-btm { display: none; }
+    .ls-frame-top { display: none; }
     @keyframes rec-blink {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.25; }
@@ -985,7 +986,61 @@
       .home-panel { overflow-y: auto; -webkit-overflow-scrolling: touch; }
       /* Let hero be its natural height; top-align so overflow is reachable;
          pad enough to clear the fixed frame labels and bottom corners */
-      #hero { min-height: unset; align-items: flex-start; padding-top: 64px; padding-bottom: 72px; }
+      #hero { min-height: unset; align-items: flex-start; padding-top: 12px; padding-bottom: 72px; }
+
+      /* Scrollable top frame overlay */
+      .ls-frame-top {
+        display: block;
+        position: relative;
+        height: 52px;
+      }
+      .ls-frame-top::before,
+      .ls-frame-top::after {
+        content: '';
+        position: absolute;
+        top: 8px;
+        width: 52px; height: 52px;
+      }
+      .ls-frame-top::before {
+        left: 16px;
+        border-top: 6px solid var(--accent);
+        border-left: 6px solid var(--accent);
+      }
+      .ls-frame-top::after {
+        right: 16px;
+        border-top: 6px solid var(--accent);
+        border-right: 6px solid var(--accent);
+      }
+      .ls-top-line {
+        position: absolute;
+        top: 8px; left: 16px; right: 16px;
+        height: 1px;
+        background: rgba(200, 133, 14, 0.22);
+      }
+      .ls-top-label {
+        position: absolute;
+        top: 20px;
+        font-family: var(--mono);
+        font-size: clamp(10px, 1.5vw, 13px);
+        font-weight: 400;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: rgba(237, 234, 228, 0.85);
+        white-space: nowrap;
+      }
+      .ls-top-label.ls-tl { left: 86px; font-variant-numeric: tabular-nums; }
+      .ls-top-label.ls-tc { display: none; }
+      .ls-top-label.ls-tr { right: 86px; text-align: right; }
+      .ls-top-label.ls-bl { display: none; left: 44px; font-variant-numeric: tabular-nums; }
+      /* Narrow phones: swap label positions to match mobile prominent layout */
+      @media (max-width: 640px) {
+        .ls-frame-top { height: 40px; }
+        .ls-frame-top::before, .ls-frame-top::after { width: 22px; height: 22px; }
+        .ls-top-label.ls-tl { display: none; }
+        .ls-top-label.ls-tc { display: none; }
+        .ls-top-label.ls-tr { right: 44px; }
+        .ls-top-label.ls-bl { display: block; }
+      }
       /* Hiding moved to JS class — see body.landscape-mobile rule below */
 
       /* Scrollable bottom frame overlay */
@@ -1036,6 +1091,44 @@
         .ls-frame-btm { height: 48px; }
         .ls-frame-btm::before,
         .ls-frame-btm::after { width: 22px; height: 22px; }
+      }
+
+      /* Content-mode font size — same for all labels including mobile-bot */
+      .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
+
+      /* Content-mode label repositioning — mirrors the max-width:640px rules
+         so wider landscape phones get the same bar layout */
+      .frame.content-mode .frame-label.bl {
+        bottom: auto; top: calc(var(--bar-h) / 2); left: 110px; right: auto;
+        transform: translateY(-50%); opacity: 0; animation: none;
+      }
+      .frame.mobile-bars-visible.content-mode .frame-label.bl {
+        opacity: 1; transition: opacity 0.4s ease 0.65s;
+      }
+      .frame.content-mode .frame-label.tr {
+        top: calc(var(--bar-h) / 2); right: 16px; transform: translateY(-50%);
+        opacity: 0; animation: none;
+      }
+      .frame.mobile-bars-visible.content-mode .frame-label.tr {
+        opacity: 1; transition: opacity 0.4s ease 0.65s;
+      }
+
+      /* Content-mode bottom bar: show mobile-bot for wider phones where the
+         max-width:640px rule doesn't apply */
+      .frame.content-mode .frame-label.mobile-bot {
+        display: block;
+        bottom: 17px; left: 0; right: 0;
+        text-align: center;
+        font-size: clamp(11px, 2.8vw, 13px);
+        white-space: nowrap;
+        opacity: 0;
+        animation: none;
+        transform: none;
+        color: rgba(237, 234, 228, 0.85);
+      }
+      .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot {
+        opacity: 1;
+        transition: opacity 0.4s ease 0.65s;
       }
 
       /* Nav dropdown: cap to available height below the top bar and allow scroll */
@@ -1171,6 +1264,14 @@
 
   <!-- ── Home panel ── -->
   <div class="home-panel" id="home-panel">
+  <!-- Landscape top frame — scrolls with content, shown only in landscape -->
+  <div class="ls-frame-top" aria-hidden="true">
+    <div class="ls-top-line"></div>
+    <span class="ls-top-label ls-tl" id="lbl-tl-ls"></span>
+    <span class="ls-top-label ls-tc" id="lbl-tc-ls"></span>
+    <span class="ls-top-label ls-tr" id="lbl-tr-ls"></span>
+    <span class="ls-top-label ls-bl" id="lbl-bl-ls"></span>
+  </div>
   <section id="hero" class="hero-intro">
     <div class="container">
       <div class="hero-grid">
@@ -1682,6 +1783,12 @@
     document.getElementById('lbl-mob').textContent = _mobText;
     const _lsEl = document.getElementById('lbl-mob-ls');
     if (_lsEl) _lsEl.textContent = _mobText;
+    // Populate landscape top overlay labels
+    const _lsTl = document.getElementById('lbl-tl-ls');
+    const _lsTc = document.getElementById('lbl-tc-ls');
+    const _lsTr = document.getElementById('lbl-tr-ls');
+    if (_lsTl) _lsTl.textContent = document.getElementById('frame-tc').textContent;
+    if (_lsTr) _lsTr.innerHTML = document.querySelector('.frame-label.tr').innerHTML;
 
     // Dynamic font scaling for mobile homepage prominent labels
     function fitMobileHomeFontSize() {
@@ -1706,25 +1813,56 @@
     fitMobileHomeFontSize();
     window.addEventListener('resize', fitMobileHomeFontSize);
 
-    // Landscape mobile: hide fixed bottom frame elements, show scrollable copies
+    // Landscape mobile: hide all fixed frame elements, replaced by scrollable copies
     const _lsBtmEls = [
+      // Bottom
       document.querySelector('.frame .corner.bl'),
       document.querySelector('.frame .corner.br'),
       document.querySelector('.frame .frame-line.bottom'),
-      document.querySelector('.frame .frame-label.bl'),  // timecode (at bottom on wide, top on narrow)
+      document.querySelector('.frame .frame-label.bl'),
       document.getElementById('lbl-bc'),
       document.getElementById('lbl-br'),
-      document.getElementById('lbl-mob')
+      document.getElementById('lbl-mob'),
+      // Top
+      document.querySelector('.frame .corner.tl'),
+      document.querySelector('.frame .corner.tr'),
+      document.querySelector('.frame .frame-line.top'),
+      document.getElementById('lbl-tl'),
+      document.getElementById('lbl-tc'),
+      document.querySelector('.frame .frame-label.tr'),
     ];
+    // Elements that must show in content-mode bars (timecode, FPS/REC, mobile-bot)
+    const _lsContentEls = new Set([
+      document.querySelector('.frame .frame-label.bl'),
+      document.querySelector('.frame .frame-label.tr'),
+      document.getElementById('lbl-mob'),
+    ]);
+    const _lsMobBot = document.getElementById('lbl-mob');
     function updateLandscapeMobile() {
       const isLand = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
       document.body.classList.toggle('landscape-mobile', isLand);
-      // Only hide bottom elements on the homepage; restore them for content pages
-      const hide = isLand && !frame.classList.contains('content-mode');
+      const inContent  = frame.classList.contains('content-mode');
+      const hasBars    = frame.classList.contains('mobile-bars-visible');
       _lsBtmEls.forEach(el => {
         if (!el) return;
-        if (hide) el.style.setProperty('display', 'none', 'important');
-        else el.style.removeProperty('display');
+        if (!isLand) {
+          el.style.removeProperty('display');
+          el.style.removeProperty('opacity');
+          el.style.removeProperty('visibility');
+        } else if (inContent && _lsContentEls.has(el)) {
+          el.style.setProperty('display', 'block', 'important');
+          if (el === _lsMobBot) {
+            // Must use !important to beat body.landscape-mobile rule which has opacity/visibility !important
+            el.style.setProperty('opacity', hasBars ? '1' : '0', 'important');
+            el.style.setProperty('visibility', hasBars ? 'visible' : 'hidden', 'important');
+          }
+        } else {
+          el.style.setProperty('display', 'none', 'important');
+          if (el === _lsMobBot) {
+            el.style.removeProperty('opacity');
+            el.style.removeProperty('visibility');
+          }
+        }
       });
     }
     updateLandscapeMobile();
@@ -1754,7 +1892,12 @@
       function tick() {
         const f = Math.floor((Date.now() - epoch) / 1000 * FPS);
         const s = Math.floor(f / FPS);
-        el.textContent = `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(f%FPS)}`;
+        const _tcStr = `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(f%FPS)}`;
+        el.textContent = _tcStr;
+        const _elLs = document.getElementById('lbl-bl-ls');
+        if (_elLs) _elLs.textContent = _tcStr;
+        const _elLsTl = document.getElementById('lbl-tl-ls');
+        if (_elLsTl) _elLsTl.textContent = _tcStr;
         rafId = requestAnimationFrame(tick);
       }
       // Pause loop when tab is hidden; resume when visible again
@@ -1874,7 +2017,7 @@
         frame.classList.remove('mobile-home-out');
         frame.classList.remove('mobile-labels-out');
         const alreadyInContent = frame.classList.contains('content-mode');
-        const isMobile = window.matchMedia('(max-width: 640px)').matches;
+        const isMobile = window.matchMedia('(max-width: 640px)').matches || window.matchMedia('(orientation: landscape) and (max-height: 500px)').matches;
         // Hide tabs and back button immediately
         tabsEl.classList.remove('tabs-ready');
         frameBack.classList.remove('back-ready');
@@ -1927,7 +2070,7 @@
       }
 
       function goHome(pushHistory = true) {
-        const isMobile = window.matchMedia('(max-width: 640px)').matches;
+        const isMobile = window.matchMedia('(max-width: 640px)').matches || window.matchMedia('(orientation: landscape) and (max-height: 500px)').matches;
         // Step 1: chevron pops left, tabs/back retract immediately
         tabsEl.classList.remove('tabs-ready');
         frameBack.classList.remove('back-ready');
