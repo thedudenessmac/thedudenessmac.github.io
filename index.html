@@ -604,8 +604,8 @@
 
     /* ── Frame: content mode ── */
     .frame.content-mode .frame-bar   { height: var(--bar-h); opacity: 1; }
-    /* Desktop goHome: retract bars simultaneously with the slide */
-    .frame.bars-retracting .frame-bar { height: 0 !important; opacity: 0 !important; transition: height 0.9s cubic-bezier(0.87, 0, 0.13, 1), opacity 0.7s ease, transform 0.9s cubic-bezier(0.87, 0, 0.13, 1); }
+    /* Desktop goHome: bars hold position during slide, then fade out after */
+    .frame.bars-retracting .frame-bar { height: var(--bar-h) !important; opacity: 0 !important; transition: opacity 0.5s ease !important; }
 
     /* Bar inner edge lines — crisp separation from content */
     .frame-bar.top    { border-bottom: 1px solid rgba(200,133,14,0.35); }
@@ -770,7 +770,7 @@
     }
     .mobile-nav-menu button:last-child { border-bottom: none; }
     .mobile-nav-menu button:active { background: rgba(200,133,14,0.08); }
-    .mobile-nav-menu button.active  { color: var(--accent); border-left: 3px solid var(--accent); padding-left: 41px; }
+    .mobile-nav-menu button.active  { color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
     .mobile-nav-menu .mobile-nav-home { color: rgba(237,234,228,0.7); padding-left: 22px; }
     .nav-home-chev { display: inline-block; width: 22px; font-size: 18px; }
 
@@ -1803,17 +1803,21 @@
             }, GOHO_BARS_MS);
           }, GOHO_CHEVRON_MS);
         } else {
-          // Desktop: bars retract simultaneously with the slide
-          frame.classList.add('bars-retracting');
+          // Desktop: bars stay during slide, fade after
           app.classList.remove('content-open');
           activePage = null;
           if (pushHistory) history.pushState(null, '', location.pathname);
           goHomeTimer = setTimeout(() => {
+            // Slide complete — fade bars while labels shift to prominent
+            frame.classList.add('bars-retracting');
             frame.classList.remove('content-mode');
             frame.classList.remove('mobile-bars-visible');
-            frame.classList.remove('bars-retracting');
             frame.classList.add('prominent');
             goHomeTimer = null;
+            goHomeBarsTimer = setTimeout(() => {
+              frame.classList.remove('bars-retracting');
+              goHomeBarsTimer = null;
+            }, 600);
           }, SLIDE_MS);
         }
       }
