@@ -63,6 +63,44 @@
       from { opacity: 1; }
       to   { opacity: 0; }
     }
+    @keyframes corner-retract {
+      from { width: 36px; height: 36px; }
+      to   { width: 0;    height: 0; }
+    }
+    @keyframes corner-retract-lg {
+      from { width: 52px; height: 52px; }
+      to   { width: 0;    height: 0; }
+    }
+
+    /* ── Mobile transition helpers (on body — true common ancestor of both
+       .frame corners/labels and #app's ls-frame-top/btm overlays) ── */
+    /* home→content phase 1: labels fade, corners retract, overlays/lines fade */
+    body.mobile-home-out .frame-label { animation: label-fade-out 0.35s ease forwards !important; }
+    body.mobile-home-out .corner      { animation: corner-retract 0.35s ease forwards !important; }
+    body.mobile-home-out .frame-line,
+    body.mobile-home-out .ls-frame-top,
+    body.mobile-home-out .ls-frame-btm { opacity: 0 !important; transition: opacity 0.35s ease !important; }
+    /* landscape overlay pseudo-element corners retract — use animation (not transition)
+       because corner-draw-sm animation controls width/height and blocks transitions */
+    body.mobile-home-out .ls-frame-top::before,
+    body.mobile-home-out .ls-frame-top::after,
+    body.mobile-home-out .ls-frame-btm::before,
+    body.mobile-home-out .ls-frame-btm::after { animation: corner-retract 0.35s ease forwards !important; }
+    /* phase 2: lock all home-overlay elements at their retracted state so nothing
+       snaps back when mobile-home-out is removed (both classes applied in same JS tick) */
+    body.mobile-labels-out .frame-label { animation: none !important; opacity: 0 !important; }
+    body.mobile-labels-out .corner { animation: none !important; width: 0 !important; height: 0 !important; }
+    body.mobile-labels-out .frame-line,
+    body.mobile-labels-out .ls-frame-top,
+    body.mobile-labels-out .ls-frame-btm { opacity: 0 !important; }
+    body.mobile-labels-out .ls-frame-top::before,
+    body.mobile-labels-out .ls-frame-top::after,
+    body.mobile-labels-out .ls-frame-btm::before,
+    body.mobile-labels-out .ls-frame-btm::after { animation: none !important; width: 0 !important; height: 0 !important; }
+    /* snap label positions without transition during goHome reset */
+    body.mobile-snap-positions .frame-label { transition: none !important; }
+    /* reset label-fade animation via class */
+    body.labels-animation-reset .frame-label { animation: none !important; }
     @keyframes hero-fadein {
       from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -916,16 +954,8 @@
       .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
 
 
-      /* Phase 1 — fade labels, corners and frame lines out before the slide */
-      .frame.mobile-home-out .frame-label,
-      .frame.mobile-home-out .corner,
-      .frame.mobile-home-out .frame-line { opacity: 0 !important; transition: opacity 0.35s ease !important; }
-      /* Phase 2 — instantly snap labels hidden once content-mode repositions them */
-      .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: none !important; }
-      /* Snap label positions instantly before fade-in (used during goHome step 4) */
-      .frame.mobile-snap-positions .frame-label { transition: none !important; }
-      /* Reset label-fade animation via class (avoids leaving inline styles on elements) */
-      .frame.labels-animation-reset .frame-label { animation: none !important; }
+      /* (mobile-home-out / mobile-labels-out / mobile-snap-positions / labels-animation-reset
+          rules are defined globally above — no duplicate needed here) */
       /* Completely suppress bars (height, opacity, border) until mobile-bars-visible fires —
          overrides the desktop content-mode rule that would otherwise show them during the slide */
       .frame.content-mode .frame-bar { height: 0 !important; opacity: 0 !important; border: none !important; }
@@ -984,9 +1014,9 @@
     @media (orientation: landscape) and (max-height: 500px) {
       /* Allow home panel to scroll instead of clipping */
       .home-panel { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-      /* Let hero be its natural height; top-align so overflow is reachable;
-         pad enough to clear the fixed frame labels and bottom corners */
-      #hero { min-height: unset; align-items: flex-start; padding-top: 12px; padding-bottom: 72px; }
+      /* Hero min-height ensures ls-frame-btm starts at the viewport bottom so the
+         fixed side lines connect to it; content taller than the viewport scrolls normally */
+      #hero { min-height: calc(100dvh - 52px - 68px); align-items: flex-start; padding-top: 12px; padding-bottom: 24px; }
 
       /* Scrollable top frame overlay */
       .ls-frame-top {
@@ -999,7 +1029,8 @@
         content: '';
         position: absolute;
         top: 8px;
-        width: 36px; height: 36px;
+        width: 0; height: 0;
+        animation: corner-draw-sm 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
       }
       .ls-frame-top::before {
         left: 16px;
@@ -1035,7 +1066,6 @@
       /* Narrow phones: swap label positions to match mobile prominent layout */
       @media (max-width: 640px) {
         .ls-frame-top { height: 52px; }
-        .ls-frame-top::before, .ls-frame-top::after { width: 36px; height: 36px; }
         .ls-top-label.ls-tl { display: none; }
         .ls-top-label.ls-tc { display: none; }
         .ls-top-label.ls-tr { right: 60px; }
@@ -1054,7 +1084,8 @@
         content: '';
         position: absolute;
         bottom: 8px;
-        width: 36px; height: 36px;
+        width: 0; height: 0;
+        animation: corner-draw-sm 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
       }
       .ls-frame-btm::before {
         left: 16px;
@@ -1086,12 +1117,16 @@
         white-space: nowrap;
       }
 
-      /* Narrow phones use 36px corners — match corner-draw-sm */
+      /* Narrow phones — animation already handles corner size via corner-draw-sm */
       @media (max-width: 640px) {
         .ls-frame-btm { height: 56px; }
-        .ls-frame-btm::before,
-        .ls-frame-btm::after { width: 36px; height: 36px; }
+        #hero { min-height: calc(100dvh - 52px - 56px); }
       }
+
+      /* Override fixed .frame side-lines so wide landscape phones (>640px) align
+         with ls-frame corner positions (16px from edge, 8px from top/bottom) */
+      .frame-line.left  { left: 16px;  top: 8px; bottom: 8px; }
+      .frame-line.right { right: 16px; top: 8px; bottom: 8px; }
 
       /* Content-mode font size — same for all labels including mobile-bot */
       .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
@@ -1131,13 +1166,6 @@
         transition: opacity 0.4s ease 0.65s;
       }
 
-      /* Transition helpers — mirrors max-width:640px rules for wider landscape phones */
-      .frame.mobile-home-out .frame-label,
-      .frame.mobile-home-out .corner,
-      .frame.mobile-home-out .frame-line { opacity: 0 !important; transition: opacity 0.35s ease !important; }
-      .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: none !important; }
-      .frame.mobile-snap-positions .frame-label { transition: none !important; }
-      .frame.labels-animation-reset .frame-label { animation: none !important; }
       /* Hide desktop nav, show mobile nav */
       .frame.content-mode .frame-back { display: none !important; }
       .frame.content-mode .frame-tabs { display: none !important; }
@@ -1163,15 +1191,16 @@
       }
     }
 
-    /* Landscape mobile: hide fixed bottom frame elements (replaced by scrollable copies) */
+    /* Landscape mobile: hide fixed .frame bottom corners/line — replaced by ls-frame-btm */
     body.landscape-mobile .corner.bl,
     body.landscape-mobile .corner.br,
-    body.landscape-mobile .frame-line.bottom,
-    body.landscape-mobile .frame-label.mobile-bot {
+    body.landscape-mobile .frame-line.bottom {
       display: none !important;
       opacity: 0 !important;
       visibility: hidden !important;
     }
+    /* Hide mobile-bot on landscape homepage only — CSS manages it, no JS needed */
+    body.landscape-mobile .frame.prominent .frame-label.mobile-bot { display: none !important; }
 
     /* Freeze all transitions/animations during instant state restore */
     .no-transition, .no-transition * {
@@ -1839,14 +1868,13 @@
 
     // Landscape mobile: hide all fixed frame elements, replaced by scrollable copies
     const _lsBtmEls = [
-      // Bottom
+      // Bottom — fixed frame elements replaced by ls-frame overlays in landscape
       document.querySelector('.frame .corner.bl'),
       document.querySelector('.frame .corner.br'),
       document.querySelector('.frame .frame-line.bottom'),
       document.querySelector('.frame .frame-label.bl'),
       document.getElementById('lbl-bc'),
       document.getElementById('lbl-br'),
-      document.getElementById('lbl-mob'),
       // Top
       document.querySelector('.frame .corner.tl'),
       document.querySelector('.frame .corner.tr'),
@@ -1855,18 +1883,16 @@
       document.getElementById('lbl-tc'),
       document.querySelector('.frame .frame-label.tr'),
     ];
-    // Elements that must show in content-mode bars (timecode, FPS/REC, mobile-bot)
+    // Elements that must remain visible in content-mode bars (timecode bl, FPS/REC tr)
+    // lbl-mob (.frame-label.mobile-bot) is now CSS-managed via content-mode rules
     const _lsContentEls = new Set([
       document.querySelector('.frame .frame-label.bl'),
       document.querySelector('.frame .frame-label.tr'),
-      document.getElementById('lbl-mob'),
     ]);
-    const _lsMobBot = document.getElementById('lbl-mob');
     function updateLandscapeMobile() {
       const isLand = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
       document.body.classList.toggle('landscape-mobile', isLand);
-      const inContent  = frame.classList.contains('content-mode');
-      const hasBars    = frame.classList.contains('mobile-bars-visible');
+      const inContent = frame.classList.contains('content-mode');
       _lsBtmEls.forEach(el => {
         if (!el) return;
         if (!isLand) {
@@ -1875,17 +1901,8 @@
           el.style.removeProperty('visibility');
         } else if (inContent && _lsContentEls.has(el)) {
           el.style.setProperty('display', 'block', 'important');
-          if (el === _lsMobBot) {
-            // Must use !important to beat body.landscape-mobile rule which has opacity/visibility !important
-            el.style.setProperty('opacity', hasBars ? '1' : '0', 'important');
-            el.style.setProperty('visibility', hasBars ? 'visible' : 'hidden', 'important');
-          }
         } else {
           el.style.setProperty('display', 'none', 'important');
-          if (el === _lsMobBot) {
-            el.style.removeProperty('opacity');
-            el.style.removeProperty('visibility');
-          }
         }
       });
     }
@@ -2036,10 +2053,10 @@
         if (mobileBarsTimer)  { clearTimeout(mobileBarsTimer);  mobileBarsTimer  = null; }
         if (mobileExitTimer)  { clearTimeout(mobileExitTimer);  mobileExitTimer  = null; }
         frame.classList.remove('mobile-bar-exit');
-        frame.classList.remove('mobile-snap-positions');
+        document.body.classList.remove('mobile-snap-positions');
         frame.classList.remove('bars-retracting');
-        frame.classList.remove('mobile-home-out');
-        frame.classList.remove('mobile-labels-out');
+        document.body.classList.remove('mobile-home-out');
+        document.body.classList.remove('mobile-labels-out');
         const alreadyInContent = frame.classList.contains('content-mode');
         const isMobile = window.matchMedia('(max-width: 640px)').matches || window.matchMedia('(orientation: landscape) and (max-height: 500px)').matches;
         // Hide tabs and back button immediately
@@ -2052,7 +2069,7 @@
 
         function slide() {
           // Snap labels hidden before content-mode repositions them
-          if (isMobile && !alreadyInContent) frame.classList.add('mobile-labels-out');
+          if (isMobile && !alreadyInContent) document.body.classList.add('mobile-labels-out');
           showPage(id, preserveScroll);
           app.classList.add('content-open');
           frame.classList.remove('prominent');
@@ -2065,7 +2082,7 @@
           // Mobile: bars pop in after slide completes; desktop: bars appear immediately
           if (!alreadyInContent) {
             mobileBarsTimer = setTimeout(() => {
-              frame.classList.remove('mobile-labels-out');
+              document.body.classList.remove('mobile-labels-out');
               frame.classList.add('mobile-bars-visible');
               mobileBarsTimer = null;
             }, isMobile ? MOBILE_BARS_MS : DESKTOP_BARS_MS);
@@ -2081,11 +2098,11 @@
         }
 
         if (isMobile && !alreadyInContent) {
-          // Phase 1: fade labels, corners, frame lines out (0.35s) before slide
-          frame.classList.add('mobile-home-out');
+          // Phase 1: fade labels, corners, frame lines and landscape overlays out (0.35s)
+          document.body.classList.add('mobile-home-out');
           mobileExitTimer = setTimeout(() => {
             mobileExitTimer = null;
-            frame.classList.remove('mobile-home-out');
+            document.body.classList.remove('mobile-home-out');
             slide(); // Phase 2: slide content in
           }, 350);
         } else {
@@ -2108,7 +2125,7 @@
 
         if (isMobile) {
           // Hide labels immediately so they don't float during bar retraction
-          frame.classList.add('mobile-labels-out');
+          document.body.classList.add('mobile-labels-out');
           // Step 2: after chevron animation (~0.35s), retract bars
           goHomeBarsTimer = setTimeout(() => {
             frame.classList.add('mobile-bar-exit');    // restore bar size so translateY can animate
@@ -2125,18 +2142,18 @@
               goHomeTimer = setTimeout(() => {
                 // Snap all labels to prominent positions while still hidden,
                 // then fade them all in together in the next frame
-                frame.classList.add('mobile-snap-positions');
+                document.body.classList.add('mobile-snap-positions');
                 frame.classList.remove('content-mode');
                 frame.classList.add('prominent');
                 goHomeTimer = null;
                 requestAnimationFrame(() => {
                   requestAnimationFrame(() => {
-                    frame.classList.remove('mobile-snap-positions');
+                    document.body.classList.remove('mobile-snap-positions');
                     // Reset label-fade via class (no inline styles left on elements)
-                    frame.classList.add('labels-animation-reset');
+                    document.body.classList.add('labels-animation-reset');
                     frame.offsetHeight; // force reflow so browser sees animation reset
-                    frame.classList.remove('labels-animation-reset');
-                    frame.classList.remove('mobile-labels-out');
+                    document.body.classList.remove('labels-animation-reset');
+                    document.body.classList.remove('mobile-labels-out');
                   });
                 });
               }, SLIDE_MS);
