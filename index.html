@@ -145,6 +145,7 @@
     .frame-label.bc { bottom: 16px; left: 0; right: 0; text-align: center; transform-origin: bottom center; }
     .frame-label.br { bottom: 16px; right: 86px; transform-origin: bottom right; text-align: right; }
     .frame-label.mobile-bot { display: none; }
+    .ls-frame-btm { display: none; }
     @keyframes rec-blink {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.25; }
@@ -985,6 +986,74 @@
       /* Let hero be its natural height; top-align so overflow is reachable;
          pad enough to clear the fixed frame labels and bottom corners */
       #hero { min-height: unset; align-items: flex-start; padding-top: 64px; padding-bottom: 72px; }
+      /* Hiding moved to JS class — see body.landscape-mobile rule below */
+
+      /* Scrollable bottom frame overlay */
+      .ls-frame-btm {
+        display: block;
+        position: relative;
+        height: 68px;
+      }
+      .ls-frame-btm::before,
+      .ls-frame-btm::after {
+        content: '';
+        position: absolute;
+        bottom: 8px;
+        width: 52px; height: 52px;
+      }
+      .ls-frame-btm::before {
+        left: 16px;
+        border-bottom: 6px solid var(--accent);
+        border-left: 6px solid var(--accent);
+      }
+      .ls-frame-btm::after {
+        right: 16px;
+        border-bottom: 6px solid var(--accent);
+        border-right: 6px solid var(--accent);
+      }
+      .ls-btm-line {
+        position: absolute;
+        bottom: 8px; left: 16px; right: 16px;
+        height: 1px;
+        background: rgba(200, 133, 14, 0.22);
+      }
+      .ls-btm-label {
+        position: absolute;
+        bottom: 20px; left: 0; right: 0;
+        padding: 0 44px;
+        text-align: center;
+        font-family: var(--mono);
+        font-size: clamp(11px, 2.8vw, 13px);
+        font-weight: 400;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: rgba(237, 234, 228, 0.85);
+        white-space: nowrap;
+      }
+
+      /* Narrow phones use 22px corners — match corner-draw-sm */
+      @media (max-width: 640px) {
+        .ls-frame-btm { height: 48px; }
+        .ls-frame-btm::before,
+        .ls-frame-btm::after { width: 22px; height: 22px; }
+      }
+
+      /* Nav dropdown: cap to available height below the top bar and allow scroll */
+      .mobile-nav-menu.menu-open {
+        max-height: calc(100dvh - var(--bar-h));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+
+    /* Landscape mobile: hide fixed bottom frame elements (replaced by scrollable copies) */
+    body.landscape-mobile .corner.bl,
+    body.landscape-mobile .corner.br,
+    body.landscape-mobile .frame-line.bottom,
+    body.landscape-mobile .frame-label.mobile-bot {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
     }
 
     /* Freeze all transitions/animations during instant state restore */
@@ -1122,6 +1191,11 @@
       </div>
     </div>
   </section>
+  <!-- Landscape bottom frame — scrolls with content, shown only in landscape -->
+  <div class="ls-frame-btm" aria-hidden="true">
+    <div class="ls-btm-line"></div>
+    <span class="ls-btm-label" id="lbl-mob-ls"></span>
+  </div>
   </div><!-- /home-panel -->
 
   <!-- ── Content panel ── -->
@@ -1604,7 +1678,10 @@
     document.getElementById('lbl-fps').textContent = CAM.fps + ' FPS';
     document.getElementById('lbl-bc').textContent  = `F ${CAM.focus}  ·  ${CAM.tstop}  ·  ${CAM.lens}`;
     document.getElementById('lbl-br').textContent  = `ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
-    document.getElementById('lbl-mob').textContent = `F ${CAM.focus}  ·  ${CAM.tstop}  ·  ${CAM.lens}  ·  ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
+    const _mobText = `F ${CAM.focus}  ·  ${CAM.tstop}  ·  ${CAM.lens}  ·  ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
+    document.getElementById('lbl-mob').textContent = _mobText;
+    const _lsEl = document.getElementById('lbl-mob-ls');
+    if (_lsEl) _lsEl.textContent = _mobText;
 
     // Dynamic font scaling for mobile homepage prominent labels
     function fitMobileHomeFontSize() {
@@ -1628,6 +1705,32 @@
     }
     fitMobileHomeFontSize();
     window.addEventListener('resize', fitMobileHomeFontSize);
+
+    // Landscape mobile: hide fixed bottom frame elements, show scrollable copies
+    const _lsBtmEls = [
+      document.querySelector('.frame .corner.bl'),
+      document.querySelector('.frame .corner.br'),
+      document.querySelector('.frame .frame-line.bottom'),
+      document.querySelector('.frame .frame-label.bl'),  // timecode (at bottom on wide, top on narrow)
+      document.getElementById('lbl-bc'),
+      document.getElementById('lbl-br'),
+      document.getElementById('lbl-mob')
+    ];
+    function updateLandscapeMobile() {
+      const isLand = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
+      document.body.classList.toggle('landscape-mobile', isLand);
+      // Only hide bottom elements on the homepage; restore them for content pages
+      const hide = isLand && !frame.classList.contains('content-mode');
+      _lsBtmEls.forEach(el => {
+        if (!el) return;
+        if (hide) el.style.setProperty('display', 'none', 'important');
+        else el.style.removeProperty('display');
+      });
+    }
+    updateLandscapeMobile();
+    window.addEventListener('resize', updateLandscapeMobile);
+    // Re-run whenever frame switches between prominent and content-mode
+    new MutationObserver(updateLandscapeMobile).observe(frame, { attributes: true, attributeFilter: ['class'] });
 
     // Resolve TC epoch — a fixed wall-clock anchor so the timecode continues
     // across content-page refreshes, and only resets on a homepage refresh.
