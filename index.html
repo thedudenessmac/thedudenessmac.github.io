@@ -45,7 +45,7 @@
     }
     @keyframes corner-draw-sm {
       from { width: 0; height: 0; }
-      to   { width: 22px; height: 22px; }
+      to   { width: 36px; height: 36px; }
     }
     @keyframes line-h {
       from { transform: scaleX(0); }
@@ -832,7 +832,7 @@
       .frame.prominent .frame-label.mobile-bot {
         display: block;
         top: auto; bottom: 20px;
-        left: 0; right: 0; padding: 0 44px; text-align: center;
+        left: 0; right: 0; padding: 0 60px; text-align: center;
         transform: translateY(-6px);
       }
 
@@ -846,10 +846,10 @@
       .frame-line.bottom { bottom: 8px; left: 16px; right: 16px; }
       .frame-line.left   { left: 16px;  top: 8px;  bottom: 8px; }
       .frame-line.right  { right: 16px; top: 8px;  bottom: 8px; }
-      .frame-label.tl { top: 20px;    left: 44px; }
-      .frame-label.tr { top: 20px;    right: 44px; }
-      .frame-label.bl { bottom: 20px; left: 44px; }
-      .frame-label.br { bottom: 20px; right: 44px; }
+      .frame-label.tl { top: 20px;    left: 60px; }
+      .frame-label.tr { top: 20px;    right: 60px; }
+      .frame-label.bl { bottom: 20px; left: 60px; }
+      .frame-label.br { bottom: 20px; right: 60px; }
 
       /* Hero: centre content, account for 68px bars top + bottom */
       #hero { min-height: 100dvh; padding: var(--bar-h) 0; }
@@ -955,7 +955,7 @@
         display: block;
         bottom: 17px; left: 0; right: 0;
         text-align: center;
-        font-size: clamp(8px, 3.2vw, 11px);
+        font-size: clamp(11px, 2.8vw, 13px);
         white-space: nowrap;
         opacity: 0;
         animation: none;
@@ -999,7 +999,7 @@
         content: '';
         position: absolute;
         top: 8px;
-        width: 52px; height: 52px;
+        width: 36px; height: 36px;
       }
       .ls-frame-top::before {
         left: 16px;
@@ -1028,18 +1028,18 @@
         color: rgba(237, 234, 228, 0.85);
         white-space: nowrap;
       }
-      .ls-top-label.ls-tl { left: 86px; font-variant-numeric: tabular-nums; }
+      .ls-top-label.ls-tl { left: 60px; font-variant-numeric: tabular-nums; }
       .ls-top-label.ls-tc { display: none; }
-      .ls-top-label.ls-tr { right: 86px; text-align: right; }
-      .ls-top-label.ls-bl { display: none; left: 44px; font-variant-numeric: tabular-nums; }
+      .ls-top-label.ls-tr { right: 60px; text-align: right; }
+      .ls-top-label.ls-bl { display: none; left: 60px; font-variant-numeric: tabular-nums; }
       /* Narrow phones: swap label positions to match mobile prominent layout */
       @media (max-width: 640px) {
-        .ls-frame-top { height: 40px; }
-        .ls-frame-top::before, .ls-frame-top::after { width: 22px; height: 22px; }
+        .ls-frame-top { height: 52px; }
+        .ls-frame-top::before, .ls-frame-top::after { width: 36px; height: 36px; }
         .ls-top-label.ls-tl { display: none; }
         .ls-top-label.ls-tc { display: none; }
-        .ls-top-label.ls-tr { right: 44px; }
-        .ls-top-label.ls-bl { display: block; }
+        .ls-top-label.ls-tr { right: 60px; }
+        .ls-top-label.ls-bl { display: block; left: 60px; }
       }
       /* Hiding moved to JS class — see body.landscape-mobile rule below */
 
@@ -1054,7 +1054,7 @@
         content: '';
         position: absolute;
         bottom: 8px;
-        width: 52px; height: 52px;
+        width: 36px; height: 36px;
       }
       .ls-frame-btm::before {
         left: 16px;
@@ -1075,7 +1075,7 @@
       .ls-btm-label {
         position: absolute;
         bottom: 20px; left: 0; right: 0;
-        padding: 0 44px;
+        padding: 0 60px;
         text-align: center;
         font-family: var(--mono);
         font-size: clamp(11px, 2.8vw, 13px);
@@ -1086,11 +1086,11 @@
         white-space: nowrap;
       }
 
-      /* Narrow phones use 22px corners — match corner-draw-sm */
+      /* Narrow phones use 36px corners — match corner-draw-sm */
       @media (max-width: 640px) {
-        .ls-frame-btm { height: 48px; }
+        .ls-frame-btm { height: 56px; }
         .ls-frame-btm::before,
-        .ls-frame-btm::after { width: 22px; height: 22px; }
+        .ls-frame-btm::after { width: 36px; height: 36px; }
       }
 
       /* Content-mode font size — same for all labels including mobile-bot */
@@ -1130,6 +1130,30 @@
         opacity: 1;
         transition: opacity 0.4s ease 0.65s;
       }
+
+      /* Transition helpers — mirrors max-width:640px rules for wider landscape phones */
+      .frame.mobile-home-out .frame-label,
+      .frame.mobile-home-out .corner,
+      .frame.mobile-home-out .frame-line { opacity: 0 !important; transition: opacity 0.35s ease !important; }
+      .frame.mobile-labels-out .frame-label { opacity: 0 !important; transition: none !important; }
+      .frame.mobile-snap-positions .frame-label { transition: none !important; }
+      .frame.labels-animation-reset .frame-label { animation: none !important; }
+      /* Hide desktop nav, show mobile nav */
+      .frame.content-mode .frame-back { display: none !important; }
+      .frame.content-mode .frame-tabs { display: none !important; }
+      .frame.content-mode .mobile-nav-btn  { display: flex; }
+      .frame.content-mode .mobile-nav-menu { display: block; }
+
+      /* Bar suppression + slide animation — mirrors max-width:640px rules for wider phones */
+      .frame.content-mode .frame-bar { height: 0 !important; opacity: 0 !important; border: none !important; }
+      .frame.mobile-bars-visible.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
+      .frame.mobile-bars-visible.content-mode .frame-bar.bottom { height: var(--bar-h) !important; opacity: 1 !important; }
+      .frame.mobile-bar-exit.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
+      .frame.mobile-bar-exit.content-mode .frame-bar.bottom { height: var(--bar-h) !important; opacity: 1 !important; }
+      .frame-bar.top    { transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
+      .frame-bar.bottom { transform: translateY(100%);  transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
+      .frame.mobile-bars-visible .frame-bar.top    { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
+      .frame.mobile-bars-visible .frame-bar.bottom { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.05s; }
 
       /* Nav dropdown: cap to available height below the top bar and allow scroll */
       .mobile-nav-menu.menu-open {
@@ -1799,7 +1823,7 @@
       measure.style.cssText = "position:fixed;top:-9999px;left:-9999px;white-space:nowrap;font-family:'PT Mono','Courier New',monospace;letter-spacing:0.06em;visibility:hidden;font-weight:400;";
       measure.textContent = el.textContent;
       document.body.appendChild(measure);
-      const availWidth = window.innerWidth - 88;
+      const availWidth = window.innerWidth - 120;
       let lo = 10, hi = 28;
       while (hi - lo > 0.5) {
         const mid = (lo + hi) / 2;
