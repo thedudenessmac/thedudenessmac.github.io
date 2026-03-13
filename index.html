@@ -2499,6 +2499,7 @@
         frame.classList.add('mobile-bars-visible');
         requestAnimationFrame(() => requestAnimationFrame(() => {
           document.documentElement.classList.remove('no-transition');
+          delete document.documentElement.dataset.restore;
         }));
       } else if (pages.includes(initialHash)) {
         document.documentElement.classList.add('no-transition');
@@ -2513,9 +2514,10 @@
         mobileNavBtn.classList.add('nav-ready');
         frame.classList.add('mobile-bars-visible');
 
-        // Re-enable transitions after browser paints the static state
+        // Re-enable transitions and clear pre-paint CSS overrides
         requestAnimationFrame(() => requestAnimationFrame(() => {
           document.documentElement.classList.remove('no-transition');
+          delete document.documentElement.dataset.restore;
         }));
 
         // Block all scroll restoration attempts for 500ms after load
