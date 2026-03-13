@@ -1267,7 +1267,7 @@
 
       /* Footer: copyright left, play button right */
       .footer-left { display: flex; align-items: center; }
-      footer { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+      footer { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 
       /* All content pages: tighter side margins, top padding, smaller body text */
       .container { padding: 0 26px; }
@@ -1531,7 +1531,11 @@
     .frame.game-mode #cnb-links,
     .frame.game-mode #cnb-hamburger    { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .frame.game-mode .content-navbar   { background: rgba(0,0,0,0.92); backdrop-filter: blur(0px); transition: background 0.5s ease, backdrop-filter 0.5s ease; }
+  /* Pre-position panels before first paint to prevent flash on refresh */
+  html[data-restore] .home-panel    { transform: translateX(-100%) !important; }
+  html[data-restore] .content-panel { transform: translateX(0)      !important; }
   </style>
+  <script>(function(){var h=location.hash.slice(1);if(['about','credits','services','gallery','contact','game'].indexOf(h)>-1){document.documentElement.dataset.restore=h;}})();</script>
 </head>
 <body>
 
