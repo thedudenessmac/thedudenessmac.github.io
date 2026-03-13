@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#0f0f0d">
   <title>Marko Balac — Script Supervisor</title>
   <meta name="description" content="Marko Balac — Script Supervisor based in Toronto, ON.">
   <link rel="icon" type="image/png" href="favicon.png">
@@ -13,7 +13,7 @@
 
   <style>
     /* ── Reset ── */
-    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: #fff; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--dark); }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* ── Variables ── */
@@ -1537,9 +1537,10 @@
     .frame.game-mode #cnb-links,
     .frame.game-mode #cnb-hamburger    { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .frame.game-mode .content-navbar   { background: rgba(0,0,0,0.92); backdrop-filter: blur(0px); transition: background 0.5s ease, backdrop-filter 0.5s ease; }
-  /* Pre-position panels before first paint to prevent flash on refresh */
+  /* Pre-position panels and navbar before first paint to prevent flash on refresh */
   html[data-restore] .home-panel    { transform: translateX(-100%) !important; }
   html[data-restore] .content-panel { transform: translateX(0)      !important; }
+  html[data-restore] .content-navbar { transform: translateY(0)     !important; }
   </style>
   <script>(function(){var h=location.hash.slice(1);if(['about','credits','services','gallery','contact','game'].indexOf(h)>-1){document.documentElement.dataset.restore=h;}})();</script>
 </head>
