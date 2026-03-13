@@ -77,26 +77,17 @@
     /* home→content phase 1: labels fade, corners retract, overlays/lines fade */
     body.mobile-home-out .frame-label { animation: label-fade-out 0.35s ease forwards !important; }
     body.mobile-home-out .corner      { animation: corner-retract 0.35s ease forwards !important; }
-    body.mobile-home-out .frame-line,
-    body.mobile-home-out .ls-frame-top,
-    body.mobile-home-out .ls-frame-btm { opacity: 0 !important; transition: opacity 0.35s ease !important; }
-    /* landscape overlay pseudo-element corners retract — use animation (not transition)
-       because corner-draw-sm animation controls width/height and blocks transitions */
-    body.mobile-home-out .ls-frame-top::before,
-    body.mobile-home-out .ls-frame-top::after,
-    body.mobile-home-out .ls-frame-btm::before,
-    body.mobile-home-out .ls-frame-btm::after { animation: corner-retract 0.35s ease forwards !important; }
+    body.mobile-home-out .frame-line  { opacity: 0 !important; transition: opacity 0.35s ease !important; }
+    body.mobile-home-out .home-top-bar { opacity: 0 !important; transition: opacity 0.35s ease !important; }
+    body.mobile-home-out .home-panel .home-bot-bar { opacity: 0 !important; transition: opacity 0.35s ease !important; }
+    body.mobile-labels-out .home-top-bar { opacity: 0 !important; }
+    body.mobile-labels-out .home-panel .home-bot-bar { opacity: 0 !important; transition: none !important; }
+    .home-panel .home-bot-bar.bot-visible { opacity: 1; }
     /* phase 2: lock all home-overlay elements at their retracted state so nothing
        snaps back when mobile-home-out is removed (both classes applied in same JS tick) */
     body.mobile-labels-out .frame-label { animation: none !important; opacity: 0 !important; }
     body.mobile-labels-out .corner { animation: none !important; width: 0 !important; height: 0 !important; }
-    body.mobile-labels-out .frame-line,
-    body.mobile-labels-out .ls-frame-top,
-    body.mobile-labels-out .ls-frame-btm { opacity: 0 !important; }
-    body.mobile-labels-out .ls-frame-top::before,
-    body.mobile-labels-out .ls-frame-top::after,
-    body.mobile-labels-out .ls-frame-btm::before,
-    body.mobile-labels-out .ls-frame-btm::after { animation: none !important; width: 0 !important; height: 0 !important; }
+    body.mobile-labels-out .frame-line { opacity: 0 !important; }
     /* snap label positions without transition during goHome reset */
     body.mobile-snap-positions .frame-label { transition: none !important; }
     /* reset label-fade animation via class */
@@ -110,6 +101,7 @@
       from { width: 0; height: 0; }
       to   { width: calc(100% + 2px); height: calc(100% + 2px); }
     }
+
 
     .frame {
       position: fixed;
@@ -132,6 +124,9 @@
     }
     .frame-bar.top    { top: 0; }
     .frame-bar.bottom { bottom: 0; }
+    .home-top-bar, .home-bot-bar { display: none; }
+    .htb-ls-only { display: none; }
+    @keyframes htb-fadein { from { opacity: 0; } to { opacity: 1; } }
 
     .corner, .frame-line { transition: opacity 0.45s ease; }
 
@@ -179,15 +174,13 @@
                   opacity    0.9s ease,
                   color      0.9s ease;
     }
-    .frame-label.tl { top: 8px;    left: 86px;  transform-origin: top left; }
-    .frame-label.tc { top: 8px;    left: 0; right: 0; text-align: center; transform-origin: top center; color: rgba(200,133,14,0.55); letter-spacing: 0.2em; }
-    .frame-label.tr { top: 8px;    right: 86px; transform-origin: top right; text-align: right; }
-    .frame-label.bl { bottom: 8px; left: 86px;  transform-origin: bottom left; font-variant-numeric: tabular-nums; }
-    .frame-label.bc { bottom: 8px; left: 0; right: 0; text-align: center; transform-origin: bottom center; }
-    .frame-label.br { bottom: 8px; right: 86px; transform-origin: bottom right; text-align: right; }
+    .frame-label.tl { top: 12px;    left: 86px;  transform-origin: top left; }
+    .frame-label.tc { top: 12px;    left: 0; right: 0; text-align: center; transform-origin: top center; color: rgba(200,133,14,0.55); letter-spacing: 0.2em; }
+    .frame-label.tr { top: 12px;    right: 86px; transform-origin: top right; text-align: right; }
+    .frame-label.bl { bottom: 12px; left: 86px;  transform-origin: bottom left; font-variant-numeric: tabular-nums; }
+    .frame-label.bc { bottom: 12px; left: 0; right: 0; text-align: center; transform-origin: bottom center; }
+    .frame-label.br { bottom: 12px; right: 86px; transform-origin: bottom right; text-align: right; }
     .frame-label.mobile-bot { display: none; }
-    .ls-frame-btm { display: none; }
-    .ls-frame-top { display: none; }
     @keyframes rec-blink {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.25; }
@@ -199,17 +192,11 @@
     .frame.prominent .corner               { animation: none !important; opacity: 0 !important; }
     .frame.prominent .frame-line.left,
     .frame.prominent .frame-line.right     { animation: none !important; opacity: 0 !important; }
-    .frame.prominent .frame-line.top       { top: 70px; left: 0; right: 0; }
-    .frame.prominent .frame-line.bottom    { bottom: 70px; left: 0; right: 0; }
+    .frame.prominent .frame-line.top    { top: 58px;    left: 0; right: 0; }
+    .frame.prominent .frame-line.bottom { bottom: 58px; left: 0; right: 0; }
 
-    /* Prominent: shift outward via translateY + scale — pure transform, zero reflow */
-    .frame.prominent .frame-label      { color: rgba(237,234,228,0.85); font-size: clamp(10px, 1.6vw, 22px); }
-    .frame.prominent .frame-label.tl { transform: translateY(16px); }
-    .frame.prominent .frame-label.tc { transform: translateY(16px); }
-    .frame.prominent .frame-label.tr { transform: translateY(16px); }
-    .frame.prominent .frame-label.bl { transform: translateY(-16px); }
-    .frame.prominent .frame-label.bc { transform: translateY(-16px); }
-    .frame.prominent .frame-label.br { transform: translateY(-16px); }
+    /* Prominent: label colour/size only — no translateY, labels sit at their base positions */
+    .frame.prominent .frame-label { color: rgba(237,234,228,0.85); font-size: clamp(10px, 1.6vw, 22px); }
     .fps-val  { color: rgba(237,234,228,0.85); }
     .rec-text { color: #ef4444; }
 
@@ -1153,55 +1140,69 @@
       /* BC always right-anchored on mobile so position can transition cleanly */
       .frame-label.bc { left: auto; right: 30px; transform-origin: bottom right; text-align: right; }
 
-      /* Prominent: two-row layout — fluid font-size, translateY for row positioning */
-      .frame.prominent .frame-label { font-size: var(--mobile-home-fs, clamp(11px, 2.8vw, 13px)); }
-      .frame.prominent .frame-label.tl { transform: translateY(6px); }
-      .frame.prominent .frame-label.tr { transform: translateY(6px); }
-      .frame.prominent .frame-label.tc { transform: translateY(46px); }
-      .frame.prominent .frame-label.bl { transform: translateY(-6px); }
-      .frame.prominent .frame-label.br { transform: translateY(-6px); }
-      .frame.prominent .frame-label.bc { transform: translateY(-32px); }
-      /* Mobile homepage: timecode moves to top-left, SDI hidden */
-      .frame.prominent .frame-label.tl { display: none; }
-      .frame.prominent .frame-label.bl { bottom: auto; top: 20px; transform: translateY(6px); }
-      /* bc and br replaced by mobile-bot in bottom row */
-      .frame.prominent .frame-label.bc { display: none; }
-      .frame.prominent .frame-label.br { display: none; }
-      /* Hide FPS on mobile — keep REC indicator */
-      .frame.prominent .fps-val,
-      .frame.prominent .fps-sep,
-      .frame.content-mode .fps-val,
-      .frame.content-mode .fps-sep { display: none; }
+      /* Homepage hero — centred layout */
+      .hero-name { font-size: clamp(28px, 10vw, 68px); white-space: nowrap; }
+      #hero .hero-grid,
+      #hero .hero-left { text-align: center; align-items: center; }
+      #hero .hero-meta { align-items: center; }
+      #hero .hero-nav  { justify-content: center; }
 
-      /* Show all 6 data points centred in the bottom row */
-      .frame.prominent .frame-label.mobile-bot {
-        display: block;
-        top: auto; bottom: 20px;
-        left: 0; right: 0; padding: 0 60px; text-align: center;
-        transform: translateY(-6px);
-        white-space: normal;
+      /* ── Mobile homepage top bar ── */
+      .frame.prominent .home-top-bar { animation: htb-fadein 0.45s ease 0.1s both; }
+      .frame.prominent .home-top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: var(--bar-h);
+        padding: 0 16px;
+        background: #000;
+        border-bottom: 4px solid rgba(237,234,228,0.35);
+        z-index: 10;
       }
-
-      /* Frame corners and lines — mobile scale */
-      .corner { animation-name: corner-draw-sm; }
-      .corner.tl { top: 8px;    left: 16px; }
-      .corner.tr { top: 8px;    right: 16px; }
-      .corner.bl { bottom: 8px; left: 16px; }
-      .corner.br { bottom: 8px; right: 16px; }
-      .frame-line.top    { top: 8px;    left: 16px; right: 16px; }
-      .frame-line.bottom { bottom: 8px; left: 16px; right: 16px; }
-      .frame-line.left   { left: 16px;  top: 8px;  bottom: 8px; }
-      .frame-line.right  { right: 16px; top: 8px;  bottom: 8px; }
-      .frame-label.tl { top: 20px;    left: 60px; }
-      .frame-label.tr { top: 20px;    right: 60px; }
-      .frame-label.bl { bottom: 20px; left: 60px; }
-      .frame-label.br { bottom: 20px; right: 60px; }
-
-      /* Hero: centre content, account for 68px bars top + bottom */
-      #hero { min-height: 100dvh; padding: var(--bar-h) 0; }
-      .hero-name { font-size: clamp(28px, 13vw, 56px); text-align: center; white-space: nowrap; }
-      .hero-meta { align-items: center; }
-      .hero-nav { justify-content: center; }
+      .htb-rec, .htb-tc {
+        font-family: var(--mono);
+        font-size: 14px;
+        letter-spacing: 0.06em;
+        color: rgba(237,234,228,0.7);
+        white-space: nowrap;
+      }
+      .htb-tc { font-variant-numeric: tabular-nums; }
+      .htb-rec .rec-dot { color: #ef4444; animation: rec-blink 2s ease-in-out infinite; }
+      /* Hide top line and top labels on mobile prominent — bar border replaces the line */
+      .frame.prominent .frame-line.top { opacity: 0 !important; animation: none !important; }
+      .frame.prominent .frame-label.tl,
+      .frame.prominent .frame-label.tr { display: none; }
+      /* ── Mobile homepage bottom bar — pinned to bottom via flex ── */
+      .home-panel { display: flex; flex-direction: column; }
+      #hero { flex: 1; min-height: 0; }
+      .home-panel .home-bot-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: var(--bar-h);
+        padding: 0 16px;
+        background: transparent;
+        border-top: 4px solid rgba(237,234,228,0.35);
+        opacity: 0;
+        transition: opacity 0.45s ease 0.1s;
+      }
+      .htb-data {
+        font-family: var(--mono);
+        font-size: 14px;
+        letter-spacing: 0.06em;
+        color: rgba(237,234,228,0.7);
+        white-space: nowrap;
+      }
+      /* Hide bottom line and bottom labels on mobile prominent — bar border replaces the line */
+      .frame.prominent .frame-line.bottom { opacity: 0 !important; animation: none !important; }
+      .frame.prominent .frame-label.bl,
+      .frame.prominent .frame-label.bc,
+      .frame.prominent .frame-label.br { display: none; }
+      /* Top bar: never show on content pages */
+      .frame.content-mode .home-top-bar { display: none !important; }
 
       /* Content page headers */
       .section-eyebrow { font-size: 38px; }
@@ -1306,10 +1307,6 @@
       }
       .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot { opacity: 1; transition: opacity 0.4s ease 0.65s; }
 
-      /* Hide desktop nav on mobile content pages */
-      .frame.content-mode .frame-back { display: none !important; }
-      .frame.content-mode .frame-tabs { display: none !important; }
-
       /* Show shared dropdown nav on mobile content pages */
       .frame.content-mode .mobile-nav-btn  { display: flex; }
       .frame.content-mode .mobile-nav-menu { display: block; }
@@ -1328,121 +1325,54 @@
 
     /* ── Mobile landscape ── */
     @media (orientation: landscape) and (max-height: 500px) {
-      /* Allow home panel to scroll instead of clipping */
-      .home-panel { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-      /* Hero min-height ensures ls-frame-btm starts at the viewport bottom so the
-         fixed side lines connect to it; content taller than the viewport scrolls normally */
-      #hero { min-height: calc(100dvh - 52px - 68px); align-items: flex-start; padding-top: 12px; padding-bottom: 24px; }
-
-      /* Scrollable top frame overlay */
-      .ls-frame-top {
-        display: block;
-        position: relative;
-        height: 52px;
-      }
-      .ls-frame-top::before,
-      .ls-frame-top::after {
-        content: '';
+      /* ── Homepage top/bottom bars ── */
+      .frame.prominent .home-top-bar { animation: htb-fadein 0.45s ease 0.1s both; }
+      .frame.prominent .home-top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         position: absolute;
-        top: 8px;
-        width: 0; height: 0; opacity: 0;
-        animation: corner-draw-sm 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+        top: 0; left: 0; right: 0;
+        height: var(--bar-h);
+        padding: 0 16px;
+        background: #000;
+        border-bottom: 4px solid rgba(237,234,228,0.35);
+        z-index: 10;
       }
-      .ls-frame-top::before {
-        left: 16px;
-        border-top: 6px solid var(--accent);
-        border-left: 6px solid var(--accent);
+      .home-panel { overflow-y: auto; }
+      #hero { padding-top: var(--bar-h); }
+      .home-panel .home-bot-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: var(--bar-h);
+        padding: 0 16px;
+        background: transparent;
+        border-top: 4px solid rgba(237,234,228,0.35);
+        opacity: 0;
+        transition: opacity 0.45s ease 0.1s;
       }
-      .ls-frame-top::after {
-        right: 16px;
-        border-top: 6px solid var(--accent);
-        border-right: 6px solid var(--accent);
-      }
-      .ls-top-line {
-        position: absolute;
-        top: 8px; left: 16px; right: 16px;
-        height: 6px;
-        background: rgba(237,234,228,0.25);
-      }
-      .ls-top-label {
-        position: absolute;
-        top: 20px;
+      .home-panel .htb-data,
+      .htb-rec, .htb-tc {
         font-family: var(--mono);
-        font-size: clamp(10px, 1.5vw, 13px);
-        font-weight: 400;
+        font-size: 14px;
         letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: rgba(237, 234, 228, 0.85);
+        color: rgba(237,234,228,0.7);
         white-space: nowrap;
       }
-      .ls-top-label.ls-tl { left: 60px; font-variant-numeric: tabular-nums; }
-      .ls-top-label.ls-tc { display: none; }
-      .ls-top-label.ls-tr { right: 60px; text-align: right; }
-      .ls-top-label.ls-bl { display: none; left: 60px; font-variant-numeric: tabular-nums; }
-      /* Narrow phones: swap label positions to match mobile prominent layout */
-      @media (max-width: 640px) {
-        .ls-frame-top { height: 52px; }
-        .ls-top-label.ls-tl { display: none; }
-        .ls-top-label.ls-tc { display: none; }
-        .ls-top-label.ls-tr { right: 60px; }
-        .ls-top-label.ls-bl { display: block; left: 60px; }
-      }
-      /* Hiding moved to JS class — see body.landscape-mobile rule below */
-
-      /* Scrollable bottom frame overlay */
-      .ls-frame-btm {
-        display: block;
-        position: relative;
-        height: 68px;
-      }
-      .ls-frame-btm::before,
-      .ls-frame-btm::after {
-        content: '';
-        position: absolute;
-        bottom: 8px;
-        width: 0; height: 0; opacity: 0;
-        animation: corner-draw-sm 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
-      }
-      .ls-frame-btm::before {
-        left: 16px;
-        border-bottom: 6px solid var(--accent);
-        border-left: 6px solid var(--accent);
-      }
-      .ls-frame-btm::after {
-        right: 16px;
-        border-bottom: 6px solid var(--accent);
-        border-right: 6px solid var(--accent);
-      }
-      .ls-btm-line {
-        position: absolute;
-        bottom: 8px; left: 16px; right: 16px;
-        height: 6px;
-        background: rgba(237,234,228,0.25);
-      }
-      .ls-btm-label {
-        position: absolute;
-        bottom: 20px; left: 0; right: 0;
-        padding: 0 60px;
-        text-align: center;
-        font-family: var(--mono);
-        font-size: clamp(11px, 2.8vw, 13px);
-        font-weight: 400;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: rgba(237, 234, 228, 0.85);
-        white-space: nowrap;
-      }
-
-      /* Narrow phones — animation already handles corner size via corner-draw-sm */
-      @media (max-width: 640px) {
-        .ls-frame-btm { height: 56px; }
-        #hero { min-height: calc(100dvh - 52px - 56px); }
-      }
-
-      /* Override fixed .frame side-lines so wide landscape phones (>640px) align
-         with ls-frame corner positions (16px from edge, 8px from top/bottom) */
-      .frame-line.left  { left: 16px;  top: 8px; bottom: 8px; }
-      .frame-line.right { right: 16px; top: 8px; bottom: 8px; }
+      .htb-tc { font-variant-numeric: tabular-nums; }
+      .htb-rec .rec-dot { color: #ef4444; animation: rec-blink 2s ease-in-out infinite; }
+      .htb-ls-only { display: inline; }
+      /* Hide frame lines and all floating labels on landscape prominent */
+      .frame.prominent .frame-line.top,
+      .frame.prominent .frame-line.bottom { opacity: 0 !important; animation: none !important; }
+      .frame.prominent .frame-label.tl,
+      .frame.prominent .frame-label.tr,
+      .frame.prominent .frame-label.bl,
+      .frame.prominent .frame-label.bc,
+      .frame.prominent .frame-label.br { display: none; }
+      .frame.content-mode .home-top-bar { display: none !important; }
 
       /* Content-mode font size — same for all labels including mobile-bot */
       .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
@@ -1482,9 +1412,7 @@
         transition: opacity 0.4s ease 0.65s;
       }
 
-      /* Hide desktop nav, show mobile nav */
-      .frame.content-mode .frame-back { display: none !important; }
-      .frame.content-mode .frame-tabs { display: none !important; }
+      /* Show mobile nav */
       .frame.content-mode .mobile-nav-btn  { display: flex; }
       .frame.content-mode .mobile-nav-menu { display: block; }
 
@@ -1514,16 +1442,6 @@
       }
     }
 
-    /* Landscape mobile: hide fixed .frame bottom corners/line — replaced by ls-frame-btm */
-    body.landscape-mobile .corner.bl,
-    body.landscape-mobile .corner.br,
-    body.landscape-mobile .frame-line.bottom {
-      display: none !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-    }
-    /* Hide mobile-bot on landscape homepage only — CSS manages it, no JS needed */
-    body.landscape-mobile .frame.prominent .frame-label.mobile-bot { display: none !important; }
 
     /* Freeze all transitions/animations during instant state restore */
     .no-transition, .no-transition * {
@@ -1594,6 +1512,10 @@
   <div class="frame prominent" id="frame">
     <div class="frame-bar top"></div>
     <div class="frame-bar bottom"></div>
+    <div class="home-top-bar">
+      <span class="htb-rec"><span class="rec-dot">◆</span> <span class="rec-text">REC</span></span>
+      <span class="htb-tc" id="home-tc">01:00:00:00</span>
+    </div>
     <div class="corner tl"></div>
     <div class="corner tr"></div>
     <div class="corner bl"></div>
@@ -1681,15 +1603,7 @@
 
   <!-- ── Home panel ── -->
   <div class="home-panel" id="home-panel">
-  <!-- Landscape top frame — scrolls with content, shown only in landscape -->
-  <div class="ls-frame-top" aria-hidden="true">
-    <div class="ls-top-line"></div>
-    <span class="ls-top-label ls-tl" id="lbl-tl-ls"></span>
-    <span class="ls-top-label ls-tc" id="lbl-tc-ls"></span>
-    <span class="ls-top-label ls-tr" id="lbl-tr-ls"></span>
-    <span class="ls-top-label ls-bl" id="lbl-bl-ls"></span>
-  </div>
-  <section id="hero" class="hero-intro">
+<section id="hero" class="hero-intro">
     <div class="container">
       <div class="hero-grid">
         <div class="hero-left">
@@ -1709,12 +1623,15 @@
       </div>
     </div>
   </section>
-  <!-- Landscape bottom frame — scrolls with content, shown only in landscape -->
-  <div class="ls-frame-btm" aria-hidden="true">
-    <div class="ls-btm-line"></div>
-    <span class="ls-btm-label" id="lbl-mob-ls"></span>
+  <div class="home-bot-bar">
+    <span class="htb-data htb-ls-only" id="home-bot-focus">F 4.2'</span>
+    <span class="htb-data" id="home-bot-tstop">T2.8</span>
+    <span class="htb-data" id="home-bot-lens">35mm</span>
+    <span class="htb-data" id="home-bot-iso">ISO 800</span>
+    <span class="htb-data htb-ls-only" id="home-bot-shutter">180°</span>
+    <span class="htb-data" id="home-bot-temp">3200K</span>
   </div>
-  </div><!-- /home-panel -->
+</div><!-- /home-panel -->
 
   <!-- ── Content panel ── -->
   <div class="content-panel" id="content-panel">
@@ -2198,14 +2115,18 @@
     document.getElementById('lbl-br').textContent  = `ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
     const _mobText = `${CAM.tstop}  ·  ${CAM.lens}  ·  ISO ${CAM.iso}  ·  ${CAM.temp}K`;
     document.getElementById('lbl-mob').textContent = _mobText;
-    const _lsEl = document.getElementById('lbl-mob-ls');
-    if (_lsEl) _lsEl.textContent = _mobText;
-    // Populate landscape top overlay labels
-    const _lsTl = document.getElementById('lbl-tl-ls');
-    const _lsTc = document.getElementById('lbl-tc-ls');
-    const _lsTr = document.getElementById('lbl-tr-ls');
-    if (_lsTl) _lsTl.textContent = document.getElementById('frame-tc').textContent;
-    if (_lsTr) _lsTr.innerHTML = document.querySelector('.frame-label.tr').innerHTML;
+    const _hbTstop   = document.getElementById('home-bot-tstop');
+    const _hbLens    = document.getElementById('home-bot-lens');
+    const _hbIso     = document.getElementById('home-bot-iso');
+    const _hbTemp    = document.getElementById('home-bot-temp');
+    const _hbFocus   = document.getElementById('home-bot-focus');
+    const _hbShutter = document.getElementById('home-bot-shutter');
+    if (_hbTstop)   _hbTstop.textContent   = CAM.tstop;
+    if (_hbLens)    _hbLens.textContent    = CAM.lens;
+    if (_hbIso)     _hbIso.textContent     = `ISO ${CAM.iso}`;
+    if (_hbTemp)    _hbTemp.textContent    = `${CAM.temp}K`;
+    if (_hbFocus)   _hbFocus.textContent   = `F ${CAM.focus}`;
+    if (_hbShutter) _hbShutter.textContent = `${CAM.shutter}°`;
 
     // Dynamic font scaling for mobile homepage prominent labels
     function fitMobileHomeFontSize() {
@@ -2230,50 +2151,6 @@
     fitMobileHomeFontSize();
     window.addEventListener('resize', fitMobileHomeFontSize);
 
-    // Landscape mobile: hide all fixed frame elements, replaced by scrollable copies
-    const _lsBtmEls = [
-      // Bottom — fixed frame elements replaced by ls-frame overlays in landscape
-      document.querySelector('.frame .corner.bl'),
-      document.querySelector('.frame .corner.br'),
-      document.querySelector('.frame .frame-line.bottom'),
-      document.querySelector('.frame .frame-label.bl'),
-      document.getElementById('lbl-bc'),
-      document.getElementById('lbl-br'),
-      // Top
-      document.querySelector('.frame .corner.tl'),
-      document.querySelector('.frame .corner.tr'),
-      document.querySelector('.frame .frame-line.top'),
-      document.getElementById('lbl-tl'),
-      document.getElementById('lbl-tc'),
-      document.querySelector('.frame .frame-label.tr'),
-    ];
-    // Elements that must remain visible in content-mode bars (timecode bl, FPS/REC tr)
-    // lbl-mob (.frame-label.mobile-bot) is now CSS-managed via content-mode rules
-    const _lsContentEls = new Set([
-      document.querySelector('.frame .frame-label.bl'),
-      document.querySelector('.frame .frame-label.tr'),
-    ]);
-    function updateLandscapeMobile() {
-      const isLand = window.innerWidth > window.innerHeight && window.innerHeight <= 500;
-      document.body.classList.toggle('landscape-mobile', isLand);
-      const inContent = frame.classList.contains('content-mode');
-      _lsBtmEls.forEach(el => {
-        if (!el) return;
-        if (!isLand) {
-          el.style.removeProperty('display');
-          el.style.removeProperty('opacity');
-          el.style.removeProperty('visibility');
-        } else if (inContent && _lsContentEls.has(el)) {
-          el.style.setProperty('display', 'block', 'important');
-        } else {
-          el.style.setProperty('display', 'none', 'important');
-        }
-      });
-    }
-    updateLandscapeMobile();
-    window.addEventListener('resize', updateLandscapeMobile);
-    // Re-run whenever frame switches between prominent and content-mode
-    new MutationObserver(updateLandscapeMobile).observe(frame, { attributes: true, attributeFilter: ['class'] });
 
     // Resolve TC epoch — a fixed wall-clock anchor so the timecode continues
     // across content-page refreshes, and only resets on a homepage refresh.
@@ -2299,12 +2176,10 @@
         const s = Math.floor(f / FPS);
         const _tcStr = `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(f%FPS)}`;
         el.textContent = _tcStr;
-        const _elLs = document.getElementById('lbl-bl-ls');
-        if (_elLs) _elLs.textContent = _tcStr;
-        const _elLsTl = document.getElementById('lbl-tl-ls');
-        if (_elLsTl) _elLsTl.textContent = _tcStr;
         const _elCnbTc = document.getElementById('cnb-tc');
         if (_elCnbTc) _elCnbTc.textContent = _tcStr;
+        const _elHomeTc = document.getElementById('home-tc');
+        if (_elHomeTc) _elHomeTc.textContent = _tcStr;
         rafId = requestAnimationFrame(tick);
       }
       // Pause loop when tab is hidden; resume when visible again
@@ -2383,6 +2258,10 @@
       let   tabsTimer        = null;
       let   mobileBarsTimer  = null;
       let   mobileExitTimer  = null;
+      let   mobileOutTimer   = null;
+      const homeBotBar = document.querySelector('.home-panel .home-bot-bar');
+      // Fade in on initial load
+      if (homeBotBar) requestAnimationFrame(() => requestAnimationFrame(() => homeBotBar.classList.add('bot-visible')));
 
       function showPage(id, preserveScroll = false) {
         // Deactivate all pages
@@ -2422,6 +2301,7 @@
         if (tabsTimer)        { clearTimeout(tabsTimer);        tabsTimer        = null; }
         if (mobileBarsTimer)  { clearTimeout(mobileBarsTimer);  mobileBarsTimer  = null; }
         if (mobileExitTimer)  { clearTimeout(mobileExitTimer);  mobileExitTimer  = null; }
+        if (mobileOutTimer)   { clearTimeout(mobileOutTimer);   mobileOutTimer   = null; }
         frame.classList.remove('mobile-bar-exit');
         document.body.classList.remove('mobile-snap-positions');
         frame.classList.remove('bars-retracting');
@@ -2435,6 +2315,7 @@
         mobileNavBtn.classList.remove('game-return');
         if (!alreadyInContent) mobileNavBtn.classList.remove('nav-ready');
         if (!alreadyInContent) frame.classList.remove('mobile-bars-visible');
+        if (!alreadyInContent && homeBotBar) homeBotBar.classList.remove('bot-visible');
 
         function slide() {
           showPage(id, preserveScroll);
@@ -2452,7 +2333,29 @@
           if (!alreadyInContent) mobileNavBtn.classList.add('nav-ready');
         }
 
-        slide();
+        if (!alreadyInContent && (window.matchMedia('(max-width: 640px)').matches || window.matchMedia('(orientation: landscape) and (max-height: 500px)').matches)) {
+          // Start panel slide immediately (matches desktop speed)
+          showPage(id, preserveScroll);
+          app.classList.add('content-open');
+          if (pushHistory) history.pushState(null, '', '#' + id);
+          // Fade frame elements in parallel; swap to content-mode after fade completes
+          document.body.classList.add('mobile-home-out');
+          mobileOutTimer = setTimeout(() => {
+            document.body.classList.add('mobile-labels-out');
+            document.body.classList.remove('mobile-home-out');
+            mobileOutTimer = null;
+            frame.classList.remove('prominent');
+            frame.classList.add('content-mode');
+            frame.classList.add('content-transitioning');
+            setTimeout(() => frame.classList.remove('content-transitioning'), 400);
+            frame.classList.add('mobile-bars-visible');
+            tabsEl.classList.add('tabs-ready');
+            frameBack.classList.add('back-ready');
+            mobileNavBtn.classList.add('nav-ready');
+          }, 350);
+        } else {
+          slide();
+        }
       }
 
       function goHome(pushHistory = true) {
@@ -2477,6 +2380,8 @@
           frame.classList.remove('mobile-bar-exit');
           frame.classList.remove('content-mode');
           frame.classList.add('prominent');
+          document.body.classList.remove('mobile-labels-out');
+          if (homeBotBar) homeBotBar.classList.add('bot-visible');
           goHomeTimer = null;
         }, 460);
       }
