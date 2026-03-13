@@ -152,7 +152,7 @@
     /* Full-frame edge lines — draw from center outward */
     .frame-line {
       position: absolute;
-      background: rgba(237,234,228,0.25);
+      background: rgba(237,234,228,0.6);
     }
     .frame-line.top    { top: 16px;    left: 16px; right: 16px;  height: 5px; transform: scaleX(0); transform-origin: center; animation: line-h 0.6s cubic-bezier(0.4,0,0.2,1) 0.42s forwards; }
     .frame-line.bottom { bottom: 16px; left: 16px; right: 16px;  height: 5px; transform: scaleX(0); transform-origin: center; animation: line-h 0.6s cubic-bezier(0.4,0,0.2,1) 0.42s forwards; }
@@ -179,12 +179,12 @@
                   opacity    0.9s ease,
                   color      0.9s ease;
     }
-    .frame-label.tl { top: 16px;    left: 86px;  transform-origin: top left; }
-    .frame-label.tc { top: 16px;    left: 0; right: 0; text-align: center; transform-origin: top center; color: rgba(200,133,14,0.55); letter-spacing: 0.2em; }
-    .frame-label.tr { top: 16px;    right: 86px; transform-origin: top right; text-align: right; }
-    .frame-label.bl { bottom: 16px; left: 86px;  transform-origin: bottom left; font-variant-numeric: tabular-nums; }
-    .frame-label.bc { bottom: 16px; left: 0; right: 0; text-align: center; transform-origin: bottom center; }
-    .frame-label.br { bottom: 16px; right: 86px; transform-origin: bottom right; text-align: right; }
+    .frame-label.tl { top: 8px;    left: 86px;  transform-origin: top left; }
+    .frame-label.tc { top: 8px;    left: 0; right: 0; text-align: center; transform-origin: top center; color: rgba(200,133,14,0.55); letter-spacing: 0.2em; }
+    .frame-label.tr { top: 8px;    right: 86px; transform-origin: top right; text-align: right; }
+    .frame-label.bl { bottom: 8px; left: 86px;  transform-origin: bottom left; font-variant-numeric: tabular-nums; }
+    .frame-label.bc { bottom: 8px; left: 0; right: 0; text-align: center; transform-origin: bottom center; }
+    .frame-label.br { bottom: 8px; right: 86px; transform-origin: bottom right; text-align: right; }
     .frame-label.mobile-bot { display: none; }
     .ls-frame-btm { display: none; }
     .ls-frame-top { display: none; }
@@ -194,6 +194,13 @@
     }
     .rec-dot { color: #ef4444; animation: rec-blink 2s ease-in-out infinite; }
 
+
+    /* Prominent: hide corners and side lines; reposition h-lines below/above labels */
+    .frame.prominent .corner               { animation: none !important; opacity: 0 !important; }
+    .frame.prominent .frame-line.left,
+    .frame.prominent .frame-line.right     { animation: none !important; opacity: 0 !important; }
+    .frame.prominent .frame-line.top       { top: 70px; left: 0; right: 0; }
+    .frame.prominent .frame-line.bottom    { bottom: 70px; left: 0; right: 0; }
 
     /* Prominent: shift outward via translateY + scale — pure transform, zero reflow */
     .frame.prominent .frame-label      { color: rgba(237,234,228,0.85); font-size: clamp(10px, 1.6vw, 22px); }
@@ -1192,7 +1199,7 @@
 
       /* Hero: centre content, account for 68px bars top + bottom */
       #hero { min-height: 100dvh; padding: var(--bar-h) 0; }
-      .hero-name { font-size: 56px; text-align: center; }
+      .hero-name { font-size: clamp(28px, 13vw, 56px); text-align: center; white-space: nowrap; }
       .hero-meta { align-items: center; }
       .hero-nav { justify-content: center; }
 
