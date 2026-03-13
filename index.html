@@ -12,6 +12,7 @@
 
   <style>
     /* ── Reset ── */
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* ── Variables ── */
@@ -1194,7 +1195,7 @@
       .home-panel .home-bot-bar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
         width: 100%;
         height: var(--bar-h);
         padding: 0 16px;
@@ -1210,6 +1211,12 @@
         color: rgba(237,234,228,0.7);
         white-space: nowrap;
       }
+      .htb-data + .htb-data::before {
+        content: '·';
+        margin: 0 8px;
+        color: rgba(237,234,228,0.35);
+      }
+      #home-bot-tstop::before { display: none; }
       /* Hide bottom line and bottom labels on mobile prominent — bar border replaces the line */
       .frame.prominent .frame-line.bottom { opacity: 0 !important; animation: none !important; }
       .frame.prominent .frame-label.bl,
@@ -1356,7 +1363,7 @@
       .home-panel .home-bot-bar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
         width: 100%;
         height: var(--bar-h);
         padding: 0 16px;
@@ -1376,6 +1383,13 @@
       .htb-tc { font-variant-numeric: tabular-nums; }
       .htb-rec .rec-dot { color: #ef4444; animation: rec-blink 2s ease-in-out infinite; }
       .htb-ls-only { display: inline; }
+      .htb-data + .htb-data::before {
+        content: '·';
+        margin: 0 8px;
+        color: rgba(237,234,228,0.35);
+      }
+      /* Vertically centre the LOG label in the landscape top bar */
+      .frame-label.tc { top: 50%; transform: translateY(-50%); }
       /* Hide frame lines and all floating labels on landscape prominent */
       .frame.prominent .frame-line.top,
       .frame.prominent .frame-line.bottom { opacity: 0 !important; animation: none !important; }
