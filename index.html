@@ -1271,9 +1271,9 @@
       /* All content pages: tighter side margins, top padding, smaller body text */
       .container { padding: 0 26px; }
       section { padding-top: 60px; font-size: 14px; }
-      /* No bottom bar on mobile — remove the desktop bottom-bar padding */
-      .page { padding-bottom: env(safe-area-inset-bottom, 0px); }
-      footer { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+      /* No bottom bar on mobile — transparent page bg lets Safari frosted glass work naturally */
+      .page { background: transparent; padding-bottom: 0; }
+      footer { padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); }
 
       /* Services: single full-width column on mobile */
       .services-grid { grid-template-columns: 1fr; }
@@ -1462,6 +1462,10 @@
       .content-navbar { height: calc(var(--bar-h) + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); opacity: 1; transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45), background 0.5s ease; }
       .frame.mobile-bars-visible.content-mode .content-navbar { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), background 0.5s ease; }
       .frame.mobile-bar-exit.content-mode .content-navbar     { transform: translateY(-100%); }
+
+      /* No bottom bar on landscape mobile either */
+      .page { background: transparent; padding-bottom: 0; }
+      footer { padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); }
 
       /* Nav dropdown: cap to available height below the top bar and allow scroll */
       .mobile-nav-menu.menu-open {
