@@ -1267,11 +1267,13 @@
 
       /* Footer: copyright left, play button right */
       .footer-left { display: flex; align-items: center; }
-      footer { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 
       /* All content pages: tighter side margins, top padding, smaller body text */
       .container { padding: 0 26px; }
       section { padding-top: 60px; font-size: 14px; }
+      /* No bottom bar on mobile — remove the desktop bottom-bar padding */
+      .page { padding-bottom: env(safe-area-inset-bottom, 0px); }
+      footer { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
 
       /* Services: single full-width column on mobile */
       .services-grid { grid-template-columns: 1fr; }
