@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Marko Balac — Script Supervisor</title>
   <meta name="description" content="Marko Balac — Script Supervisor based in Toronto, ON.">
   <link rel="icon" type="image/png" href="favicon.png">
@@ -1169,8 +1169,8 @@
         justify-content: space-between;
         position: absolute;
         top: 0; left: 0; right: 0;
-        height: var(--bar-h);
-        padding: 0 16px;
+        height: calc(var(--bar-h) + env(safe-area-inset-top, 0px));
+        padding: env(safe-area-inset-top, 0px) 16px 0;
         background: #000;
         border-bottom: 4px solid rgba(237,234,228,0.35);
         z-index: 10;
@@ -1197,8 +1197,8 @@
         align-items: center;
         justify-content: center;
         width: 100%;
-        height: var(--bar-h);
-        padding: 0 16px;
+        height: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
+        padding: 0 16px env(safe-area-inset-bottom, 0px);
         background: transparent;
         border-top: 4px solid rgba(237,234,228,0.35);
         opacity: 0;
@@ -1336,7 +1336,7 @@
       .frame.mobile-bars-visible .frame-bar.top    { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
       .frame.mobile-bars-visible .frame-bar.bottom { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.05s; }
       /* Content navbar: same slide animation as top bar */
-      .content-navbar { height: var(--bar-h); opacity: 1; transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45), background 0.5s ease; }
+      .content-navbar { height: calc(var(--bar-h) + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); opacity: 1; transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45), background 0.5s ease; }
       .frame.mobile-bars-visible.content-mode .content-navbar { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), background 0.5s ease; }
       .frame.mobile-bar-exit.content-mode .content-navbar     { transform: translateY(-100%); }
 
@@ -1351,22 +1351,22 @@
         justify-content: space-between;
         position: absolute;
         top: 0; left: 0; right: 0;
-        height: var(--bar-h);
-        padding: 0 16px;
+        height: calc(var(--bar-h) + env(safe-area-inset-top, 0px));
+        padding: env(safe-area-inset-top, 0px) 16px 0;
         background: #000;
         border-bottom: 4px solid rgba(237,234,228,0.35);
         z-index: 10;
         animation: htb-fadein 0.45s ease 0.1s both;
       }
       .home-panel { overflow-y: auto; }
-      #hero { padding-top: var(--bar-h); }
+      #hero { padding-top: calc(var(--bar-h) + env(safe-area-inset-top, 0px)); }
       .home-panel .home-bot-bar {
         display: flex;
         align-items: center;
         justify-content: center;
         width: 100%;
-        height: var(--bar-h);
-        padding: 0 16px;
+        height: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
+        padding: 0 16px env(safe-area-inset-bottom, 0px);
         background: transparent;
         border-top: 4px solid rgba(237,234,228,0.35);
         opacity: 0;
@@ -1455,13 +1455,13 @@
       .frame-bar.bottom { transform: translateY(100%);  transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
       .frame.mobile-bars-visible .frame-bar.top    { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
       .frame.mobile-bars-visible .frame-bar.bottom { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.05s; }
-      .content-navbar { height: var(--bar-h); opacity: 1; transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45), background 0.5s ease; }
+      .content-navbar { height: calc(var(--bar-h) + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); opacity: 1; transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45), background 0.5s ease; }
       .frame.mobile-bars-visible.content-mode .content-navbar { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), background 0.5s ease; }
       .frame.mobile-bar-exit.content-mode .content-navbar     { transform: translateY(-100%); }
 
       /* Nav dropdown: cap to available height below the top bar and allow scroll */
       .mobile-nav-menu.menu-open {
-        max-height: calc(100dvh - var(--bar-h));
+        max-height: calc(100dvh - var(--bar-h) - env(safe-area-inset-top, 0px));
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
       }
