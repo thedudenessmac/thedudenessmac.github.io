@@ -526,7 +526,7 @@
     .cnb-mobile-menu.open { display: flex; }
     .cnb-mobile-menu button {
       font-family: var(--mono);
-      font-size: 12px;
+      font-size: 14px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: rgba(237,234,228,0.6);
@@ -2354,9 +2354,18 @@
       const cnbBack     = document.getElementById('cnb-back');
       const cnbBackText = cnbBack.querySelector('.text');
       cnbBack.addEventListener('click', () => { if (gameOpen) closeGame(); else goHome(); });
-      document.getElementById('cnb-hamburger').addEventListener('click', () => {
-        document.getElementById('cnb-mobile-menu').classList.toggle('open');
-        document.getElementById('cnb-hamburger').classList.toggle('is-open');
+      const cnbHamburger = document.getElementById('cnb-hamburger');
+      const cnbMobileMenu = document.getElementById('cnb-mobile-menu');
+      cnbHamburger.addEventListener('click', () => {
+        cnbMobileMenu.classList.toggle('open');
+        cnbHamburger.classList.toggle('is-open');
+      });
+      document.addEventListener('click', e => {
+        if (!cnbMobileMenu.classList.contains('open')) return;
+        if (!cnbHamburger.contains(e.target) && !cnbMobileMenu.contains(e.target)) {
+          cnbMobileMenu.classList.remove('open');
+          cnbHamburger.classList.remove('is-open');
+        }
       });
 
       // Top bar page tabs
