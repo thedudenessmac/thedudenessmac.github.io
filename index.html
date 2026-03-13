@@ -12,7 +12,7 @@
 
   <style>
     /* ── Reset ── */
-    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: #000; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* ── Variables ── */
@@ -1266,6 +1266,7 @@
 
       /* Footer: copyright left, play button right */
       .footer-left { display: flex; align-items: center; }
+      footer { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
 
       /* All content pages: tighter side margins, top padding, smaller body text */
       .container { padding: 0 26px; }
