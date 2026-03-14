@@ -24,7 +24,7 @@
       --dim:        #c8c2bb;
       --accent:     #c8850e;
       --border:     #e0dbd4;
-      --dark:       #0f0f0d;
+      --dark:       #000;
       --dark-text:  #edeae4;
       --bar-h:      64px;
       --mono:       'PT Mono', 'Courier New', monospace;
@@ -297,7 +297,7 @@
       gap: 12px;
       margin-top: 28px;
     }
-    .hero-nav a {
+    .hero-nav button {
       position: relative;
       display: flex;
       align-items: center;
@@ -319,16 +319,16 @@
       transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
       white-space: nowrap;
     }
-    .hero-nav a svg {
+    .hero-nav button svg {
       position: absolute;
       width: 18px;
       fill: rgba(237,234,228,0.85);
       z-index: 9;
       transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    .hero-nav a .arr-1 { right: 14px; }
-    .hero-nav a .arr-2 { left: -25%; }
-    .hero-nav a .circle {
+    .hero-nav button .arr-1 { right: 14px; }
+    .hero-nav button .arr-2 { left: -25%; }
+    .hero-nav button .circle {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -340,29 +340,29 @@
       opacity: 0;
       transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    .hero-nav a .text {
+    .hero-nav button .text {
       position: relative;
       z-index: 1;
       transform: translateX(-12px);
       transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
     }
-    .hero-nav a:hover {
+    .hero-nav button:hover {
       box-shadow: 0 0 0 12px transparent;
       color: rgba(237,234,228,0.95);
       border-radius: 12px;
     }
-    .hero-nav a:hover .arr-1 { right: -25%; }
-    .hero-nav a:hover .arr-2 { left: 14px; }
-    .hero-nav a:hover .text { transform: translateX(12px); }
-    .hero-nav a:hover svg { fill: rgba(237,234,228,0.95); }
-    .hero-nav a:active { scale: 0.95; box-shadow: 0 0 0 4px rgba(237,234,228,0.65); }
-    .hero-nav a:hover .circle { width: 220px; height: 220px; opacity: 1; }
+    .hero-nav button:hover .arr-1 { right: -25%; }
+    .hero-nav button:hover .arr-2 { left: 14px; }
+    .hero-nav button:hover .text { transform: translateX(12px); }
+    .hero-nav button:hover svg { fill: rgba(237,234,228,0.95); }
+    .hero-nav button:active { scale: 0.95; box-shadow: 0 0 0 4px rgba(237,234,228,0.65); }
+    .hero-nav button:hover .circle { width: 220px; height: 220px; opacity: 1; }
 
     /* Hero intro sequence — only active on fresh homepage load (.hero-intro class) */
     .hero-intro .hero-name     { opacity: 0; animation: hero-fadein 0.65s ease 0.5s  forwards; }
     .hero-intro .hero-role     { opacity: 0; animation: hero-fadein 0.55s ease 0.75s forwards; }
     .hero-intro .hero-location { opacity: 0; animation: hero-fadein 0.55s ease 0.95s forwards; }
-    .hero-intro .hero-nav a    { opacity: 0; animation: hero-fadein 0.55s ease 1.1s  forwards; }
+    .hero-intro .hero-nav button    { opacity: 0; animation: hero-fadein 0.55s ease 1.1s  forwards; }
 
     /* ── Content Navbar ── */
     .content-navbar {
@@ -709,7 +709,6 @@
     }
     .credits-earlier td { color: #888 !important; }
     .credits-earlier td:first-child { font-weight: 400 !important; color: #888 !important; }
-    .credits-group { display: none; }
 
     /* ── Services ── */
     .services-phase { margin-bottom: 40px; }
@@ -1153,7 +1152,90 @@
     }
 
 
-    /* ── Mobile: monitor frame labels ── */
+    /* ── Shared mobile rules (portrait + landscape) ── */
+    @media (max-width: 640px), (orientation: landscape) and (max-height: 500px) {
+      /* Homepage top bar */
+      .frame.prominent .home-top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: calc(var(--bar-h) + env(safe-area-inset-top, 0px));
+        padding: env(safe-area-inset-top, 0px) 16px 0;
+        background: #000;
+        border-bottom: 4px solid rgba(237,234,228,0.35);
+        z-index: 10;
+        animation: htb-fadein 0.45s ease 0.1s both;
+      }
+      /* Homepage bottom bar */
+      .home-panel .home-bot-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
+        padding: 0 16px env(safe-area-inset-bottom, 0px);
+        background: transparent;
+        border-top: 4px solid rgba(237,234,228,0.35);
+        opacity: 0;
+        transition: opacity 0.45s ease 0.1s;
+      }
+      .htb-tc { font-variant-numeric: tabular-nums; }
+      .htb-rec .rec-dot { color: #ef4444; animation: rec-blink 2s ease-in-out infinite; }
+      .htb-data + .htb-data::before {
+        content: '·';
+        margin: 0 8px;
+        color: rgba(237,234,228,0.35);
+      }
+      /* Top bar: never show on content pages */
+      .frame.content-mode .home-top-bar { display: none !important; }
+      /* Content-mode label font size */
+      .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
+      /* Combined bottom row label */
+      .frame.content-mode .frame-label.mobile-bot {
+        display: block;
+        bottom: 17px; left: 0; right: 0;
+        text-align: center;
+        font-size: clamp(11px, 2.8vw, 13px);
+        white-space: nowrap;
+        opacity: 0;
+        animation: none;
+        transform: none;
+        color: rgba(237,234,228,0.85);
+      }
+      /* Fade in labels when bars are visible */
+      .frame.mobile-bars-visible.content-mode .frame-label.bl  { opacity: 1; transition: opacity 0.4s ease 0.65s; }
+      .frame.mobile-bars-visible.content-mode .frame-label.tr  { opacity: 1; transition: opacity 0.4s ease 0.65s; }
+      .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot { opacity: 1; transition: opacity 0.4s ease 0.65s; }
+      /* Show mobile nav on content pages */
+      .frame.content-mode .mobile-nav-btn  { display: flex; }
+      .frame.content-mode .mobile-nav-menu { display: block; }
+      /* Suppress bars until mobile-bars-visible fires */
+      .frame.content-mode .frame-bar { height: 0 !important; opacity: 0 !important; border: none !important; }
+      .frame.mobile-bars-visible.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
+      .frame.mobile-bars-visible.content-mode .frame-bar.bottom { height: 0 !important; opacity: 0 !important; }
+      .frame.mobile-bar-exit.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
+      .frame.mobile-bar-exit.content-mode .frame-bar.bottom { height: 0 !important; opacity: 0 !important; }
+      /* Hide bottom bar labels on mobile content pages */
+      .frame.content-mode .frame-label.bc,
+      .frame.content-mode .frame-label.br,
+      .frame.content-mode .frame-label.mobile-bot { display: none !important; }
+      /* Mobile bar slide-in animations */
+      .frame-bar.top    { transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
+      .frame-bar.bottom { transform: translateY(100%);  transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
+      .frame.mobile-bars-visible .frame-bar.top    { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
+      .frame.mobile-bars-visible .frame-bar.bottom { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.05s; }
+      /* Content navbar slide animation */
+      .content-navbar { height: calc(var(--bar-h) + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); opacity: 1; transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45), background 0.5s ease; }
+      .frame.mobile-bars-visible.content-mode .content-navbar { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), background 0.5s ease; }
+      .frame.mobile-bar-exit.content-mode .content-navbar     { transform: translateY(-100%); }
+      /* No bottom page padding — Safari frosted glass handles safe area */
+      .page { background: transparent; padding-bottom: 0; }
+      footer { padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); }
+    }
+
+    /* ── Mobile portrait ── */
     @media (max-width: 640px) {
       /* Slimmer bars: top bar is single-row, bottom bar keeps two rows */
       :root { --bar-h: 64px; }
@@ -1182,20 +1264,7 @@
       #hero .hero-meta { align-items: center; }
       #hero .hero-nav  { justify-content: center; }
 
-      /* ── Mobile homepage top bar ── */
-      .frame.prominent .home-top-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: calc(var(--bar-h) + env(safe-area-inset-top, 0px));
-        padding: env(safe-area-inset-top, 0px) 16px 0;
-        background: #000;
-        border-bottom: 4px solid rgba(237,234,228,0.35);
-        z-index: 10;
-        animation: htb-fadein 0.45s ease 0.1s both;
-      }
+      /* ── Mobile homepage top bar text ── */
       .htb-rec, .htb-tc {
         font-family: var(--mono);
         font-size: 14px;
@@ -1203,8 +1272,6 @@
         color: rgba(237,234,228,0.7);
         white-space: nowrap;
       }
-      .htb-tc { font-variant-numeric: tabular-nums; }
-      .htb-rec .rec-dot { color: #ef4444; animation: rec-blink 2s ease-in-out infinite; }
       /* Hide top line and top labels on mobile prominent — bar border replaces the line */
       .frame.prominent .frame-line.top { opacity: 0 !important; animation: none !important; }
       .frame.prominent .frame-label.tl,
@@ -1212,18 +1279,6 @@
       /* ── Mobile homepage bottom bar — pinned to bottom via flex ── */
       .home-panel { display: flex; flex-direction: column; }
       #hero { flex: 1; min-height: 0; }
-      .home-panel .home-bot-bar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
-        padding: 0 16px env(safe-area-inset-bottom, 0px);
-        background: transparent;
-        border-top: 4px solid rgba(237,234,228,0.35);
-        opacity: 0;
-        transition: opacity 0.45s ease 0.1s;
-      }
       .htb-data {
         font-family: var(--mono);
         font-size: 14px;
@@ -1231,19 +1286,12 @@
         color: rgba(237,234,228,0.7);
         white-space: nowrap;
       }
-      .htb-data + .htb-data::before {
-        content: '·';
-        margin: 0 8px;
-        color: rgba(237,234,228,0.35);
-      }
       #home-bot-tstop::before { display: none; }
       /* Hide bottom line and bottom labels on mobile prominent — bar border replaces the line */
       .frame.prominent .frame-line.bottom { opacity: 0 !important; animation: none !important; }
       .frame.prominent .frame-label.bl,
       .frame.prominent .frame-label.bc,
       .frame.prominent .frame-label.br { display: none; }
-      /* Top bar: never show on content pages */
-      .frame.content-mode .home-top-bar { display: none !important; }
 
       /* Content page headers */
       .section-eyebrow { font-size: 38px; }
@@ -1290,9 +1338,6 @@
       /* All content pages: tighter side margins, top padding, smaller body text */
       .container { padding: 0 26px; }
       section { padding-top: 60px; font-size: 14px; }
-      /* No bottom bar on mobile — transparent page bg lets Safari frosted glass work naturally */
-      .page { background: transparent; padding-bottom: 0; }
-      footer { padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); }
 
       /* Services: single full-width column on mobile */
       .services-grid { grid-template-columns: 1fr; }
@@ -1304,97 +1349,21 @@
       .about-grid { grid-template-columns: 1fr; gap: 40px; }
       .about-photo { aspect-ratio: 3 / 4; max-height: 480px; }
 
-
       /* (mobile-home-out / mobile-labels-out / mobile-snap-positions / labels-animation-reset
           rules are defined globally above — no duplicate needed here) */
-      /* Completely suppress bars (height, opacity, border) until mobile-bars-visible fires —
-         overrides the desktop content-mode rule that would otherwise show them during the slide */
-      .frame.content-mode .frame-bar { height: 0 !important; opacity: 0 !important; border: none !important; }
-      .frame.mobile-bars-visible.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
-      .frame.mobile-bars-visible.content-mode .frame-bar.bottom { height: 0 !important; opacity: 0 !important; }
-      /* Restore bar size during goHome so bars can animate away via translateY */
-      .frame.mobile-bar-exit.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
-      .frame.mobile-bar-exit.content-mode .frame-bar.bottom { height: 0 !important; opacity: 0 !important; }
-      /* Hide bottom bar labels on mobile content pages */
-      .frame.content-mode .frame-label.bc,
-      .frame.content-mode .frame-label.br,
-      .frame.content-mode .frame-label.mobile-bot { display: none !important; }
-
-      /* Content-mode label positions for 52px bars
-         Top bar  — timecode (BL) left, fps+rec (TR) right
-         Bot bar  — single combined row centred */
-      .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
       /* Hide A·SDI-1·4.5K on mobile content pages */
       .frame.content-mode .frame-label.tl { display: none; }
       /* Timecode top-left, cleared past the chevron button (~80px) */
       .frame.content-mode .frame-label.bl { bottom: auto; top: calc(var(--bar-h) / 2); left: 110px; right: auto; transform: translateY(-50%); opacity: 0; animation: none; font-size: clamp(12px, 3.8vw, 16px); }
-      .frame.mobile-bars-visible.content-mode .frame-label.bl { opacity: 1; transition: opacity 0.4s ease 0.65s; }
       /* FPS+REC top-right */
       .frame.content-mode .frame-label.tr { top: calc(var(--bar-h) / 2); right: 16px; transform: translateY(-50%); opacity: 0; animation: none; font-size: clamp(12px, 3.8vw, 16px); }
-      .frame.mobile-bars-visible.content-mode .frame-label.tr { opacity: 1; transition: opacity 0.4s ease 0.65s; }
-      /* Hide individual BC and BR on mobile content pages */
-      .frame.content-mode .frame-label.bc { display: none; }
-      .frame.content-mode .frame-label.br { display: none; }
-      /* Combined bottom row */
-      .frame.content-mode .frame-label.mobile-bot {
-        display: block;
-        bottom: 17px; left: 0; right: 0;
-        text-align: center;
-        font-size: clamp(11px, 2.8vw, 13px);
-        white-space: nowrap;
-        opacity: 0;
-        animation: none;
-        transform: none;
-        color: rgba(237,234,228,0.85);
-      }
-      .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot { opacity: 1; transition: opacity 0.4s ease 0.65s; }
-
-      /* Show shared dropdown nav on mobile content pages */
-      .frame.content-mode .mobile-nav-btn  { display: flex; }
-      .frame.content-mode .mobile-nav-menu { display: block; }
-
-      /* Mobile entry animation: bars slide in from edges */
-      .frame-bar.top    { transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
-      .frame-bar.bottom { transform: translateY(100%);  transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
-      .frame.mobile-bars-visible .frame-bar.top    { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
-      .frame.mobile-bars-visible .frame-bar.bottom { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.05s; }
-      /* Content navbar: same slide animation as top bar */
-      .content-navbar { height: calc(var(--bar-h) + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); opacity: 1; transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45), background 0.5s ease; }
-      .frame.mobile-bars-visible.content-mode .content-navbar { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), background 0.5s ease; }
-      .frame.mobile-bar-exit.content-mode .content-navbar     { transform: translateY(-100%); }
 
     }
 
     /* ── Mobile landscape ── */
     @media (orientation: landscape) and (max-height: 500px) {
-      /* ── Homepage top/bottom bars ── */
-      .frame.prominent .home-top-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: absolute;
-        top: 0; left: 0; right: 0;
-        height: calc(var(--bar-h) + env(safe-area-inset-top, 0px));
-        padding: env(safe-area-inset-top, 0px) 16px 0;
-        background: #000;
-        border-bottom: 4px solid rgba(237,234,228,0.35);
-        z-index: 10;
-        animation: htb-fadein 0.45s ease 0.1s both;
-      }
       .home-panel { overflow-y: auto; }
       #hero { padding-top: calc(var(--bar-h) + env(safe-area-inset-top, 0px)); }
-      .home-panel .home-bot-bar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
-        padding: 0 16px env(safe-area-inset-bottom, 0px);
-        background: transparent;
-        border-top: 4px solid rgba(237,234,228,0.35);
-        opacity: 0;
-        transition: opacity 0.45s ease 0.1s;
-      }
       .home-panel .htb-data,
       .htb-rec, .htb-tc {
         font-family: var(--mono);
@@ -1403,14 +1372,7 @@
         color: rgba(237,234,228,0.7);
         white-space: nowrap;
       }
-      .htb-tc { font-variant-numeric: tabular-nums; }
-      .htb-rec .rec-dot { color: #ef4444; animation: rec-blink 2s ease-in-out infinite; }
       .htb-ls-only { display: inline; }
-      .htb-data + .htb-data::before {
-        content: '·';
-        margin: 0 8px;
-        color: rgba(237,234,228,0.35);
-      }
       .frame-label.tc { display: none !important; }
       /* Hide frame lines and all floating labels on landscape prominent */
       .frame.prominent .frame-line.top,
@@ -1420,72 +1382,16 @@
       .frame.prominent .frame-label.bl,
       .frame.prominent .frame-label.bc,
       .frame.prominent .frame-label.br { display: none; }
-      .frame.content-mode .home-top-bar { display: none !important; }
-
-      /* Content-mode font size — same for all labels including mobile-bot */
-      .frame.content-mode .frame-label { font-size: clamp(11px, 2.8vw, 13px); }
-
       /* Content-mode label repositioning — mirrors the max-width:640px rules
          so wider landscape phones get the same bar layout */
       .frame.content-mode .frame-label.bl {
         bottom: auto; top: calc(var(--bar-h) / 2); left: 110px; right: auto;
         transform: translateY(-50%); opacity: 0; animation: none;
       }
-      .frame.mobile-bars-visible.content-mode .frame-label.bl {
-        opacity: 1; transition: opacity 0.4s ease 0.65s;
-      }
       .frame.content-mode .frame-label.tr {
         top: calc(var(--bar-h) / 2); right: 16px; transform: translateY(-50%);
         opacity: 0; animation: none;
       }
-      .frame.mobile-bars-visible.content-mode .frame-label.tr {
-        opacity: 1; transition: opacity 0.4s ease 0.65s;
-      }
-
-      /* Content-mode bottom bar: show mobile-bot for wider phones where the
-         max-width:640px rule doesn't apply */
-      .frame.content-mode .frame-label.mobile-bot {
-        display: block;
-        bottom: 17px; left: 0; right: 0;
-        text-align: center;
-        font-size: clamp(11px, 2.8vw, 13px);
-        white-space: nowrap;
-        opacity: 0;
-        animation: none;
-        transform: none;
-        color: rgba(237, 234, 228, 0.85);
-      }
-      .frame.mobile-bars-visible.content-mode .frame-label.mobile-bot {
-        opacity: 1;
-        transition: opacity 0.4s ease 0.65s;
-      }
-
-      /* Show mobile nav */
-      .frame.content-mode .mobile-nav-btn  { display: flex; }
-      .frame.content-mode .mobile-nav-menu { display: block; }
-
-      /* Bar suppression + slide animation — mirrors max-width:640px rules for wider phones */
-      .frame.content-mode .frame-bar { height: 0 !important; opacity: 0 !important; border: none !important; }
-      .frame.mobile-bars-visible.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
-      .frame.mobile-bars-visible.content-mode .frame-bar.bottom { height: 0 !important; opacity: 0 !important; }
-      .frame.mobile-bar-exit.content-mode .frame-bar.top    { height: var(--bar-h) !important; opacity: 1 !important; border-bottom: 1px solid rgba(200,133,14,0.35) !important; }
-      .frame.mobile-bar-exit.content-mode .frame-bar.bottom { height: 0 !important; opacity: 0 !important; }
-      /* Hide bottom bar labels on mobile content pages */
-      .frame.content-mode .frame-label.bc,
-      .frame.content-mode .frame-label.br,
-      .frame.content-mode .frame-label.mobile-bot { display: none !important; }
-      .frame-bar.top    { transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
-      .frame-bar.bottom { transform: translateY(100%);  transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45); }
-      .frame.mobile-bars-visible .frame-bar.top    { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1); }
-      .frame.mobile-bars-visible .frame-bar.bottom { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.05s; }
-      .content-navbar { height: calc(var(--bar-h) + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px); opacity: 1; transform: translateY(-100%); transition: transform 0.45s cubic-bezier(0.55, 0, 1, 0.45), background 0.5s ease; }
-      .frame.mobile-bars-visible.content-mode .content-navbar { transform: translateY(0); transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), background 0.5s ease; }
-      .frame.mobile-bar-exit.content-mode .content-navbar     { transform: translateY(-100%); }
-
-      /* No bottom bar on landscape mobile either */
-      .page { background: transparent; padding-bottom: 0; }
-      footer { padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); }
-
       /* Nav dropdown: cap to available height below the top bar and allow scroll */
       .mobile-nav-menu.menu-open {
         max-height: calc(100dvh - var(--bar-h) - env(safe-area-inset-top, 0px));
@@ -1610,10 +1516,10 @@
       <div class="cnb-inner">
         <div class="cnb-left">
           <button class="cnb-back-btn" id="cnb-back">
-            <svg xmlns="http://www.w3.org/2000/svg" class="arr-2" viewBox="0 0 24 24"><g transform="scale(-1,1) translate(-24,0)"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></g></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-2" viewBox="0 0 24 24"><g transform="scale(-1,1) translate(-24,0)"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></g></svg>
             <span class="text">Home</span>
             <span class="circle"></span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="arr-1" viewBox="0 0 24 24"><g transform="scale(-1,1) translate(-24,0)"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></g></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-1" viewBox="0 0 24 24"><g transform="scale(-1,1) translate(-24,0)"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></g></svg>
           </button>
           <span class="cnb-rec"><span class="rec-dot">◆</span> <span class="rec-text">REC</span></span>
           <span class="cnb-tc" id="cnb-tc">01:00:00:00</span>
@@ -1626,7 +1532,7 @@
           <button data-page="contact">Contact</button>
         </div>
         <button class="cnb-hamburger" id="cnb-hamburger" aria-label="Menu">
-          <svg viewBox="0 0 32 32">
+          <svg aria-hidden="true" viewBox="0 0 32 32">
             <path class="hbg-line hbg-line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22" />
             <path class="hbg-line" d="M7 16 27 16" />
           </svg>
@@ -1670,11 +1576,11 @@
             <span class="hero-location">Based in Toronto, ON</span>
           </div>
           <nav class="hero-nav">
-            <a href="#about"><svg xmlns="http://www.w3.org/2000/svg" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">About</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></a>
-            <a href="#credits"><svg xmlns="http://www.w3.org/2000/svg" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">Credits</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></a>
-            <a href="#services"><svg xmlns="http://www.w3.org/2000/svg" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">Services</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></a>
-            <a href="#gallery"><svg xmlns="http://www.w3.org/2000/svg" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">Gallery</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></a>
-            <a href="#contact"><svg xmlns="http://www.w3.org/2000/svg" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">Contact</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></a>
+            <button data-page="about"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">About</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></button>
+            <button data-page="credits"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">Credits</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></button>
+            <button data-page="services"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">Services</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></button>
+            <button data-page="gallery"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">Gallery</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></button>
+            <button data-page="contact"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg><span class="text">Contact</span><span class="circle"></span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg></button>
           </nav>
         </div>
       </div>
@@ -1730,7 +1636,6 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="credits-group"><td colspan="5">Script Supervisor</td></tr>
           <tr>
             <td>Matcha Latte <span class="film-tag">16mm</span></td>
             <td>Andrés Pérez Galicia<span class="producer">prod. Nessa Hallman</span></td>
@@ -1831,7 +1736,7 @@
         <div class="services-grid">
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M277-279h275v-60H277v60Zm0-171h406v-60H277v60Zm0-171h406v-60H277v60Zm-97 501q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm0-60h600v-600H180v600Zm0-600v600-600Z"/>
               </svg>
             </div>
@@ -1842,7 +1747,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M592-302 450-444v-196h60v171l124 124-42 43ZM450-730v-90h60v90h-60Zm280 280v-60h90v60h-90ZM450-140v-90h60v90h-60ZM140-450v-60h90v60h-90ZM480.27-80q-82.74 0-155.5-31.5Q252-143 197.5-197.5t-86-127.34Q80-397.68 80-480.5t31.5-155.66Q143-709 197.5-763t127.34-85.5Q397.68-880 480.5-880t155.66 31.5Q709-817 763-763t85.5 127Q880-563 880-480.27q0 82.74-31.5 155.5Q817-252 763-197.68q-54 54.31-127 86Q563-80 480.27-80Zm.23-60Q622-140 721-239.5t99-241Q820-622 721.19-721T480-820q-141 0-240.5 98.81T140-480q0 141 99.5 240.5t241 99.5Zm-.5-340Z"/>
               </svg>
             </div>
@@ -1853,7 +1758,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M0-240v-53q0-38.57 41.5-62.78Q83-380 150.38-380q12.16 0 23.39.5t22.23 2.15q-8 17.35-12 35.17-4 17.81-4 37.18v65H0Zm240 0v-65q0-32 17.5-58.5T307-410q32-20 76.5-30t96.5-10q53 0 97.5 10t76.5 30q32 20 49 46.5t17 58.5v65H240Zm540 0v-65q0-19.86-3.5-37.43T765-377.27q11-1.73 22.17-2.23 11.17-.5 22.83-.5 67.5 0 108.75 23.77T960-293v53H780Zm-480-60h360v-6q0-37-50.5-60.5T480-390q-79 0-129.5 23.5T300-305v5ZM149.57-410q-28.57 0-49.07-20.56Q80-451.13 80-480q0-29 20.56-49.5Q121.13-550 150-550q29 0 49.5 20.5t20.5 49.93q0 28.57-20.5 49.07T149.57-410Zm660 0q-28.57 0-49.07-20.56Q740-451.13 740-480q0-29 20.56-49.5Q781.13-550 810-550q29 0 49.5 20.5t20.5 49.93q0 28.57-20.5 49.07T809.57-410ZM480-480q-50 0-85-35t-35-85q0-51 35-85.5t85-34.5q51 0 85.5 34.5T600-600q0 50-34.5 85T480-480Zm.35-60Q506-540 523-557.35t17-43Q540-626 522.85-643t-42.5-17q-25.35 0-42.85 17.15t-17.5 42.5q0 25.35 17.35 42.85t43 17.5ZM480-300Zm0-300Z"/>
               </svg>
             </div>
@@ -1871,7 +1776,7 @@
         <div class="services-grid">
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="m734-120-42-42 74-74H504v-60h262l-74-74 42-42 146 146-146 146Zm106-352h-60v-308h-60v90H240v-90h-60v600h264v60H180q-26 0-43-17t-17-43v-600q0-26 17-43t43-17h202q7-35 34.5-57.5T480-920q36 0 63.5 22.5T578-840h202q26 0 43 17t17 43v308ZM508.5-791.5Q520-803 520-820t-11.5-28.5Q497-860 480-860t-28.5 11.5Q440-837 440-820t11.5 28.5Q463-780 480-780t28.5-11.5Z"/>
               </svg>
             </div>
@@ -1882,7 +1787,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M140-160q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm0-60h310v-520H140v520Zm370 0h310v-520H510v520Zm-320-97h210v-60H190v60Zm0-129h210v-60H190v60Zm0-129h210v-60H190v60Zm370 258h210v-60H560v60Zm0-129h210v-60H560v60Zm0-129h210v-60H560v60ZM450-220v-520 520Z"/>
               </svg>
             </div>
@@ -1893,7 +1798,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="m140-840 74 152h130l-74-152h89l74 152h130l-74-152h89l74 152h130l-74-152h112q24 0 42 18t18 42v600q0 24-18 42t-42 18H140q-24 0-42-18t-18-42v-600q0-24 18-42t42-18Zm0 212v448h680v-448H140Zm0 0v448-448Zm180 388h320v-32q0-42-42.5-65T480-360q-75 0-117.5 23T320-272v32Zm212.5-201.5Q554-463 554-494t-21.5-52.5Q511-568 480-568t-52.5 21.5Q406-525 406-494t21.5 52.5Q449-420 480-420t52.5-21.5Z"/>
               </svg>
             </div>
@@ -1904,7 +1809,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M284-277h60v-205h-60v205Zm332 0h60v-420h-60v420Zm-166 0h60v-118h-60v118Zm0-205h60v-60h-60v60ZM180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm0-60h600v-600H180v600Zm0-600v600-600Z"/>
               </svg>
             </div>
@@ -1915,7 +1820,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M260-300h260v-60H260v60Zm380 0h60v-360h-60v360ZM260-450h260v-60H260v60Zm0-150h260v-60H260v60ZM132-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h696q24 0 42 18t18 42v600q0 24-18 42t-42 18H132Zm0-60h696v-600H132v600Zm0 0v-600 600Z"/>
               </svg>
             </div>
@@ -1926,7 +1831,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M230-240h196v-60h-85l36-95h199l37 95h-84v60h201v-60h-41.19L522-720h-84L272-300h-42v60Zm170-215 71-185h10l72 185H400ZM140-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h680q24 0 42 18t18 42v680q0 24-18 42t-42 18H140Zm0-60h680v-680H140v680Zm0 0v-680 680Z"/>
               </svg>
             </div>
@@ -1944,7 +1849,7 @@
         <div class="services-grid">
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="m480-522 42 42 249-249-42-42-249 249ZM180-180h42l258-258-42-42-258 258v42Zm362-238L418-542l198-198-30-30-234 234-43-43 228-228q25-25 49.5-25.5T637-807l23 23 45-45q11-11 25-11t25 11l73 73q11 11 11 26t-11 26L542-418ZM244-120H120v-124l298-298 124 124-298 298Z"/>
               </svg>
             </div>
@@ -1955,7 +1860,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm0-60h600v-600H180v600Zm0-600v600-600Zm140 500h320v-60H380v-110h220v-60H380v-110h260v-60H320v400Z"/>
               </svg>
             </div>
@@ -1966,7 +1871,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M332-254q11 0 18-6t8-15q2-17 4.5-32l4.5-27q2-10 3-22t5-28q26-5 51.5-8.5T476-399q26-3 50.5-4.5T574-407q5 20 8.5 40t9.5 40q8 23 17.5 39t23.5 27q9 7 19 9t18-1q11-4 12-12t-6-24q-9-20-15-36.5T651-356q-4-15-7-28l-6-26q6 0 13.5-.5T663-412q17-2 25-11t8-20q0-12-9.5-20t-26.5-8h-13.5q-9.5 0-19.5 1-2-19-4.5-37.5T617-545q-3-22-6.5-40t-7.5-35q-5-20-14.5-36.5T565-685q-12-11-26-16.5t-28-5.5q-23 0-41 8t-35 26q-10 11-21 25.5T390-613q-6-9-12.5-13t-15.5-4q-8 0-13 4.5t-5 11.5q0 28-3.5 54.5T331-506q-4 19-8.5 38t-9.5 38q-13 1-22 2.5t-14 4.5q-6 3-9 8.5t-3 13.5q0 8 2 12.5t7 7.5q5 3 13 4t20 0q0 16-2 31.5t-2 30.5q0 14 .5 24.5T306-274q3 11 9.5 15.5T332-254Zm60-195q9-34 19-62.5t22-53.5q12-26 28.5-53t45.5-27q17 0 28 17.5t17 52.5q4 24 5.5 53.5T562-468q-21 2-42 3.5t-43 3.5q-21 2-42 5t-43 7ZM140-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h680q24 0 42 18t18 42v680q0 24-18 42t-42 18H140Zm0-60h680v-680H140v680Zm0 0v-680 680Z"/>
               </svg>
             </div>
@@ -1977,7 +1882,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M57-160q-23.51 0-40.26-17.63Q0-195.25 0-220h141q-24 0-42-18t-18-42v-500q0-24 18-42t42-18h678q24 0 42 18t18 42v500q0 24-18 42t-42 18h141q0 25-17.62 42.5Q924.75-160 900-160H57Zm447-32q10-10 10-24t-10-24q-10-10-24-10t-24 10q-10 10-10 24t10 24q10 10 24 10t24-10Zm-363-88h678v-500H141v500Zm0 0v-500 500Z"/>
               </svg>
             </div>
@@ -1988,7 +1893,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="m125-40 114-586-98 43v134H81v-174l188-81q27-12 58.5-6.5T375-679l42 66q28 45 71.5 74.5T589-509v60q-60 0-115-28t-97-91l-39 153 89 83v292h-60v-239l-104-99-76 338h-62Zm198.5-735.5Q302-797 302-827t21.5-51.5Q345-900 375-900t51.5 21.5Q448-857 448-827t-21.5 51.5Q405-754 375-754t-51.5-21.5ZM785-41l-35-35 35-35H560v-50h225l-35-35 35-35 95 95-95 95ZM655-217l-95-95 95-95 35 35-35 35h225v50H655l35 35-35 35Z"/>
               </svg>
             </div>
@@ -1999,7 +1904,7 @@
           </div>
           <div class="service-card">
             <div class="svc-icon-box">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
                 <path d="M360-860v-60h240v60H360Zm90 447h60v-230h-60v230ZM340.5-109.5Q275-138 226-187t-77.5-114.5Q120-367 120-441t28.5-139.5Q177-646 226-695t114.5-77.5Q406-801 480-801q67 0 126 22.5T711-716l51-51 42 42-51 51q36 40 61.5 97T840-441q0 74-28.5 139.5T734-187q-49 49-114.5 77.5T480-81q-74 0-139.5-28.5Zm352-119Q780-316 780-441t-87.5-212.5Q605-741 480-741t-212.5 87.5Q180-566 180-441t87.5 212.5Q355-141 480-141t212.5-87.5ZM480-440Z"/>
               </svg>
             </div>
@@ -2037,10 +1942,10 @@
           <li class="contact-item">
             <span class="contact-label">IMDb</span>
             <a href="https://www.imdb.com/name/nm18259375/" class="imdb-btn" target="_blank" rel="noopener noreferrer">
-              <svg xmlns="http://www.w3.org/2000/svg" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-2" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
               <span class="text">View IMDb Profile</span>
               <span class="circle"></span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="arr-1" viewBox="0 0 24 24"><path d="M16.1716 10.9999L10.8076 5.63589L12.2218 4.22168L20 11.9999L12.2218 19.778L10.8076 18.3638L16.1716 12.9999H4V10.9999H16.1716Z"/></svg>
             </a>
           </li>
         </ul>
@@ -2144,8 +2049,10 @@
 
     // ── Running timecode ──────────────────────────────
     (function () {
-      const el    = document.getElementById('frame-tc');
+      const el       = document.getElementById('frame-tc');
       if (!el) return;
+      const elCnbTc  = document.getElementById('cnb-tc');   // cached once
+      const elHomeTc = document.getElementById('home-tc');  // cached once
       const FPS   = tcFps;
       const epoch = _tcEpoch; // wall-clock ms when TC was at frame 0
       const pad   = n => String(n).padStart(2, '0');
@@ -2155,10 +2062,8 @@
         const s = Math.floor(f / FPS);
         const _tcStr = `${pad(Math.floor(s/3600)%24)}:${pad(Math.floor(s/60)%60)}:${pad(s%60)}:${pad(f%FPS)}`;
         el.textContent = _tcStr;
-        const _elCnbTc = document.getElementById('cnb-tc');
-        if (_elCnbTc) _elCnbTc.textContent = _tcStr;
-        const _elHomeTc = document.getElementById('home-tc');
-        if (_elHomeTc) _elHomeTc.textContent = _tcStr;
+        if (elCnbTc)  elCnbTc.textContent  = _tcStr;
+        if (elHomeTc) elHomeTc.textContent = _tcStr;
         rafId = requestAnimationFrame(tick);
       }
       // Pause loop when tab is hidden; resume when visible again
@@ -2183,8 +2088,11 @@
         if (!tabsEl || !tabIndicator) return;
         const btn = tabsEl.querySelector(`button[data-page="${id}"]`);
         if (!btn) return;
-        tabIndicator.style.left  = btn.offsetLeft + 'px';
-        tabIndicator.style.width = btn.offsetWidth + 'px';
+        // Read layout values first, then write — avoids forced reflow (layout thrashing)
+        const left  = btn.offsetLeft;
+        const width = btn.offsetWidth;
+        tabIndicator.style.left  = left  + 'px';
+        tabIndicator.style.width = width + 'px';
       }
       const mobileNavBtn  = document.getElementById('mobile-nav-btn');
       const mobileNavMenu = document.getElementById('mobile-nav-menu');
@@ -2229,7 +2137,7 @@
       const GOHO_BARS_MS    = 450;  // goHome step 3: bar retract duration (0.45s CSS)
       const DESKTOP_BARS_MS = 300;  // desktop: bars appear after this delay
 
-      const pages     = ['about', 'credits', 'services', 'gallery', 'contact'];
+      const pages     = _contentPages.filter(p => p !== 'game');
       let   activePage = null;
       let   goHomeTimer      = null;
       let   goHomeBarsTimer  = null;
@@ -2238,11 +2146,14 @@
       let   mobileBarsTimer  = null;
       let   mobileExitTimer  = null;
       let   mobileOutTimer   = null;
+      let   _forceTopCleanup = null;   // cancels pending scroll-lock from showPage
       const homeBotBar = document.querySelector('.home-panel .home-bot-bar');
       // Fade in on initial load
       if (homeBotBar) requestAnimationFrame(() => requestAnimationFrame(() => homeBotBar.classList.add('bot-visible')));
 
       function showPage(id, preserveScroll = false) {
+        // Cancel any pending scroll-lock from a previous navigation
+        if (_forceTopCleanup) { _forceTopCleanup(); _forceTopCleanup = null; }
         // Deactivate all pages
         pages.forEach(p => {
           const el = document.getElementById('page-' + p);
@@ -2256,7 +2167,8 @@
             target.scrollTop = 0;
             const forceTop = () => { target.scrollTop = 0; };
             target.addEventListener('scroll', forceTop);
-            setTimeout(() => target.removeEventListener('scroll', forceTop), 500);
+            const _tid = setTimeout(() => { target.removeEventListener('scroll', forceTop); _forceTopCleanup = null; }, 500);
+            _forceTopCleanup = () => { clearTimeout(_tid); target.removeEventListener('scroll', forceTop); };
           }
         }
         activePage = id;
@@ -2365,11 +2277,10 @@
         }, 460);
       }
 
-      // Hero nav links
-      document.querySelectorAll('.hero-nav a').forEach(link => {
-        link.addEventListener('click', e => {
-          e.preventDefault();
-          openContent(link.getAttribute('href').replace('#', ''));
+      // Hero nav buttons
+      document.querySelectorAll('.hero-nav button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          openContent(btn.dataset.page);
         });
       });
 
@@ -2546,7 +2457,8 @@
           pageEl.scrollTop = 0;
           const forceTop = () => { pageEl.scrollTop = 0; };
           pageEl.addEventListener('scroll', forceTop);
-          setTimeout(() => pageEl.removeEventListener('scroll', forceTop), 500);
+          const _tid = setTimeout(() => { pageEl.removeEventListener('scroll', forceTop); _forceTopCleanup = null; }, 500);
+          _forceTopCleanup = () => { clearTimeout(_tid); pageEl.removeEventListener('scroll', forceTop); };
         }
       }
     })();
