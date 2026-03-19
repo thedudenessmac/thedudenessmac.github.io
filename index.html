@@ -601,6 +601,36 @@
       transition: border-color 0.2s, opacity 0.2s;
     }
     .cv-link:hover { opacity: 0.7; border-color: var(--accent); }
+    .cv-btn {
+      position: relative; display: inline-block;
+      font-family: var(--mono); font-size: 13px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 11px 24px; color: var(--accent);
+      text-decoration: none; background-color: transparent;
+      border: 2px solid var(--accent); border-radius: 24px;
+      cursor: pointer; white-space: nowrap; margin-top: 24px;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); overflow: hidden;
+    }
+    .cv-btn::before {
+      content: ''; position: absolute; width: 100%; height: 100%;
+      background: var(--accent); top: 0; left: -100%;
+      border-radius: inherit;
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .cv-btn span { position: relative; overflow: hidden; transition: all 0.7s; }
+    .cv-btn span::before {
+      content: attr(data-label); position: absolute; inset: 0;
+      display: flex; align-items: center;
+      color: #212121; width: 0; overflow: hidden; white-space: nowrap;
+    }
+    .cv-btn:hover span::before {
+      width: 100%;
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+      transition-delay: 0.4s;
+    }
+    .cv-btn:hover::before { left: 0; }
+    .cv-btn:hover { border-color: transparent; }
+    .cv-btn:active { scale: 0.9; }
 
     .about-photo {
       width: 100%;
@@ -1309,7 +1339,7 @@
       .frame.prominent .frame-label.tr { display: none; }
       /* ── Mobile homepage bottom bar — pinned to bottom via flex ── */
       .home-panel { display: flex; flex-direction: column; }
-      #hero { flex: 1; min-height: 0; }
+      #hero { flex: 1; min-height: 0; padding-top: calc(var(--bar-h) + env(safe-area-inset-top, 0px)); }
       .htb-data {
         font-family: var(--mono);
         font-size: 14px;
@@ -1645,7 +1675,8 @@
           <p>I am also a Script Supervisor.</p>
           <p>My job is to protect the integrity of the artistic vision that sustains every narrative project, be it a short film, feature, or series.</p>
           <p>Or, put more dispassionately, I am a cost-containment measure for the production at large. I solve problems BEFORE they become EXPENSIVE problems days, weeks, or months down the road.</p>
-          <p>Please find a copy of my CV <a href="marko-balac-cv.pdf" class="cv-link" target="_blank" rel="noopener noreferrer"><strong>here</strong></a>.</p>
+          <p>Please find a copy of my CV below.</p>
+          <a href="marko-balac-cv.pdf" class="cv-btn" target="_blank" rel="noopener noreferrer"><span data-label="View CV">View CV</span></a>
         </div>
         <picture>
           <source srcset="headshot.webp" type="image/webp">
