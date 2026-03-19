@@ -8,13 +8,13 @@
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500&family=PT+Mono&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=PT+Mono&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       background: #000;
       color: #e0e0d8;
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'PT Mono', 'Courier New', monospace;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -23,16 +23,57 @@
     }
     .back-link {
       align-self: flex-start;
-      font-size: 11px;
-      color: #3a5878;
-      text-decoration: none;
-      letter-spacing: 0.1em;
-      margin-bottom: 24px;
-      opacity: 0.7;
-      transition: opacity 0.15s;
+      position: relative;
+      display: inline-block;
       font-family: 'PT Mono', 'Courier New', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      padding: 8px 20px;
+      color: #c8850e;
+      text-decoration: none;
+      background-color: transparent;
+      border: 2px solid #c8850e;
+      border-radius: 24px;
+      margin-bottom: 24px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      overflow: hidden;
     }
-    .back-link:hover { opacity: 1; }
+    .back-link::before {
+      content: '';
+      position: absolute;
+      width: 100%; height: 100%;
+      background: #c8850e;
+      top: 0; left: -100%;
+      border-radius: inherit;
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .back-link span {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.7s;
+    }
+    .back-link span::before {
+      content: attr(data-label);
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      color: #212121;
+      width: 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .back-link:hover span::before {
+      width: 100%;
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+      transition-delay: 0.4s;
+    }
+    .back-link:hover::before { left: 0; }
+    .back-link:hover { border-color: transparent; }
+    .back-link:active { scale: 0.95; }
 
     /* ── Monitor housing ── */
     .monitor-housing {
@@ -175,7 +216,7 @@
   </style>
 </head>
 <body>
-  <a class="back-link" href="index.html">← BACK</a>
+  <a class="back-link" href="index.html"><span data-label="← Back">← Back</span></a>
   <div class="rotate-prompt">↻ ROTATE FOR BEST EXPERIENCE</div>
   <div class="monitor-housing">
     <div class="hud-top">

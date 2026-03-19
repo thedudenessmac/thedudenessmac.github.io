@@ -1623,12 +1623,12 @@
   <section id="credits">
     <div class="container">
       <p class="section-eyebrow">Credits</p>
-      <p class="phase-label"><span class="credits-section-title green">Recent Credits</span></p>
+      <p class="phase-label"><span class="credits-section-title green">Script Supervision Credits</span></p>
       <table class="credits-table">
         <thead>
           <tr>
             <th>Production</th>
-            <th>Director</th>
+            <th>Director/Producer</th>
             <th>Role</th>
             <th>Format</th>
             <th>Year</th>
@@ -2288,7 +2288,7 @@
         });
       });
       const cnbBack     = document.getElementById('cnb-back');
-      const cnbBackText = cnbBack.querySelector('.text');
+      const cnbBackText = cnbBack.querySelector('span');
       cnbBack.addEventListener('click', () => { if (gameOpen) closeGame(); else goHome(); });
       const cnbHamburger = document.getElementById('cnb-hamburger');
       const cnbMobileMenu = document.getElementById('cnb-mobile-menu');
@@ -2338,7 +2338,7 @@
         gamePanel.classList.add('active');
         frameBack.classList.add('showing-return');
         mobileNavBtn.classList.add('game-return');
-        if (cnbBackText) cnbBackText.textContent = 'Back';
+        if (cnbBackText) { cnbBackText.textContent = 'Back'; cnbBackText.dataset.label = 'Back'; }
         if (pushHistory) history.pushState(null, '', '#game');
       }
 
@@ -2346,7 +2346,7 @@
         gameOpen = false;
         gamePanel.classList.remove('active');
         mobileNavBtn.classList.remove('game-return');
-        if (cnbBackText) cnbBackText.textContent = 'Home';
+        if (cnbBackText) { cnbBackText.textContent = 'Home'; cnbBackText.dataset.label = 'Home'; }
         gameIframe.src = 'about:blank'; // free iframe memory on close
         // Phase 1: return face exits upward — button stays still
         frameBack.classList.add('return-exit');
@@ -2420,7 +2420,7 @@
         gamePanel.classList.add('active');
         frameBack.classList.add('back-ready', 'showing-return');
         mobileNavBtn.classList.add('nav-ready', 'game-return');
-        if (cnbBackText) cnbBackText.textContent = 'Back';
+        if (cnbBackText) { cnbBackText.textContent = 'Back'; cnbBackText.dataset.label = 'Back'; }
         frame.classList.add('mobile-bars-visible');
         requestAnimationFrame(() => requestAnimationFrame(() => {
           document.documentElement.classList.remove('no-transition');
