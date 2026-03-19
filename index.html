@@ -597,12 +597,6 @@
       color: #444;
     }
     .about-text p + p { margin-top: 16px; }
-    .about-text p.about-subsection-heading {
-      font-family: 'Metamorphous', serif;
-      font-size: clamp(22px, 2.5vw, 28px);
-      color: #000;
-      margin-bottom: 16px;
-    }
 
     .cv-link {
       font-size: inherit;
@@ -762,63 +756,6 @@
       transition: transform 0.3s ease, border-color 0.3s ease;
     }
     .service-card:hover { transform: translateY(-8px); border-color: var(--accent); }
-
-    /* ── Expandable card variant ── */
-    .svc-expandable {
-      display: block;
-      cursor: pointer;
-      user-select: none;
-      align-self: start;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    .svc-expandable:hover { transform: none; border-color: var(--accent); }
-    .svc-expandable.open  { border-color: var(--accent); box-shadow: 0 4px 12px 0 rgba(0,0,0,0.1); }
-    .svc-header {
-      display: grid;
-      grid-template-columns: 40px 1fr;
-      column-gap: 12px;
-      row-gap: 6px;
-      align-items: center;
-    }
-    .svc-body {
-      display: grid;
-      grid-template-rows: 0fr;
-      transition: grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .svc-expandable.open .svc-body { grid-template-rows: 1fr; }
-    .svc-body-inner { overflow: hidden; }
-    .svc-body-content {
-      padding-top: 12px;
-      margin-top: 12px;
-      border-top: 1px solid #e5e7eb;
-      font-size: 13px;
-      color: #6b7280;
-      line-height: 1.6;
-    }
-    .svc-sample-btn {
-      appearance: none;
-      background-color: #fafbfc;
-      border: 1px solid rgba(27,31,35,0.15);
-      border-radius: 6px;
-      box-shadow: rgba(27,31,35,0.04) 0 1px 0, rgba(255,255,255,0.25) 0 1px 0 inset;
-      box-sizing: border-box;
-      color: #24292e;
-      cursor: pointer;
-      display: inline-block;
-      font-size: 13px;
-      font-weight: 500;
-      line-height: 20px;
-      padding: 6px 16px;
-      text-decoration: none;
-      transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-      vertical-align: middle;
-      white-space: nowrap;
-    }
-    .svc-sample-btn:hover { background-color: #f3f4f6; transition-duration: 0.1s; }
-    .svc-sample-btn:active { background-color: #edeff2; box-shadow: rgba(225,228,232,0.2) 0 1px 0 inset; transition: none; }
 
     .svc-icon-box {
       width: 40px; height: 40px;
@@ -1685,8 +1622,6 @@
           <p>My job is to protect the integrity of the artistic vision that sustains every narrative project, be it a short film, feature, or series.</p>
           <p>Or, put more dispassionately, I am a cost-containment measure for the production at large. I solve problems BEFORE they become EXPENSIVE problems days, weeks, or months down the road.</p>
           <p>Please find a copy of my CV <a href="marko-balac-cv.pdf" class="cv-link" target="_blank" rel="noopener noreferrer"><strong>here</strong></a>.</p>
-          <p class="about-subsection-heading">Training</p>
-          <p>In 2026, I completed the <strong>Director Whisperer International Script Supervision Training Program</strong>, taught by Toronto-based veteran Script Supervisor Daniela Saioni.</p>
         </div>
         <picture>
           <source srcset="headshot.webp" type="image/webp">
@@ -1853,116 +1788,70 @@
       <div class="services-phase">
         <p class="phase-label"><span class="credits-section-title green">On Set</span></p>
         <div class="services-grid">
-          <div class="service-card svc-expandable">
-            <div class="svc-header">
-              <div class="svc-icon-box">
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
-                  <path d="m734-120-42-42 74-74H504v-60h262l-74-74 42-42 146 146-146 146Zm106-352h-60v-308h-60v90H240v-90h-60v600h264v60H180q-26 0-43-17t-17-43v-600q0-26 17-43t43-17h202q7-35 34.5-57.5T480-920q36 0 63.5 22.5T578-840h202q26 0 43 17t17 43v308ZM508.5-791.5Q520-803 520-820t-11.5-28.5Q497-860 480-860t-28.5 11.5Q440-837 440-820t11.5 28.5Q463-780 480-780t28.5-11.5Z"/>
-                </svg>
-              </div>
-              <div class="svc-text">
-                <p class="svc-name">On-Set Continuity</p>
-                <p class="svc-note">Match action, dialogue, and everything in between</p>
-              </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
+                <path d="m734-120-42-42 74-74H504v-60h262l-74-74 42-42 146 146-146 146Zm106-352h-60v-308h-60v90H240v-90h-60v600h264v60H180q-26 0-43-17t-17-43v-600q0-26 17-43t43-17h202q7-35 34.5-57.5T480-920q36 0 63.5 22.5T578-840h202q26 0 43 17t17 43v308ZM508.5-791.5Q520-803 520-820t-11.5-28.5Q497-860 480-860t-28.5 11.5Q440-837 440-820t11.5 28.5Q463-780 480-780t28.5-11.5Z"/>
+              </svg>
             </div>
-            <div class="svc-body">
-              <div class="svc-body-inner">
-                <div class="svc-body-content">
-                  <a href="continuity-slate-sheet.pdf" target="_blank" rel="noopener noreferrer" class="svc-sample-btn">Sample: Continuity Slate Sheet</a>
-                </div>
-              </div>
+            <div class="svc-text">
+              <p class="svc-name">On-Set Continuity</p>
+              <p class="svc-note">Match action, dialogue, and everything in between</p>
             </div>
           </div>
-          <div class="service-card svc-expandable">
-            <div class="svc-header">
-              <div class="svc-icon-box">
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
-                  <path d="M140-160q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm0-60h310v-520H140v520Zm370 0h310v-520H510v520Zm-320-97h210v-60H190v60Zm0-129h210v-60H190v60Zm0-129h210v-60H190v60Zm370 258h210v-60H560v60Zm0-129h210v-60H560v60Zm0-129h210v-60H560v60ZM450-220v-520 520Z"/>
-                </svg>
-              </div>
-              <div class="svc-text">
-                <p class="svc-name">Facing Pages</p>
-                <p class="svc-note">Detailed take-by-take on-set notes</p>
-              </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
+                <path d="M140-160q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm0-60h310v-520H140v520Zm370 0h310v-520H510v520Zm-320-97h210v-60H190v60Zm0-129h210v-60H190v60Zm0-129h210v-60H190v60Zm370 258h210v-60H560v60Zm0-129h210v-60H560v60Zm0-129h210v-60H560v60ZM450-220v-520 520Z"/>
+              </svg>
             </div>
-            <div class="svc-body">
-              <div class="svc-body-inner">
-                <div class="svc-body-content">
-                  <a href="facing-page-1cam.pdf" target="_blank" rel="noopener noreferrer" class="svc-sample-btn">Sample: Facing Page 1-Cam</a>
-                </div>
-              </div>
+            <div class="svc-text">
+              <p class="svc-name">Facing Pages</p>
+              <p class="svc-note">Detailed take-by-take on-set notes</p>
             </div>
           </div>
-          <div class="service-card svc-expandable">
-            <div class="svc-header">
-              <div class="svc-icon-box">
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
-                  <path d="m140-840 74 152h130l-74-152h89l74 152h130l-74-152h89l74 152h130l-74-152h112q24 0 42 18t18 42v600q0 24-18 42t-42 18H140q-24 0-42-18t-18-42v-600q0-24 18-42t42-18Zm0 212v448h680v-448H140Zm0 0v448-448Zm180 388h320v-32q0-42-42.5-65T480-360q-75 0-117.5 23T320-272v32Zm212.5-201.5Q554-463 554-494t-21.5-52.5Q511-568 480-568t-52.5 21.5Q406-525 406-494t21.5 52.5Q449-420 480-420t52.5-21.5Z"/>
-                </svg>
-              </div>
-              <div class="svc-text">
-                <p class="svc-name">Editor's Log</p>
-                <p class="svc-note">Daily footage report in shooting order</p>
-              </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
+                <path d="m140-840 74 152h130l-74-152h89l74 152h130l-74-152h89l74 152h130l-74-152h112q24 0 42 18t18 42v600q0 24-18 42t-42 18H140q-24 0-42-18t-18-42v-600q0-24 18-42t42-18Zm0 212v448h680v-448H140Zm0 0v448-448Zm180 388h320v-32q0-42-42.5-65T480-360q-75 0-117.5 23T320-272v32Zm212.5-201.5Q554-463 554-494t-21.5-52.5Q511-568 480-568t-52.5 21.5Q406-525 406-494t21.5 52.5Q449-420 480-420t52.5-21.5Z"/>
+              </svg>
             </div>
-            <div class="svc-body">
-              <div class="svc-body-inner">
-                <div class="svc-body-content">Sample content coming soon.</div>
-              </div>
+            <div class="svc-text">
+              <p class="svc-name">Editor's Log</p>
+              <p class="svc-note">Daily footage report in shooting order</p>
             </div>
           </div>
-          <div class="service-card svc-expandable">
-            <div class="svc-header">
-              <div class="svc-icon-box">
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
-                  <path d="M284-277h60v-205h-60v205Zm332 0h60v-420h-60v420Zm-166 0h60v-118h-60v118Zm0-205h60v-60h-60v60ZM180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm0-60h600v-600H180v600Zm0-600v600-600Z"/>
-                </svg>
-              </div>
-              <div class="svc-text">
-                <p class="svc-name">Daily Report</p>
-                <p class="svc-note">Topsheet with key production information</p>
-              </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
+                <path d="M284-277h60v-205h-60v205Zm332 0h60v-420h-60v420Zm-166 0h60v-118h-60v118Zm0-205h60v-60h-60v60ZM180-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h600q24 0 42 18t18 42v600q0 24-18 42t-42 18H180Zm0-60h600v-600H180v600Zm0-600v600-600Z"/>
+              </svg>
             </div>
-            <div class="svc-body">
-              <div class="svc-body-inner">
-                <div class="svc-body-content">Sample content coming soon.</div>
-              </div>
+            <div class="svc-text">
+              <p class="svc-name">Daily Report</p>
+              <p class="svc-note">Topsheet with key production information</p>
             </div>
           </div>
-          <div class="service-card svc-expandable">
-            <div class="svc-header">
-              <div class="svc-icon-box">
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
-                  <path d="M260-300h260v-60H260v60Zm380 0h60v-360h-60v360ZM260-450h260v-60H260v60Zm0-150h260v-60H260v60ZM132-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h696q24 0 42 18t18 42v600q0 24-18 42t-42 18H132Zm0-60h696v-600H132v600Zm0 0v-600 600Z"/>
-                </svg>
-              </div>
-              <div class="svc-text">
-                <p class="svc-name">Lined Script</p>
-                <p class="svc-note">Digital or hand drawn record of coverage</p>
-              </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
+                <path d="M260-300h260v-60H260v60Zm380 0h60v-360h-60v360ZM260-450h260v-60H260v60Zm0-150h260v-60H260v60ZM132-120q-24 0-42-18t-18-42v-600q0-24 18-42t42-18h696q24 0 42 18t18 42v600q0 24-18 42t-42 18H132Zm0-60h696v-600H132v600Zm0 0v-600 600Z"/>
+              </svg>
             </div>
-            <div class="svc-body">
-              <div class="svc-body-inner">
-                <div class="svc-body-content">Sample content coming soon.</div>
-              </div>
+            <div class="svc-text">
+              <p class="svc-name">Lined Script</p>
+              <p class="svc-note">Digital or hand drawn record of coverage</p>
             </div>
           </div>
-          <div class="service-card svc-expandable">
-            <div class="svc-header">
-              <div class="svc-icon-box">
-                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
-                  <path d="M230-240h196v-60h-85l36-95h199l37 95h-84v60h201v-60h-41.19L522-720h-84L272-300h-42v60Zm170-215 71-185h10l72 185H400ZM140-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h680q24 0 42 18t18 42v680q0 24-18 42t-42 18H140Zm0-60h680v-680H140v680Zm0 0v-680 680Z"/>
-                </svg>
-              </div>
-              <div class="svc-text">
-                <p class="svc-name">As-Read Script</p>
-                <p class="svc-note">With accurate and up-to-date dialogue and changes</p>
-              </div>
+          <div class="service-card">
+            <div class="svc-icon-box">
+              <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 -960 960 960" fill="currentColor">
+                <path d="M230-240h196v-60h-85l36-95h199l37 95h-84v60h201v-60h-41.19L522-720h-84L272-300h-42v60Zm170-215 71-185h10l72 185H400ZM140-80q-24 0-42-18t-18-42v-680q0-24 18-42t42-18h680q24 0 42 18t18 42v680q0 24-18 42t-42 18H140Zm0-60h680v-680H140v680Zm0 0v-680 680Z"/>
+              </svg>
             </div>
-            <div class="svc-body">
-              <div class="svc-body-inner">
-                <div class="svc-body-content">Sample content coming soon.</div>
-              </div>
+            <div class="svc-text">
+              <p class="svc-name">As-Read Script</p>
+              <p class="svc-note">With accurate and up-to-date dialogue and changes</p>
             </div>
           </div>
         </div>
@@ -2588,16 +2477,6 @@
       }
     })();
 
-    // ── Expandable service cards (accordion) ──────────────────────────────
-    (function () {
-      document.querySelectorAll('.svc-expandable').forEach(card => {
-        card.addEventListener('click', () => {
-          const isOpen = card.classList.contains('open');
-          card.closest('.services-phase').querySelectorAll('.svc-expandable').forEach(c => c.classList.remove('open'));
-          if (!isOpen) card.classList.add('open');
-        });
-      });
-    })();
 
   </script>
 
