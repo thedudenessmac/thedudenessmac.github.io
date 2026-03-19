@@ -658,10 +658,9 @@
     }
     .producer {
       display: block;
-      font-size: 12px;
+      font-size: 14px;
       color: #888;
-      font-style: italic;
-      margin-top: 3px;
+      margin-top: 4px;
     }
     .fmt {
       display: inline-block;
@@ -710,6 +709,37 @@
     }
     .credits-earlier td { color: #888 !important; }
     .credits-earlier td:first-child { font-weight: 400 !important; color: #888 !important; }
+
+    .earlier-role-header td {
+      padding: 48px 0 16px 0 !important;
+      border-bottom: 1px solid var(--border);
+    }
+    .earlier-role-row td {
+      padding: 16px 0 !important;
+      font-size: 14px;
+      font-weight: 400;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .earlier-role-row .fmt-note {
+      color: #777;
+      font-weight: 400;
+    }
+    .prod-company {
+      display: block;
+      font-size: 12px;
+      font-weight: 400;
+      font-style: italic;
+      color: #888;
+      margin-top: 3px;
+    }
+    .earlier-role-row:last-child td { border-bottom: 1px solid var(--border) !important; }
+    .earlier-role-row td.year-cell {
+      text-align: right;
+      color: #888;
+      white-space: nowrap;
+      width: 60px;
+    }
 
     /* ── Services ── */
     .services-phase { margin-bottom: 40px; }
@@ -1318,7 +1348,7 @@
       .credits-table td:nth-child(3) { grid-column: 2; grid-row: 1; font-size: 12px; letter-spacing: 0.05em; color: #777; line-height: 1.4; text-align: right; }
       /* Col 2: Director + Producer — mid-left */
       .credits-table td:nth-child(2) { grid-column: 1; grid-row: 2; font-size: 12px; }
-      .credits-table td:nth-child(2):not(:empty)::before { content: "dir. "; color: var(--muted); }
+      .credits-table td:nth-child(2):not(:empty)::before { content: ""; }
       .credits-table td:nth-child(2):empty { display: none; }
       /* When director is absent, pull format up to row 2 alongside year */
       .credits-table tr:has(td:nth-child(2):empty) td:nth-child(4) { grid-row: 2; }
@@ -1332,6 +1362,15 @@
       .credits-divider td { border-bottom: none !important; }
       .credits-table .credits-subheader { display: none; }
       .credits-table tbody { border-top: 1px solid var(--border); }
+      /* Grouped earlier credits rows — override grid layout */
+      .credits-table .earlier-role-header,
+      .credits-table .earlier-role-row { display: block; border: none; padding: 0; }
+      .credits-table .earlier-role-row { border-bottom: 1px solid var(--border); }
+      .credits-table .earlier-role-row:last-child { border-bottom: 1px solid var(--border); }
+      .earlier-role-header td { display: block; padding: 32px 0 12px 0 !important; border-bottom: 1px solid var(--border) !important; }
+      .earlier-role-row td { display: block; padding: 12px 0 !important; color: inherit; border-bottom: none !important; }
+      .credits-table .earlier-role-row:last-child td { border-bottom: none !important; }
+      .earlier-role-row td.year-cell { text-align: left; color: #888; padding-top: 4px !important; font-size: 13px; }
 
       /* Footer: copyright left, play button right */
       .footer-left { display: flex; align-items: center; }
@@ -1636,85 +1675,42 @@
         </thead>
         <tbody>
           <tr>
-            <td>Matcha Latte <span class="film-tag">16mm</span></td>
-            <td>Andrés Pérez Galicia<span class="producer">prod. Nessa Hallman</span></td>
+            <td>Matcha Latte <span class="film-tag">16mm</span><span class="prod-company">Cordillera Collective</span></td>
+            <td>Director: Andrés Pérez Galicia<span class="producer">Producer: Nessa Hallman</span></td>
             <td>Script Supervisor</td>
             <td><span class="fmt">Short</span></td>
             <td>2026</td>
           </tr>
           <tr>
-            <td>A Beautiful Lie</td>
-            <td>Pablo de la Chica<span class="producer">prod. Mohaid Sharif</span></td>
+            <td>A Beautiful Lie<span class="prod-company">Salon Indien Films</span></td>
+            <td>Director: Pablo de la Chica<span class="producer">Producer: Mohaid Sharif</span></td>
             <td>Script Supervisor</td>
             <td><span class="fmt">Short</span></td>
             <td>2025</td>
           </tr>
 
-          <tr class="credits-divider">
-            <td colspan="5"><span class="credits-section-title blue">Earlier Credits</span></td>
+          <tr class="earlier-role-header">
+            <td colspan="5"><span class="credits-section-title blue">Daily Set PA</span></td>
           </tr>
-          <tr class="credits-subheader">
-            <td>Production</td>
-            <td></td>
-            <td>Role</td>
-            <td>Format</td>
-            <td>Year</td>
+          <tr class="earlier-role-row">
+            <td colspan="4"><strong>In Character</strong> <span class="fmt-note">(CFC Short)</span>, <strong>Mayday S20</strong> <span class="fmt-note">(TV Series)</span>, <strong>Spinning</strong> <span class="fmt-note">(Short)</span></td>
+            <td class="year-cell">2019</td>
           </tr>
 
-          <tr class="credits-earlier">
-            <td>In Character<span class="producer">Canadian Film Centre</span></td>
-            <td></td><td>Set PA<span class="producer">Daily</span></td>
-            <td><span class="fmt">Short</span></td><td>2019</td>
+          <tr class="earlier-role-header">
+            <td colspan="5"><span class="credits-section-title blue">Daily Office PA</span></td>
           </tr>
-          <tr class="credits-earlier">
-            <td>Mayday<span class="producer">Season 20</span></td>
-            <td></td><td>Set PA<span class="producer">Daily</span></td>
-            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          <tr class="earlier-role-row">
+            <td colspan="4"><strong>Utopia Falls S1</strong> <span class="fmt-note">(TV Series)</span>, <strong>The Queen's Gambit S1</strong> <span class="fmt-note">(TV Series)</span></td>
+            <td class="year-cell">2019</td>
           </tr>
-          <tr class="credits-earlier">
-            <td>Spinning</td>
-            <td></td><td>Set PA<span class="producer">Daily</span></td>
-            <td><span class="fmt">Short</span></td><td>2019</td>
+
+          <tr class="earlier-role-header">
+            <td colspan="5"><span class="credits-section-title blue">Daily Location Support</span></td>
           </tr>
-          <tr class="credits-earlier">
-            <td>Utopia Falls</td>
-            <td></td><td>Office PA<span class="producer">Daily</span></td>
-            <td><span class="fmt">TV Series</span></td><td>2019</td>
-          </tr>
-          <tr class="credits-earlier">
-            <td>The Queen's Gambit</td>
-            <td></td><td>Office PA<span class="producer">Daily</span></td>
-            <td><span class="fmt">TV Series</span></td><td>2019</td>
-          </tr>
-          <tr class="credits-earlier">
-            <td>Mrs. America</td>
-            <td></td><td>Location Support<span class="producer">Daily</span></td>
-            <td><span class="fmt">TV Series</span></td><td>2019</td>
-          </tr>
-          <tr class="credits-earlier">
-            <td>Grand Army</td>
-            <td></td><td>Location Support<span class="producer">Daily</span></td>
-            <td><span class="fmt">TV Series</span></td><td>2019</td>
-          </tr>
-          <tr class="credits-earlier">
-            <td>Condor<span class="producer">Season 2</span></td>
-            <td></td><td>Location Support<span class="producer">Daily</span></td>
-            <td><span class="fmt">TV Series</span></td><td>2019</td>
-          </tr>
-          <tr class="credits-earlier">
-            <td>Spiral</td>
-            <td></td><td>Location Support<span class="producer">Daily</span></td>
-            <td><span class="fmt">Feature</span></td><td>2019</td>
-          </tr>
-          <tr class="credits-earlier">
-            <td>Ginny &amp; Georgia<span class="producer">Season 1</span></td>
-            <td></td><td>Location Support<span class="producer">Daily</span></td>
-            <td><span class="fmt">TV Series</span></td><td>2019</td>
-          </tr>
-          <tr class="credits-earlier">
-            <td>The Boys<span class="producer">Season 2</span></td>
-            <td></td><td>Location Support<span class="producer">Daily</span></td>
-            <td><span class="fmt">TV Series</span></td><td>2019</td>
+          <tr class="earlier-role-row">
+            <td colspan="4"><strong>Mrs. America S1</strong> <span class="fmt-note">(TV Series)</span>, <strong>Grand Army S1</strong> <span class="fmt-note">(TV Series)</span>, <strong>Condor S2</strong> <span class="fmt-note">(TV Series)</span>, <strong>Spiral</strong> <span class="fmt-note">(Feature)</span>, <strong>Ginny &amp; Georgia S2</strong> <span class="fmt-note">(TV Series)</span>, <strong>The Boys S2</strong> <span class="fmt-note">(TV Series)</span></td>
+            <td class="year-cell">2019</td>
           </tr>
         </tbody>
       </table>
