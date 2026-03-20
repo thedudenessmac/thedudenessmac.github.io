@@ -238,17 +238,18 @@ if (!ctx) {
   document.body.replaceChildren(msg);
   throw new Error('Canvas 2D context unavailable');
 }
+const S   = 2;      // 1 virtual px = 2 real px
+const VW  = 360;    // virtual width
+const VH  = 240;    // virtual height
+const TOP = 27;     // top bar height
+const BOT = 27;     // bottom bar height
+const SH  = VH - TOP - BOT;   // scene height = 186
+
+const dpr = window.devicePixelRatio || 1;
+canvas.width  = VW * S * dpr;
+canvas.height = VH * S * dpr;
+ctx.scale(dpr, dpr);
 ctx.imageSmoothingEnabled = false;
-
-const S   = 3;      // 1 virtual px = 3 real px
-const VW  = 240;    // virtual width
-const VH  = 160;    // virtual height
-const TOP = 18;     // top bar height
-const BOT = 18;     // bottom bar height
-const SH  = VH - TOP - BOT;   // scene height = 124
-
-canvas.width  = VW * S;
-canvas.height = VH * S;
 
 // ── Colour palette ────────────────────────────────────────────────
 const C = {
@@ -276,6 +277,9 @@ const C = {
   stemA: '#448018',
   uiBg: '#070710',    uiText: '#d4d4cc',
   uiDim: '#585870',   uiAccent: '#3468b8',
+  lightMtl: '#4a4a5a', lightShade: '#333344', lightGlow: '#8888a0',
+  bottleBody: '#b8d8f0', bottleCap: '#e0e0e8', bottleLabel: '#4080c0',
+  hatCrown: '#4a3e28', hatBrim: '#3a3020', hatBand: '#2a2418',
   uiGold: '#d8a818',  uiGold2: '#f0cc40',
   uiGreen: '#20982a', uiRed: '#ba2018',   uiAmber: '#c07c10',
 };
@@ -298,221 +302,307 @@ function inZ(mx, my, z) {
 function getMouse(e) {
   const rect = canvas.getBoundingClientRect();
   return {
-    mx: (e.clientX - rect.left) * (canvas.width  / rect.width)  / S,
-    my: (e.clientY - rect.top)  * (canvas.height / rect.height) / S,
+    mx: (e.clientX - rect.left) * VW / rect.width,
+    my: (e.clientY - rect.top)  * VH / rect.height,
   };
 }
 
 // ── Scene drawing ─────────────────────────────────────────────────
 
 function drawBg() {
-  r(0, TOP,      VW, SH - 40, C.wall);
-  r(0, TOP,      VW, 4, '#1a1a2a');        // ceiling shadow strip
-  r(0, TOP + SH - 44, VW, 2,  C.wallDk);
-  r(0, TOP + SH - 42, VW, 4,  C.base);
-  r(0, TOP + SH - 38, VW, 38, C.floor);
-  for (let i = 0; i < 4; i++) r(0, TOP + SH - 34 + i * 8, VW, 1, C.floorDk);
+  r(0, TOP,      VW, SH - 60, C.wall);
+  r(0, TOP,      VW, 6, '#1a1a2a');        // ceiling shadow strip
+  // Subtle wall texture — sparse noise
+  for (let wx = 6; wx < VW; wx += 18) {
+    for (let wy = TOP + 9; wy < TOP + SH - 69; wy += 15) {
+      const ox = (wy % 30 < 15) ? 9 : 0;
+      r(wx + ox, wy, 1, 1, '#2d2d3c');
+    }
+  }
+  // Wainscoting chair rail
+  r(0, TOP + SH - 69, VW, 2, '#222234');
+  r(0, TOP + SH - 67, VW, 2, '#2a2a3e');
+  // Dark transition strip
+  r(0, TOP + SH - 66, VW, 3,  C.wallDk);
+  // Baseboard with detail
+  r(0, TOP + SH - 63, VW, 6,  C.base);
+  r(0, TOP + SH - 63, VW, 2, '#202036');
+  r(0, TOP + SH - 58, VW, 2, '#121222');
+  // Floor
+  r(0, TOP + SH - 57, VW, 57, C.floor);
+  for (let i = 0; i < 4; i++) r(0, TOP + SH - 51 + i * 12, VW, 1, C.floorDk);
   // Tape mark (actor position)
-  r(110, TOP + SH - 6,  14, 1, C.tape);
-  r(116, TOP + SH - 10,  2, 6, C.tape);
+  r(165, TOP + SH - 9,  21, 2, C.tape);
+  r(174, TOP + SH - 15,  3, 9, C.tape);
+}
+
+function drawLight() {
+  const lx = 177;
+  const ly = TOP;
+  // Cord
+  r(lx + 2, ly, 3, 12, '#2a2a3a');
+  // Mounting plate
+  r(lx - 3, ly + 12, 12, 5, C.lightMtl);
+  // Shade (wider toward bottom)
+  r(lx - 6, ly + 17, 18, 3, '#3a3a4a');
+  r(lx - 9, ly + 20, 24, 5, C.lightShade);
+  // Bulb glow
+  r(lx - 5, ly + 24, 15, 3, C.lightGlow);
+  r(lx - 2, ly + 24,  9, 2, '#aaaabc');
 }
 
 function drawFrame() {
   // Picture frame on wall, left side — never changes
-  r(22, TOP + 8, 24, 17, C.frameA);
-  r(23, TOP + 9, 22, 15, C.frameB);
+  r(33, TOP + 12, 36, 26, C.frameA);
+  r(35, TOP + 14, 33, 23, C.frameB);
   // Painting: sky + hills
-  r(24, TOP + 10, 20, 13, C.glass1);
-  r(24, TOP + 10, 20,  7, C.glass2);
-  r(24, TOP + 16, 20,  3, C.hills1);
-  r(24, TOP + 18, 14,  5, C.hills2);
-  r(24, TOP + 19,  8,  4, '#2e4820');
+  r(36, TOP + 15, 30, 20, C.glass1);
+  r(36, TOP + 15, 30, 11, C.glass2);
+  r(36, TOP + 24, 30,  5, C.hills1);
+  r(36, TOP + 27, 21,  8, C.hills2);
+  r(36, TOP + 29, 12,  6, '#2e4820');
 }
 
 function drawTable() {
-  r(5, TOP + 58, 68, 5, C.tableTop);
-  r(5, TOP + 58, 68, 1, '#9a7252');        // top-surface highlight
-  r(5, TOP + 62, 68, 3, C.tableSide);
-  r(9,  TOP + 65, 4, 20, C.tableLeg);
-  r(65, TOP + 65, 4, 20, C.tableLeg);
-  r(12, TOP + 65, 1, 20, '#2a1a08');
-  r(68, TOP + 65, 1, 20, '#2a1a08');
+  // Table shadow on floor
+  r(11, TOP + SH - 56, 99, 5, '#0c0c1a');
+  r(8,  TOP + SH - 54, 105, 3, '#10101e');
+  // Table
+  r(8,  TOP + 87, 102, 8, C.tableTop);
+  r(8,  TOP + 87, 102, 2, '#9a7252');      // top-surface highlight
+  r(8,  TOP + 93, 102, 5, C.tableSide);
+  r(14, TOP + 98, 6, 30, C.tableLeg);
+  r(98, TOP + 98, 6, 30, C.tableLeg);
+  r(18, TOP + 98, 2, 30, '#2a1a08');
+  r(102, TOP + 98, 2, 30, '#2a1a08');
 }
 
-function drawBook() {
-  // Script/binder on table — never changes
-  r(34, TOP + 50, 4,  9, C.bookB);
-  r(38, TOP + 50, 18, 9, C.bookA);
-  r(38, TOP + 50, 18, 2, '#b8aa78');
-  r(40, TOP + 54, 14, 1, C.bookLine);
-  r(40, TOP + 57, 10, 1, C.bookLine);
+function drawBook(open) {
+  if (open) {
+    // Open binder — pages fanned out, wider on table
+    r(42, TOP + 75, 6,  14, C.bookB);      // left spine
+    r(48, TOP + 75, 21, 14, C.bookA);      // left page
+    r(48, TOP + 75, 21, 3, '#b8aa78');
+    r(51, TOP + 81, 15, 2, C.bookLine);
+    r(51, TOP + 86, 11, 1, C.bookLine);
+    r(69, TOP + 74,  2, 15, C.bookB);      // center spine ridge
+    r(71, TOP + 75, 21, 14, C.bookA);      // right page
+    r(71, TOP + 75, 21, 3, '#b8aa78');
+    r(74, TOP + 81, 15, 2, C.bookLine);
+    r(74, TOP + 86, 11, 1, C.bookLine);
+  } else {
+    // Closed binder
+    r(51, TOP + 75, 6,  14, C.bookB);
+    r(57, TOP + 75, 27, 14, C.bookA);
+    r(57, TOP + 75, 27, 3, '#b8aa78');
+    r(60, TOP + 81, 21, 2, C.bookLine);
+    r(60, TOP + 86, 15, 1, C.bookLine);
+  }
 }
 
 function drawMug(left) {
-  const mx = left ? 12 : 55;
-  const my = TOP + 46;
-  r(mx,      my,      9, 12, C.mugA);
-  r(mx + 7,  my + 1,  2, 11, C.mugB);
-  r(mx,      my + 10, 9,  2, C.mugB);
-  r(mx + 1,  my,      7,  3, C.mugCoffee);
-  r(mx + 9,  my + 2,  2,  1, C.mugB);
-  r(mx + 10, my + 3,  1,  4, C.mugB);
-  r(mx + 9,  my + 7,  2,  1, C.mugB);
-  r(mx + 2,  my - 4,  1,  3, '#4a4a5a');
-  r(mx + 6,  my - 5,  1,  4, '#4a4a5a');
+  const mx = left ? 18 : 83;
+  const my = TOP + 69;
+  r(mx,      my,      14, 18, C.mugA);
+  r(mx + 11, my + 2,  3, 16, C.mugB);
+  r(mx,      my + 15, 14,  3, C.mugB);
+  r(mx + 2,  my,      10,  5, C.mugCoffee);
+  r(mx + 14, my + 3,  3,  2, C.mugB);
+  r(mx + 15, my + 5,  2,  6, C.mugB);
+  r(mx + 14, my + 11, 3,  1, C.mugB);
+  r(mx + 3,  my - 6,  2,  5, '#4a4a5a');
+  r(mx + 9,  my - 8,  2,  6, '#4a4a5a');
 }
 
 function drawClipboard(x, y) {
-  r(x,     y,      10, 14, C.boardA);
-  r(x + 9, y + 1,   2, 14, C.boardB);
-  r(x + 1, y + 13, 10,  2, C.boardB);
-  r(x + 2, y - 3,   6,  4, C.boardB);
-  r(x + 3, y - 4,   4,  2, C.boardLine);
-  r(x + 1, y + 4,   8,  1, C.boardLine);
-  r(x + 1, y + 7,   8,  1, C.boardLine);
-  r(x + 1, y + 10,  6,  1, C.boardLine);
+  r(x,      y,      15, 21, C.boardA);
+  r(x + 14, y + 2,   3, 21, C.boardB);
+  r(x + 2,  y + 20, 15,  3, C.boardB);
+  r(x + 3,  y - 5,   9,  6, C.boardB);
+  r(x + 5,  y - 6,   6,  3, C.boardLine);
+  r(x + 2,  y + 6,  12,  2, C.boardLine);
+  r(x + 2,  y + 11, 12,  1, C.boardLine);
+  r(x + 2,  y + 15,  9,  1, C.boardLine);
 }
 
 function drawCharacter(clipLeft, tieColor) {
-  const cx = 112;
-  const cy = TOP + 24;   // grounded: feet land on floor at TOP+SH-38
+  const cx = 168;
+  const cy = TOP + 36;   // grounded: feet land on floor at TOP+SH-57
 
   // Floor shadow (at feet level)
-  r(cx - 4, TOP + SH - 38, 28, 3, '#0b0b18');
+  r(cx - 6, TOP + SH - 57, 42, 5, '#0b0b18');
 
   // Left arm
   if (clipLeft) {
-    r(cx - 3,  cy + 16,  3,  4, C.shirt);  // short shoulder stub to arm junction
-    r(cx - 15, cy + 20, 15,  4, C.shirt);  // sleeved forearm
-    r(cx - 15, cy + 20,  4,  4, C.skin);   // wrist/hand at far end
-    drawClipboard(cx - 26, cy + 13);
+    r(cx - 5,  cy + 24,  6,  6, C.shirt);  // shoulder
+    r(cx - 5,  cy + 27,  3,  6, C.shirt);  // upper arm connector
+    r(cx - 23, cy + 30, 21,  6, C.shirt);  // forearm
+    r(cx - 23, cy + 30,  6,  6, C.skin);   // wrist/hand
+    drawClipboard(cx - 39, cy + 20);
   } else {
-    r(cx - 3, cy + 16, 3, 18, C.shirt);    // full hanging sleeve
-    r(cx - 3, cy + 30, 3,  6, C.skin);     // hanging hand
+    r(cx - 5, cy + 24, 5, 27, C.shirt);    // full hanging sleeve
+    r(cx - 5, cy + 45, 5,  9, C.skin);     // hanging hand
   }
 
   // Right arm
   if (!clipLeft) {
-    r(cx + 16, cy + 16,  3,  4, C.shirt);  // short shoulder stub to arm junction
-    r(cx + 16, cy + 20, 15,  4, C.shirt);  // sleeved forearm
-    r(cx + 27, cy + 20,  4,  4, C.skin);   // wrist/hand at far end
-    drawClipboard(cx + 28, cy + 13);
+    r(cx + 23, cy + 24,  6,  6, C.shirt);  // shoulder
+    r(cx + 26, cy + 27,  3,  6, C.shirt);  // upper arm connector
+    r(cx + 26, cy + 30, 21,  6, C.shirt);  // forearm
+    r(cx + 41, cy + 30,  6,  6, C.skin);   // wrist/hand
+    drawClipboard(cx + 42, cy + 20);
   } else {
-    r(cx + 16, cy + 16, 3, 18, C.shirt);   // full hanging sleeve
-    r(cx + 16, cy + 30, 3,  6, C.skin);    // hanging hand
+    r(cx + 24, cy + 24, 5, 27, C.shirt);   // full hanging sleeve
+    r(cx + 24, cy + 45, 5,  9, C.skin);    // hanging hand
   }
 
   // Body
-  r(cx,      cy + 14, 16, 22, C.shirt);
-  r(cx + 13, cy + 14,  3, 22, C.shirtDk);
+  r(cx,      cy + 21, 24, 33, C.shirt);
+  r(cx + 20, cy + 21,  4, 33, C.shirtDk);
   // Tie
-  r(cx + 6,  cy + 14,  4, 16, tieColor);
-  r(cx + 5,  cy + 28,  6,  5, tieColor);
+  r(cx + 9,  cy + 21,  6, 24, tieColor);
+  r(cx + 8,  cy + 42,  9,  8, tieColor);
   // Collar
-  r(cx + 1,  cy + 14, 14,  4, '#e0e0e0');
-  r(cx + 6,  cy + 14,  4,  5, '#d4d4d4');
+  r(cx + 2,  cy + 21, 21,  6, '#e0e0e0');
+  r(cx + 9,  cy + 21,  6,  8, '#d4d4d4');
   // Pants
-  r(cx,      cy + 36, 16, 22, C.pants);
-  r(cx + 7,  cy + 40,  2, 18, C.pantsDk);
-  r(cx + 13, cy + 36,  3, 22, C.pantsDk);
+  r(cx,      cy + 54, 24, 33, C.pants);
+  r(cx + 11, cy + 60,  3, 27, C.pantsDk);
+  r(cx + 20, cy + 54,  4, 33, C.pantsDk);
   // Shoes
-  r(cx - 1,  cy + 57,  8,  5, C.shoe);
-  r(cx + 8,  cy + 57,  8,  5, C.shoe);
-  r(cx - 2,  cy + 60,  3,  2, C.shoe);
-  r(cx + 15, cy + 60,  3,  2, C.shoe);
+  r(cx - 2,  cy + 86, 12,  7, C.shoe);
+  r(cx + 12, cy + 86, 12,  7, C.shoe);
+  r(cx - 3,  cy + 90,  5,  3, C.shoe);
+  r(cx + 23, cy + 90,  5,  3, C.shoe);
   // Head
-  r(cx + 2,  cy,      12, 14, C.skin);
-  r(cx + 13, cy + 1,   2, 11, C.skin);
-  r(cx + 1,  cy + 2,   1, 10, '#c09060');
+  r(cx + 3,  cy,      18, 21, C.skin);
+  r(cx + 20, cy + 2,   3, 17, C.skin);
+  r(cx + 2,  cy + 3,   2, 15, '#c09060');
   // Hair
-  r(cx + 2,  cy,      12,  4, C.hair);
-  r(cx + 2,  cy + 4,   2,  3, C.hair);
-  r(cx + 12, cy + 4,   2,  3, C.hair);
+  r(cx + 3,  cy,      18,  6, C.hair);
+  r(cx + 3,  cy + 6,   3,  5, C.hair);
+  r(cx + 18, cy + 6,   3,  5, C.hair);
   // Eyes
-  r(cx + 4,  cy + 6,   3,  3, '#181010');
-  r(cx + 9,  cy + 6,   3,  3, '#181010');
-  r(cx + 4,  cy + 6,   1,  1, '#fff');
-  r(cx + 9,  cy + 6,   1,  1, '#fff');
+  r(cx + 6,  cy + 9,   5,  5, '#181010');
+  r(cx + 14, cy + 9,   5,  5, '#181010');
+  r(cx + 6,  cy + 9,   2,  2, '#fff');
+  r(cx + 14, cy + 9,   2,  2, '#fff');
   // Nose & mouth
-  r(cx + 7,  cy + 9,   2,  2, '#b88060');
-  r(cx + 5,  cy + 12,  5,  1, '#8a5848');
+  r(cx + 11, cy + 14,  3,  3, '#b88060');
+  r(cx + 8,  cy + 18,  8,  2, '#8a5848');
 }
 
 function drawRack(hasJacket) {
-  const rx = 195;
-  r(rx - 10, TOP + SH - 6,  22, 3, C.rack);
-  r(rx - 14, TOP + SH - 4,  30, 4, C.rackMid);
-  r(rx,      TOP + 8,   3, SH - 10, C.rack);
-  r(rx + 2,  TOP + 8,   1, SH - 10, C.rackMid);
-  r(rx - 22, TOP + 8,  46,  3, C.rack);
-  r(rx - 24, TOP + 6,   4,  7, C.rackMid);
-  r(rx + 22, TOP + 6,   4,  7, C.rackMid);
+  const rx = 293;
+  r(rx - 15, TOP + SH - 9,  33, 5, C.rack);
+  r(rx - 21, TOP + SH - 6,  45, 6, C.rackMid);
+  r(rx,      TOP + 12,  5, SH - 15, C.rack);
+  r(rx + 3,  TOP + 12,  2, SH - 15, C.rackMid);
+  r(rx - 33, TOP + 12, 69,  5, C.rack);
+  r(rx - 36, TOP + 9,   6, 11, C.rackMid);
+  r(rx + 33, TOP + 9,   6, 11, C.rackMid);
 
   if (hasJacket) {
-    r(rx - 13, TOP + 11, 30,  5, C.jacketB);
-    r(rx - 11, TOP + 11, 26,  5, C.jacketA);
-    r(rx - 13, TOP + 16, 13, 26, C.jacketA);
-    r(rx - 13, TOP + 16,  2, 26, C.jacketB);
-    r(rx -  2, TOP + 16,  2, 26, C.jacketB);
-    r(rx +  3, TOP + 16, 13, 26, C.jacketA);
-    r(rx + 14, TOP + 16,  2, 26, C.jacketB);
-    r(rx -  1, TOP + 16,  5, 26, C.jacketB);
-    r(rx,      TOP + 16,  3, 26, '#180802');
-    r(rx - 7,  TOP + 16,  5, 10, C.jacketB);
-    r(rx +  5, TOP + 16,  5, 10, C.jacketB);
-    r(rx - 11, TOP + 30,  6,  5, C.jacketB);
-    r(rx +  8, TOP + 30,  6,  5, C.jacketB);
-    r(rx +  1, TOP + 20,  1,  1, '#c89858');
-    r(rx +  1, TOP + 24,  1,  1, '#c89858');
-    r(rx +  1, TOP + 28,  1,  1, '#c89858');
+    r(rx - 20, TOP + 17, 45,  8, C.jacketB);
+    r(rx - 17, TOP + 17, 39,  8, C.jacketA);
+    r(rx - 20, TOP + 24, 20, 39, C.jacketA);
+    r(rx - 20, TOP + 24,  3, 39, C.jacketB);
+    r(rx -  3, TOP + 24,  3, 39, C.jacketB);
+    r(rx +  5, TOP + 24, 20, 39, C.jacketA);
+    r(rx + 21, TOP + 24,  3, 39, C.jacketB);
+    r(rx -  2, TOP + 24,  8, 39, C.jacketB);
+    r(rx,      TOP + 24,  5, 39, '#180802');
+    r(rx - 11, TOP + 24,  8, 15, C.jacketB);
+    r(rx +  8, TOP + 24,  8, 15, C.jacketB);
+    r(rx - 17, TOP + 45,  9,  8, C.jacketB);
+    r(rx + 12, TOP + 45,  9,  8, C.jacketB);
+    r(rx +  2, TOP + 30,  2,  2, '#c89858');
+    r(rx +  2, TOP + 36,  2,  2, '#c89858');
+    r(rx +  2, TOP + 42,  2,  2, '#c89858');
   }
 }
 
 function drawPlant() {
   // Potted plant, far right — never changes
-  const px = 220;
-  const py = TOP + SH - 38;  // floor level
+  const px = 330;
+  const py = TOP + SH - 57;  // floor level
   // Pot
-  r(px,      py,      16, 13, C.potA);
-  r(px + 1,  py + 11, 14,  2, C.potB);
-  r(px + 3,  py,      10,  3, C.potB);
-  r(px + 2,  py + 2,  12,  4, C.soil);
+  r(px,      py,      24, 20, C.potA);
+  r(px + 2,  py + 17, 21,  3, C.potB);
+  r(px + 5,  py,      15,  5, C.potB);
+  r(px + 3,  py + 3,  18,  6, C.soil);
   // Stems
-  r(px + 7,  py - 11,  2, 11, C.stemA);
-  r(px + 5,  py - 15,  2,  7, C.stemA);
-  r(px + 10, py - 13,  2,  9, C.stemA);
+  r(px + 11, py - 17,  3, 17, C.stemA);
+  r(px + 8,  py - 23,  3, 11, C.stemA);
+  r(px + 15, py - 20,  3, 14, C.stemA);
   // Leaves
-  r(px + 3,  py - 19,  10, 7, C.leafA);
-  r(px + 1,  py - 16,   7, 5, C.leafB);
-  r(px + 10, py - 17,   7, 5, C.leafB);
-  r(px + 5,  py - 22,   6, 4, C.leafC);
-  r(px + 2,  py - 14,   4, 3, C.leafB);
+  r(px + 5,  py - 29, 15, 11, C.leafA);
+  r(px + 2,  py - 24, 11,  8, C.leafB);
+  r(px + 15, py - 26, 11,  8, C.leafB);
+  r(px + 8,  py - 33,  9,  6, C.leafC);
+  r(px + 3,  py - 21,  6,  5, C.leafB);
+}
+
+function drawWaterBottle() {
+  const bx = 30;
+  const by = TOP + 66;
+  // Bottle body
+  r(bx,     by,      8, 21, C.bottleBody);
+  r(bx + 6, by + 2,  2, 19, '#90b8d0');   // right edge shadow
+  r(bx,     by + 18, 8,  3, '#90b8d0');   // bottom shadow
+  // Cap
+  r(bx,     by - 3, 8, 3, C.bottleCap);
+  r(bx + 2, by - 5, 5, 2, C.bottleCap);
+  // Neck
+  r(bx + 2, by,     5, 3, '#c8e8f8');
+  // Label
+  r(bx + 2, by + 8, 5, 6, '#ffffff');
+  r(bx + 2, by + 9, 5, 2, C.bottleLabel);
+  // Water level
+  r(bx + 2, by + 5, 5, 1, '#80c0e0');
+}
+
+function drawHat() {
+  const hx = 251;
+  const hy = TOP + 8;
+  // Brim
+  r(hx - 6, hy + 12, 30, 5, C.hatBrim);
+  r(hx - 3, hy + 14, 24, 3, '#2e2618');   // underside shadow
+  // Crown
+  r(hx,     hy,     18, 14, C.hatCrown);
+  r(hx + 2, hy,     15,  3, '#564830');    // highlight
+  r(hx,     hy + 3, 18,  2, C.hatBand);   // hat band
+  // Pinched top
+  r(hx + 5, hy,      9,  2, '#3e3420');
 }
 
 function drawChair(left) {
-  const cx = left ? 76 : 148;
-  const cy = TOP + 44;
-  r(cx,      cy,       3, 32, C.chairA);
-  r(cx + 19, cy,       3, 32, C.chairA);
-  r(cx + 2,  cy,       1, 32, C.chairB);
-  r(cx + 21, cy,       1, 32, C.chairB);
-  r(cx,      cy +  5, 22,  3, C.chairB);
-  r(cx,      cy + 12, 22,  3, C.chairB);
-  r(cx -  1, cy + 18, 24,  5, C.chairA);
-  r(cx -  1, cy + 22, 24,  2, C.chairB);
-  r(cx +  1, cy + 24,  3, 18, C.chairB);
-  r(cx + 18, cy + 24,  3, 18, C.chairB);
-  r(cx,      cy + 28,  2, 14, C.chairB);
-  r(cx + 20, cy + 28,  2, 14, C.chairB);
+  const cx = left ? 114 : 222;
+  const cy = TOP + 66;
+  r(cx,      cy,       5, 48, C.chairA);
+  r(cx + 29, cy,       5, 48, C.chairA);
+  r(cx + 3,  cy,       2, 48, C.chairB);
+  r(cx + 32, cy,       2, 48, C.chairB);
+  r(cx,      cy +  8, 33,  5, C.chairB);
+  r(cx,      cy + 18, 33,  5, C.chairB);
+  r(cx -  2, cy + 27, 36,  8, C.chairA);
+  r(cx -  2, cy + 33, 36,  3, C.chairB);
+  r(cx +  2, cy + 36,  5, 27, C.chairB);
+  r(cx + 27, cy + 36,  5, 27, C.chairB);
+  r(cx,      cy + 42,  3, 21, C.chairB);
+  r(cx + 30, cy + 42,  3, 21, C.chairB);
 }
 
 function drawScene(state) {
   drawBg();
+  drawLight();
   drawFrame();
   drawTable();
-  drawBook();
+  drawBook(state.bookOpen);
+  if (state.waterBottle) drawWaterBottle();
   if (state.chairLeft) drawChair(true);
   drawRack(state.hasJacket);
+  if (state.hatOnRack) drawHat();
   drawPlant();
   drawMug(state.mugLeft);
   drawCharacter(state.clipLeft, state.tieRed ? C.tieRed : C.tieBlue);
@@ -522,90 +612,120 @@ function drawScene(state) {
 // ── Zone definitions ──────────────────────────────────────────────
 // All zones are in virtual coords. state = take2 state for SPOT phase.
 function getZones(state) {
-  const cy = TOP + 24;   // must match drawCharacter
+  const cy = TOP + 36;   // must match drawCharacter
   return {
     // ── Changeable (correct to click) ──
     mug: {
-      x: state.mugLeft ? 9 : 52,
-      y: TOP + 41, w: 14, h: 18,   // +1 up to catch steam top
+      x: state.mugLeft ? 14 : 78,
+      y: TOP + 62, w: 21, h: 27,
     },
     clipboard: {
-      x: state.clipLeft ? (112 - 26 - 3) : (112 + 28 - 2),
-      y: cy + 9, w: 14, h: 19,     // +1 up to catch board clamp
+      x: state.clipLeft ? (168 - 39 - 5) : (168 + 42 - 3),
+      y: cy + 14, w: 21, h: 29,
     },
     jacket: {
-      x: 179, y: TOP + 8, w: 36, h: 42,  // centred on jacket body
+      x: 269, y: TOP + 12, w: 54, h: 63,
     },
     chair: {
-      x: state.chairLeft ? 74 : 146,
-      y: TOP + 42, w: 28, h: 44,
+      x: state.chairLeft ? 111 : 219,
+      y: TOP + 63, w: 42, h: 66,
     },
     tie: {
-      x: 112 + 4, y: cy + 13, w: 10, h: 24,
+      x: 168 + 6, y: cy + 20, w: 15, h: 36,
+    },
+    book: {
+      x: 39, y: TOP + 71, w: 54, h: 21,
+    },
+    waterBottle: {
+      x: 27, y: TOP + 59, w: 14, h: 30,
+    },
+    hatOnRack: {
+      x: 242, y: TOP + 5, w: 36, h: 21,
     },
     // ── Stable distractors (wrong to click) ──
     frame: {
-      x: 20, y: TOP + 6, w: 28, h: 21,
-    },
-    book: {
-      x: 32, y: TOP + 48, w: 24, h: 13,  // widened to cover full book
+      x: 30, y: TOP + 9, w: 42, h: 32,
     },
     plant: {
-      x: 218, y: TOP + SH - 60, w: 22, h: 40,  // trimmed dead space below pot
+      x: 327, y: TOP + SH - 90, w: 33, h: 60,
+    },
+    light: {
+      x: 168, y: TOP, w: 24, h: 30,
     },
   };
 }
 
-const CHANGEABLE = ['mug', 'clipboard', 'jacket', 'chair', 'tie'];
-const STABLE     = ['frame', 'book', 'plant'];
+const CHANGEABLE = ['mug', 'clipboard', 'jacket', 'chair', 'tie', 'book', 'waterBottle', 'hatOnRack'];
+const STABLE     = ['frame', 'plant', 'light'];
 // Submit button (virtual coords, sits in bottom bar)
-const SUBMIT = { x: VW / 2 - 32, y: TOP + SH + 4, w: 64, h: 10 };
+const SUBMIT = { x: VW / 2 - 48, y: TOP + SH + 6, w: 96, h: 15 };
 
-// ── Round definitions ─────────────────────────────────────────────
-// Rounds have varying numbers of changes: 3, 4, 5.
-const ROUNDS = [
-  { // Round 1: 3 changes (mug, jacket, tie)
-    take1: { mugLeft: true,  clipLeft: true,  hasJacket: true,  chairLeft: true,  tieRed: true  },
-    take2: { mugLeft: false, clipLeft: true,  hasJacket: false, chairLeft: true,  tieRed: false },
-  },
-  { // Round 2: 4 changes (mug, clipboard, jacket, chair)
-    take1: { mugLeft: false, clipLeft: false, hasJacket: false, chairLeft: false, tieRed: true  },
-    take2: { mugLeft: true,  clipLeft: true,  hasJacket: true,  chairLeft: true,  tieRed: true  },
-  },
-  { // Round 3: 5 changes (all)
-    take1: { mugLeft: true,  clipLeft: false, hasJacket: true,  chairLeft: false, tieRed: false },
-    take2: { mugLeft: false, clipLeft: true,  hasJacket: false, chairLeft: true,  tieRed: true  },
-  },
-];
+// ── Round generation ──────────────────────────────────────────────
+const ROUND_COUNT = 3;
+const CHANGES_PER_ROUND = [3, 4, 5];
+
+const ZONE_TO_STATE = {
+  mug: 'mugLeft', clipboard: 'clipLeft', jacket: 'hasJacket',
+  chair: 'chairLeft', tie: 'tieRed', book: 'bookOpen',
+  waterBottle: 'waterBottle', hatOnRack: 'hatOnRack',
+};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function generateRounds() {
+  const rounds = [];
+  for (let i = 0; i < ROUND_COUNT; i++) {
+    const take1 = {};
+    for (const key of Object.keys(ZONE_TO_STATE)) {
+      take1[ZONE_TO_STATE[key]] = Math.random() < 0.5;
+    }
+    const numChanges = CHANGES_PER_ROUND[i];
+    const changedZones = shuffle(CHANGEABLE).slice(0, numChanges);
+    const take2 = { ...take1 };
+    for (const zone of changedZones) {
+      const stateKey = ZONE_TO_STATE[zone];
+      take2[stateKey] = !take1[stateKey];
+    }
+    rounds.push({ take1, take2 });
+  }
+  return rounds;
+}
+
+let ROUNDS = generateRounds();
 
 function getChangedZones(round) {
   const changed = [];
-  if (round.take1.mugLeft   !== round.take2.mugLeft)   changed.push('mug');
-  if (round.take1.clipLeft  !== round.take2.clipLeft)  changed.push('clipboard');
-  if (round.take1.hasJacket !== round.take2.hasJacket) changed.push('jacket');
-  if (round.take1.chairLeft !== round.take2.chairLeft) changed.push('chair');
-  if (round.take1.tieRed    !== round.take2.tieRed)    changed.push('tie');
+  for (const [zone, stateKey] of Object.entries(ZONE_TO_STATE)) {
+    if (round.take1[stateKey] !== round.take2[stateKey]) changed.push(zone);
+  }
   return changed;
 }
 
 // ── UI helpers ────────────────────────────────────────────────────
 function filmStrip(vy) {
-  r(0, vy, VW, 8, '#0a0a0a');
-  for (let i = 0; i < 24; i++) r(1 + i * 10, vy + 1, 5, 6, '#1a1a1a');
+  r(0, vy, VW, 12, '#0a0a0a');
+  for (let i = 0; i < 36; i++) r(2 + i * 10, vy + 2, 5, 8, '#1a1a1a');
 }
 
 function drawTopBar(left, right) {
   r(0, 0, VW, TOP, C.uiBg);
-  txt(left,  6, TOP / 2, 3.5, C.uiText, 'left');
-  if (right) txt(right, VW - 6, TOP / 2, 3.5, C.uiDim, 'right');
+  txt(left,  9, TOP / 2, 5, C.uiText, 'left');
+  if (right) txt(right, VW - 9, TOP / 2, 5, C.uiDim, 'right');
 }
 
 function drawBottomBar(left, center, right) {
   const by = TOP + SH;
   r(0, by, VW, BOT, C.uiBg);
-  if (left)   txt(left,    8,      by + BOT / 2, 3.5, C.uiGold,  'left');
-  if (center) txt(center,  VW / 2, by + BOT / 2, 3.5, C.uiDim,   'center');
-  if (right)  txt(right,   VW - 8, by + BOT / 2, 3.5, C.uiDim,   'right');
+  if (left)   txt(left,    12,     by + BOT / 2, 5, C.uiGold,  'left');
+  if (center) txt(center,  VW / 2, by + BOT / 2, 5, C.uiDim,   'center');
+  if (right)  txt(right,   VW - 12, by + BOT / 2, 5, C.uiDim,   'right');
 }
 
 function drawSubmitBtn(hover) {
@@ -613,13 +733,13 @@ function drawSubmitBtn(hover) {
   const col = hover ? C.uiGold2 : C.uiGold;
   r(SUBMIT.x - 1, SUBMIT.y - 1, SUBMIT.w + 2, SUBMIT.h + 2, '#3a3010');
   r(SUBMIT.x,     SUBMIT.y,     SUBMIT.w,     SUBMIT.h,     hover ? '#3a2e08' : '#26200a');
-  txt('SUBMIT', VW / 2, by + BOT / 2, 3.5, col);
+  txt('SUBMIT', VW / 2, by + BOT / 2, 5, col);
 }
 
 function drawObserveBar(t, total) {
   const pct = 1 - t / total;
   const col = pct > 0.35 ? C.uiAccent : C.uiRed;
-  r(0, TOP + SH - 2, Math.ceil(VW * pct), 2, col);
+  r(0, TOP + SH - 3, Math.ceil(VW * pct), 3, col);
 }
 
 function outline(z, color, dash) {
@@ -636,14 +756,14 @@ function drawTitle(frame) {
   r(0, 0, VW, VH, C.uiBg);
 
   // ── Clapperboard slate ──────────────────────────────────────────
-  const bx  = VW / 2 - 40;  // left edge = 80
-  const by  = 12;
-  const bw  = 80;
-  const cH  = 14;   // clapper stick height
-  const bdH = 40;   // body height
+  const bx  = VW / 2 - 60;  // left edge = 120
+  const by  = 18;
+  const bw  = 120;
+  const cH  = 21;   // clapper stick height
+  const bdH = 60;   // body height
 
   // Drop shadow
-  r(bx + 3, by + 3, bw + 2, cH + bdH, '#000');
+  r(bx + 5, by + 5, bw + 3, cH + bdH, '#000');
 
   // ── Diagonal stripe clapper ──
   ctx.save();
@@ -651,7 +771,7 @@ function drawTitle(frame) {
   ctx.rect(bx * S, by * S, bw * S, cH * S);
   ctx.clip();
   r(bx, by, bw, cH, '#161616');
-  const stripeW = 8 * S;
+  const stripeW = 12 * S;
   const clipPx  = cH * S;
   ctx.fillStyle = '#e2e2e2';
   for (let i = -1; i <= Math.ceil((bw * S + clipPx) / (stripeW * 2)) + 1; i++) {
@@ -667,83 +787,83 @@ function drawTitle(frame) {
   ctx.restore();
 
   // ── Hinge bar ──
-  r(bx - 1, by + cH - 4, bw + 2, 5, '#383838');
-  r(bx,     by + cH - 3, bw,     1, '#5a5a5a');
+  r(bx - 2, by + cH - 6, bw + 3, 8, '#383838');
+  r(bx,     by + cH - 5, bw,     2, '#5a5a5a');
   // Centre pivot
-  r(bx + bw / 2 - 6, by + cH - 6, 12, 9, '#282828');
-  r(bx + bw / 2 - 5, by + cH - 5, 10, 7, '#444444');
-  r(bx + bw / 2 - 3, by + cH - 4,  6, 5, '#363636');
+  r(bx + bw / 2 - 9, by + cH - 9, 18, 14, '#282828');
+  r(bx + bw / 2 - 8, by + cH - 8, 15, 11, '#444444');
+  r(bx + bw / 2 - 5, by + cH - 6,  9,  8, '#363636');
 
   // ── Slate body ──
   r(bx, by + cH, bw, bdH, '#d4ccb4');
-  r(bx, by + cH, bw,   1, '#a8a088');  // inner top shadow
+  r(bx, by + cH, bw,   2, '#a8a088');  // inner top shadow
 
   // ── Outer border ──
-  r(bx - 1, by,             bw + 2, 1,            '#1c1c1c');
-  r(bx - 1, by + cH + bdH,  bw + 2, 1,            '#1c1c1c');
-  r(bx - 1, by,             1,       cH + bdH + 1, '#1c1c1c');
-  r(bx + bw, by,            1,       cH + bdH + 1, '#1c1c1c');
+  r(bx - 2, by,             bw + 3, 2,            '#1c1c1c');
+  r(bx - 2, by + cH + bdH,  bw + 3, 2,            '#1c1c1c');
+  r(bx - 2, by,             2,       cH + bdH + 2, '#1c1c1c');
+  r(bx + bw, by,            2,       cH + bdH + 2, '#1c1c1c');
 
   // ── Dark header band with production name ──
-  r(bx, by + cH,      bw, 11, '#181820');
-  r(bx, by + cH + 11, bw,  1, '#302818');
-  txt('CONTINUITY!', VW / 2, by + cH + 6, 3, '#c8850e');
+  r(bx, by + cH,      bw, 17, '#181820');
+  r(bx, by + cH + 17, bw,  2, '#302818');
+  txt('CONTINUITY!', VW / 2, by + cH + 9, 5, '#c8850e');
 
   // ── Field rows ──
   const mid = bx + bw / 2;
-  const fy  = by + cH + 13;  // absolute y = 32
+  const fy  = by + cH + 20;
 
   // Row 1: SCENE | TAKE
-  r(mid,   fy,      1,               10, '#b0a888');  // vertical divider
-  r(bx + 2, fy + 9, mid - bx - 3,    1, '#b0a888');  // bottom line left
-  r(mid + 1, fy + 9, bx + bw - mid - 2, 1, '#b0a888'); // bottom line right
+  r(mid,     fy,      2,               15, '#b0a888');  // vertical divider
+  r(bx + 3,  fy + 14, mid - bx - 5,    2, '#b0a888');  // bottom line left
+  r(mid + 2, fy + 14, bx + bw - mid - 3, 2, '#b0a888'); // bottom line right
 
   ctx.save();
   ctx.textBaseline = 'middle';
   ctx.fillStyle = '#6a6050';
-  ctx.font = `${2 * S}px "Press Start 2P", monospace`;
+  ctx.font = `${3 * S}px "Press Start 2P", monospace`;
   ctx.textAlign = 'left';
-  ctx.fillText('SCN',  (bx + 3) * S,  (fy + 5) * S);
-  ctx.fillText('TAKE', (mid + 2) * S, (fy + 5) * S);
+  ctx.fillText('SCN',  (bx + 5) * S,  (fy + 8) * S);
+  ctx.fillText('TAKE', (mid + 3) * S, (fy + 8) * S);
   ctx.fillStyle = '#1c180e';
-  ctx.font = `${2.5 * S}px "Press Start 2P", monospace`;
+  ctx.font = `${4 * S}px "Press Start 2P", monospace`;
   ctx.textAlign = 'right';
-  ctx.fillText('1', (mid - 3) * S,     (fy + 5) * S);
-  ctx.fillText('1', (bx + bw - 3) * S, (fy + 5) * S);
+  ctx.fillText('1', (mid - 5) * S,     (fy + 8) * S);
+  ctx.fillText('1', (bx + bw - 5) * S, (fy + 8) * S);
 
   // Row 2: DIR
-  const fy2 = fy + 10;
-  r(bx + 2, fy2 + 9, bw - 4, 1, '#b0a888');
+  const fy2 = fy + 15;
+  r(bx + 3, fy2 + 14, bw - 6, 2, '#b0a888');
   ctx.fillStyle = '#6a6050';
-  ctx.font = `${2 * S}px "Press Start 2P", monospace`;
+  ctx.font = `${3 * S}px "Press Start 2P", monospace`;
   ctx.textAlign = 'left';
-  ctx.fillText('DIR', (bx + 3) * S, (fy2 + 5) * S);
+  ctx.fillText('DIR', (bx + 5) * S, (fy2 + 8) * S);
 
   // Row 3: CAM
-  const fy3 = fy2 + 10;
-  ctx.fillText('CAM', (bx + 3) * S, (fy3 + 4) * S);
+  const fy3 = fy2 + 15;
+  ctx.fillText('CAM', (bx + 5) * S, (fy3 + 6) * S);
   ctx.fillStyle = '#1c180e';
   ctx.textAlign = 'right';
-  ctx.fillText('A', (bx + bw - 3) * S, (fy3 + 4) * S);
+  ctx.fillText('A', (bx + bw - 5) * S, (fy3 + 6) * S);
   ctx.restore();
 
   // ── Main title text ──
-  txt('CONTINUITY!', VW / 2, 83, 8, C.uiGold);
-  txt('A FILM SET PUZZLE', VW / 2, 99, 3, '#3a5888');
-  txt('FIND ALL THE CHANGES', VW / 2, 111, 3, C.uiDim);
-  txt('BETWEEN TAKES', VW / 2, 119, 3, C.uiDim);
+  txt('CONTINUITY!', VW / 2, 125, 12, C.uiGold);
+  txt('A FILM SET PUZZLE', VW / 2, 149, 5, '#3a5888');
+  txt('FIND ALL THE CHANGES', VW / 2, 167, 5, C.uiDim);
+  txt('BETWEEN TAKES', VW / 2, 179, 5, C.uiDim);
   if (Math.floor(frame / 28) % 2 === 0)
-    txt('CLICK TO START', VW / 2, 135, 3, C.uiText);
+    txt('CLICK TO START', VW / 2, 203, 5, C.uiText);
 }
 
 function drawIntro(roundIdx, frame) {
   r(0, 0, VW, VH, C.uiBg);
-  txt(`SCENE ${roundIdx + 1} OF ${ROUNDS.length}`, VW / 2, 52, 3, '#383858');
-  txt('WATCH CAREFULLY', VW / 2, 72, 4.5, C.uiText);
-  txt('THINGS WILL CHANGE', VW / 2, 88, 3, C.uiDim);
+  txt(`SCENE ${roundIdx + 1} OF ${ROUNDS.length}`, VW / 2, 78, 5, '#383858');
+  txt('WATCH CAREFULLY', VW / 2, 108, 7, C.uiText);
+  txt('THINGS WILL CHANGE', VW / 2, 132, 5, C.uiDim);
   for (let i = 0; i < ROUNDS.length; i++) {
     const col = i < roundIdx ? C.uiGold : (i === roundIdx ? C.uiAccent : '#1e1e36');
-    r(VW / 2 - ROUNDS.length * 6 + i * 12, 108, 5, 5, col);
+    r(VW / 2 - ROUNDS.length * 9 + i * 18, 162, 8, 8, col);
   }
 }
 
@@ -754,23 +874,23 @@ function drawCut(t, total) {
     ctx.fillStyle = `rgba(255,255,255,${flash * 0.3})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
-  txt('CUT!', VW / 2, VH / 2, 12, '#ffffff');
+  txt('CUT!', VW / 2, VH / 2, 18, '#ffffff');
 }
 
 function drawEnd(win, totalScore, totalMax, frame) {
   r(0, 0, VW, VH, C.uiBg);
   if (win) {
-    txt('WRAPPED!',       VW / 2, 46, 7,   C.uiGold);
-    txt('NICE COVERAGE',  VW / 2, 64, 3.5, '#3a5888');
+    txt('WRAPPED!',       VW / 2, 69,  11, C.uiGold);
+    txt('NICE COVERAGE',  VW / 2, 96,  5,  '#3a5888');
   } else {
-    txt('THAT\'S A',      VW / 2, 38, 5,   C.uiRed);
-    txt('WRAP.',          VW / 2, 52, 5,   C.uiRed);
-    txt('THE EDITOR NOTICED.', VW / 2, 68, 3, '#806050');
+    txt('THAT\'S A',      VW / 2, 57,  8,  C.uiRed);
+    txt('WRAP.',          VW / 2, 78,  8,  C.uiRed);
+    txt('THE EDITOR NOTICED.', VW / 2, 102, 5, '#806050');
   }
-  txt(`FINAL SCORE: ${totalScore}`, VW / 2, 88, 3.5, C.uiGold);
-  txt(`OUT OF ${totalMax}`,          VW / 2, 98, 3,   C.uiDim);
+  txt(`FINAL SCORE: ${totalScore}`, VW / 2, 132, 5, C.uiGold);
+  txt(`OUT OF ${totalMax}`,          VW / 2, 147, 5, C.uiDim);
   if (Math.floor(frame / 28) % 2 === 0)
-    txt('CLICK TO PLAY AGAIN', VW / 2, 118, 3, C.uiText);
+    txt('CLICK TO PLAY AGAIN', VW / 2, 177, 5, C.uiText);
 }
 
 // ── Result overlay ────────────────────────────────────────────────
@@ -794,7 +914,7 @@ function drawResult(roundState, selected, roundScore, correct, wrong, totalChang
   const by = TOP + SH;
   r(0, by, VW, BOT, C.uiBg);
   const scoreCol = roundScore > 0 ? C.uiGold : C.uiDim;
-  txt(`ROUND: ${roundScore}/${maxForRound} PTS`, VW / 2, by + BOT / 2, 3.5, scoreCol);
+  txt(`ROUND: ${roundScore}/${maxForRound} PTS`, VW / 2, by + BOT / 2, 5, scoreCol);
 }
 
 // ── Game state ────────────────────────────────────────────────────
@@ -932,13 +1052,14 @@ function getTouch(e) {
   const touch = e.changedTouches[0];
   const rect  = canvas.getBoundingClientRect();
   return {
-    mx: (touch.clientX - rect.left) * (canvas.width  / rect.width)  / S,
-    my: (touch.clientY - rect.top)  * (canvas.height / rect.height) / S,
+    mx: (touch.clientX - rect.left) * VW / rect.width,
+    my: (touch.clientY - rect.top)  * VH / rect.height,
   };
 }
 
 function handleInteract(mx, my) {
   if (state === 'TITLE') {
+    ROUNDS = generateRounds();
     roundIdx = 0; score = 0; timer = 0; frame = 0;
     selected.clear();
     state = 'INTRO';
