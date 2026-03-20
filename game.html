@@ -191,33 +191,11 @@
       .monitor-housing { width: min(720px, 100%); }
     }
 
-    /* ── Portrait nudge ── */
-    .rotate-prompt {
-      display: none;
-      position: fixed;
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(6,6,14,0.92);
-      color: #c8850e;
-      font-family: 'PT Mono', 'Courier New', monospace;
-      font-size: 12px;
-      letter-spacing: 0.08em;
-      padding: 8px 16px;
-      border: 1px solid #c8850e;
-      white-space: nowrap;
-      z-index: 100;
-      pointer-events: none;
-    }
-    @media (max-width: 800px) and (orientation: portrait) {
-      .rotate-prompt { display: block; }
-    }
   </style>
 </head>
 <body>
   <a class="back-link" href="index.html"><span data-label="← Back">← Back</span></a>
-  <div class="rotate-prompt">↻ ROTATE FOR BEST EXPERIENCE</div>
-  <div class="monitor-housing">
+<div class="monitor-housing">
     <div class="hud-top">
       <span class="hud-cam">A</span>
       <span class="hud-title">CONTINUITY!</span>
