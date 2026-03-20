@@ -764,6 +764,7 @@
       margin-top: 3px;
     }
     .credit-unit { display: inline-block; white-space: nowrap; }
+    .credit-unit:not(:last-child)::after { content: ',\00a0'; }
     .earlier-role-row:last-child td { border-bottom: 1px solid var(--border) !important; }
     .earlier-role-row td.year-cell {
       text-align: right;
@@ -1401,6 +1402,8 @@
       .earlier-role-header td { display: block; padding: 32px 0 12px 0 !important; border-bottom: 1px solid var(--border) !important; }
       .earlier-role-row td { display: block; padding: 12px 0 !important; color: inherit; border-bottom: none !important; font-size: 13px; }
       .credits-table .earlier-role-row:last-child td { border-bottom: none !important; }
+      .earlier-role-row .credit-unit { display: block; }
+      .earlier-role-row .credit-unit::after { content: ''; }
       .earlier-role-row td.year-cell { text-align: left; color: #888; padding-top: 4px !important; font-size: 13px; }
 
       /* Footer: copyright left, play button right */
@@ -1725,7 +1728,7 @@
             <td colspan="5"><span class="credits-section-title blue">Daily Set PA</span></td>
           </tr>
           <tr class="earlier-role-row">
-            <td colspan="4"><span class="credit-unit"><strong>In Character</strong> <span class="fmt-note">(CFC Short)</span></span>, <span class="credit-unit"><strong>Mayday S20</strong> <span class="fmt-note">(TV Series)</span></span>, <span class="credit-unit"><strong>Spinning</strong> <span class="fmt-note">(Short)</span></span></td>
+            <td colspan="4"><span class="credit-unit"><strong>In Character</strong> <span class="fmt-note">(CFC Short)</span></span><span class="credit-unit"><strong>Mayday S20</strong> <span class="fmt-note">(TV Series)</span></span><span class="credit-unit"><strong>Spinning</strong> <span class="fmt-note">(Short)</span></span></td>
             <td class="year-cell">2019</td>
           </tr>
 
@@ -1733,7 +1736,7 @@
             <td colspan="5"><span class="credits-section-title blue">Daily Office PA</span></td>
           </tr>
           <tr class="earlier-role-row">
-            <td colspan="4"><span class="credit-unit"><strong>Utopia Falls S1</strong> <span class="fmt-note">(TV Series)</span></span>, <span class="credit-unit"><strong>The Queen's Gambit S1</strong> <span class="fmt-note">(TV Series)</span></span></td>
+            <td colspan="4"><span class="credit-unit"><strong>Utopia Falls S1</strong> <span class="fmt-note">(TV Series)</span></span><span class="credit-unit"><strong>The Queen's Gambit S1</strong> <span class="fmt-note">(TV Series)</span></span></td>
             <td class="year-cell">2019</td>
           </tr>
 
@@ -1741,7 +1744,7 @@
             <td colspan="5"><span class="credits-section-title blue">Daily Location Support</span></td>
           </tr>
           <tr class="earlier-role-row">
-            <td colspan="4"><span class="credit-unit"><strong>Mrs. America S1</strong> <span class="fmt-note">(TV Series)</span></span>, <span class="credit-unit"><strong>Grand Army S1</strong> <span class="fmt-note">(TV Series)</span></span>, <span class="credit-unit"><strong>Condor S2</strong> <span class="fmt-note">(TV Series)</span></span>, <span class="credit-unit"><strong>Spiral</strong> <span class="fmt-note">(Feature)</span></span>, <span class="credit-unit"><strong>Ginny &amp; Georgia S2</strong> <span class="fmt-note">(TV Series)</span></span>, <span class="credit-unit"><strong>The Boys S2</strong> <span class="fmt-note">(TV Series)</span></span></td>
+            <td colspan="4"><span class="credit-unit"><strong>Mrs. America S1</strong> <span class="fmt-note">(TV Series)</span></span><span class="credit-unit"><strong>Grand Army S1</strong> <span class="fmt-note">(TV Series)</span></span><span class="credit-unit"><strong>Condor S2</strong> <span class="fmt-note">(TV Series)</span></span><span class="credit-unit"><strong>Spiral</strong> <span class="fmt-note">(Feature)</span></span><span class="credit-unit"><strong>Ginny &amp; Georgia S2</strong> <span class="fmt-note">(TV Series)</span></span><span class="credit-unit"><strong>The Boys S2</strong> <span class="fmt-note">(TV Series)</span></span></td>
             <td class="year-cell">2019</td>
           </tr>
         </tbody>
