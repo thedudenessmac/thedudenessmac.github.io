@@ -233,7 +233,7 @@
       <span class="hud-sep">·</span>
       <span class="hud-rec"><span class="rec-sq"></span>REC</span>
     </div>
-    <canvas id="game"></canvas>
+    <canvas id="game" role="img" aria-label="Continuity! film set puzzle game"></canvas>
     <div class="hud-bot">
       <span class="hud-tc" id="hud-tc">00:00:00:00</span>
       <span class="hud-sep">·</span>
@@ -254,6 +254,10 @@
 
 const canvas = document.getElementById('game');
 const ctx    = canvas.getContext('2d');
+if (!ctx) {
+  document.body.innerHTML = '<p style="color:#c8850e;text-align:center;padding:40px;font-family:monospace">Canvas not supported in this browser.</p>';
+  throw new Error('Canvas 2D context unavailable');
+}
 ctx.imageSmoothingEnabled = false;
 
 const S   = 3;      // 1 virtual px = 3 real px
@@ -829,7 +833,7 @@ let submitHov = false;  // cursor over submit button
 let selected  = new Set();
 let lastResult = { correct: 0, wrong: 0, roundScore: 0 };
 
-function rnd() { return ROUNDS[roundIdx]; }
+function rnd() { return ROUNDS[Math.min(roundIdx, ROUNDS.length - 1)]; }
 
 function processSubmit() {
   const changedZones = getChangedZones(rnd());
@@ -891,9 +895,8 @@ function updateHUD() {
 }
 
 // ── Main loop ─────────────────────────────────────────────────────
+let _rafId;
 function loop() {
-  requestAnimationFrame(loop);
-  if (document.hidden) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   frame++;
   updateHUD();
@@ -939,6 +942,7 @@ function loop() {
     const totalMax = ROUNDS.reduce((sum, round) => sum + getChangedZones(round).length * 10, 0);
     drawEnd(score >= Math.ceil(totalMax * 0.6), score, totalMax, frame);
   }
+  _rafId = requestAnimationFrame(loop);
 }
 
 // ── Input ─────────────────────────────────────────────────────────
@@ -1033,7 +1037,11 @@ if (new URLSearchParams(location.search).has('embedded')) {
   const bl = document.querySelector('.back-link');
   if (bl) bl.style.display = 'none';
 }
-document.fonts.ready.then(() => requestAnimationFrame(loop));
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) cancelAnimationFrame(_rafId);
+  else _rafId = requestAnimationFrame(loop);
+});
+document.fonts.ready.then(() => { _rafId = requestAnimationFrame(loop); });
 </script>
 </body>
 </html>

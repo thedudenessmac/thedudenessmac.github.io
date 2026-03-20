@@ -701,19 +701,6 @@
       padding: 3px 7px;
       vertical-align: middle;
     }
-    .credits-subheader { display: table-row; }
-    .credits-subheader td {
-      font-family: var(--mono);
-      font-size: 11px !important;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: var(--muted) !important;
-      font-weight: 400 !important;
-      padding: 0 28px 16px 0 !important;
-      border-bottom: 1px solid var(--border);
-    }
-    .credits-subheader td:last-child { padding-right: 0 !important; }
-
     .credits-section-title {
       font-family: var(--mono);
       font-size: 16pt;
@@ -723,14 +710,6 @@
     .credits-section-title.green  { color: #38761d; }
     .credits-section-title.blue   { color: #0b5394; }
     .credits-section-title.yellow { color: #a07800; }
-
-    .credits-divider td {
-      padding-top: 72px !important;
-      padding-bottom: 14px !important;
-      border-bottom: none !important;
-    }
-    .credits-earlier td { color: #888 !important; }
-    .credits-earlier td:first-child { font-weight: 400 !important; color: #888 !important; }
 
     .earlier-role-header td {
       padding: 48px 0 16px 0 !important;
@@ -1219,7 +1198,7 @@
         height: calc(var(--bar-h) + env(safe-area-inset-top, 0px));
         padding: env(safe-area-inset-top, 0px) 16px 0;
         background: #000;
-        border-bottom: 4px solid rgba(237,234,228,0.35);
+        border-bottom: 4px solid rgba(237,234,228,0.6);
         z-index: 10;
         animation: htb-fadein 0.45s ease 0.1s both;
       }
@@ -1232,7 +1211,7 @@
         height: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
         padding: 0 16px env(safe-area-inset-bottom, 0px);
         background: transparent;
-        border-top: 4px solid rgba(237,234,228,0.35);
+        border-top: 4px solid rgba(237,234,228,0.6);
         opacity: 0;
         transition: opacity 0.45s ease 0.1s;
       }
@@ -1332,7 +1311,7 @@
         font-family: var(--mono);
         font-size: 14px;
         letter-spacing: 0.06em;
-        color: rgba(237,234,228,0.7);
+        color: rgba(237,234,228,0.85);
         white-space: nowrap;
       }
       /* Hide top line and top labels on mobile prominent — bar border replaces the line */
@@ -1346,7 +1325,7 @@
         font-family: var(--mono);
         font-size: 14px;
         letter-spacing: 0.06em;
-        color: rgba(237,234,228,0.7);
+        color: rgba(237,234,228,0.85);
         white-space: nowrap;
       }
       #home-bot-tstop::before { display: none; }
@@ -1389,10 +1368,6 @@
       .credits-table td:nth-child(5) { grid-column: 2; grid-row: 2; font-size: 13px; text-align: right; color: #888; }
       /* Col 4: Format — full width, bottom row */
       .credits-table td:nth-child(4) { grid-column: 1 / -1; grid-row: 3; padding-top: 5px !important; }
-      /* Divider and subheader rows */
-      .credits-divider { padding-top: 40px !important; padding-bottom: 14px !important; }
-      .credits-divider td { border-bottom: none !important; }
-      .credits-table .credits-subheader { display: none; }
       .credits-table tbody { border-top: 1px solid var(--border); }
       /* Grouped earlier credits rows — override grid layout */
       .credits-table .earlier-role-header,
@@ -1443,7 +1418,7 @@
         font-family: var(--mono);
         font-size: 14px;
         letter-spacing: 0.06em;
-        color: rgba(237,234,228,0.7);
+        color: rgba(237,234,228,0.85);
         white-space: nowrap;
       }
       .htb-ls-only { display: inline; }
@@ -1488,7 +1463,7 @@
       z-index: 150;
       background: #000;
       transform: translateY(100%);
-      transition: transform 0.9s cubic-bezier(0.87, 0, 0.13, 1);
+      transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
       pointer-events: none;
     }
     .game-panel.active {
@@ -1527,15 +1502,15 @@
     .mobile-nav-btn.game-return .mobile-nav-face-return  { opacity: 1; transform: translateY(0); }
 
     .frame.game-mode .frame-bar.bottom  { transform: translateY(100%); }
-    .frame.game-mode .frame-label       { opacity: 0 !important; transition: opacity 0.5s ease !important; }
-    .frame.game-mode .frame-label.tr    { transition: opacity 0.5s ease 0.1s !important; }
-    .frame.game-mode .frame-label.tl    { transition: opacity 0.5s ease 0.05s !important; }
-    .frame.game-mode .frame-tabs        { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.4s ease !important; }
+    .frame.game-mode .frame-label       { opacity: 0 !important; transition: opacity 0.3s ease !important; }
+    .frame.game-mode .frame-label.tr    { transition: opacity 0.3s ease 0.05s !important; }
+    .frame.game-mode .frame-label.tl    { transition: opacity 0.3s ease 0.025s !important; }
+    .frame.game-mode .frame-tabs        { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.25s ease !important; }
     .frame.game-mode .cnb-rec,
     .frame.game-mode .cnb-tc,
     .frame.game-mode #cnb-links,
-    .frame.game-mode #cnb-hamburger    { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-    .frame.game-mode .content-navbar   { background: rgba(0,0,0,0.92); backdrop-filter: blur(0px); transition: background 0.5s ease, backdrop-filter 0.5s ease; }
+    .frame.game-mode #cnb-hamburger    { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+    .frame.game-mode .content-navbar   { background: rgba(0,0,0,0.92); backdrop-filter: blur(0px); transition: background 0.3s ease, backdrop-filter 0.3s ease; }
   /* Pre-position panels and navbar before first paint to prevent flash on refresh */
   html[data-restore] .home-panel    { transform: translateX(-100%) !important; }
   html[data-restore] .content-panel { transform: translateX(0)      !important; }
@@ -2009,6 +1984,10 @@
   </div>
 
   <script>
+    // Safe sessionStorage wrapper — no-ops when storage is unavailable (private mode / quota exceeded)
+    function _ssGet(k) { try { return sessionStorage.getItem(k); } catch(e) { return null; } }
+    function _ssSet(k, v) { try { sessionStorage.setItem(k, v); } catch(e) {} }
+
     // ── Camera presets ────────────────────────────────
     const CAM_PRESETS = [
       { sdi:'A · SDI-1 · 6K',   gamma:'S-Log3 › Rec.709', fps:48,    iso:100,  temp:5600, shutter:90,  focus:"18'",  tstop:'T8',   lens:'21mm',  tc:'01:00:00:00' },
@@ -2024,29 +2003,35 @@
     ];
     const _contentPages = ['about','credits','services','gallery','contact','game'];
     const _onContent    = _contentPages.includes(location.hash.replace('#',''));
-    const _stored       = parseInt(sessionStorage.getItem('camPreset'), 10);
+    const _stored       = parseInt(_ssGet('camPreset'), 10);
     let   _idx;
     if (!_onContent) {
       // Homepage — always pick a fresh preset and save it
       _idx = Math.floor(Math.random() * CAM_PRESETS.length);
-      sessionStorage.setItem('camPreset', _idx);
+      _ssSet('camPreset', _idx);
     } else if (!isNaN(_stored)) {
       // Content page — reuse the preset from this session
       _idx = _stored;
     } else {
       // Direct URL to content page (no session yet) — pick and save
       _idx = Math.floor(Math.random() * CAM_PRESETS.length);
-      sessionStorage.setItem('camPreset', _idx);
+      _ssSet('camPreset', _idx);
     }
     const CAM   = CAM_PRESETS[_idx];
     const tcFps = Math.round(CAM.fps);
-    document.getElementById('lbl-tl').textContent  = CAM.sdi;
-    document.getElementById('lbl-tc').textContent  = CAM.gamma;
-    document.getElementById('lbl-fps').textContent = CAM.fps + ' FPS';
-    document.getElementById('lbl-bc').textContent  = `F ${CAM.focus}  ·  ${CAM.tstop}  ·  ${CAM.lens}`;
-    document.getElementById('lbl-br').textContent  = `ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
+    const _lblTl  = document.getElementById('lbl-tl');
+    const _lblTc  = document.getElementById('lbl-tc');
+    const _lblFps = document.getElementById('lbl-fps');
+    const _lblBc  = document.getElementById('lbl-bc');
+    const _lblBr  = document.getElementById('lbl-br');
+    const _lblMob = document.getElementById('lbl-mob');
+    if (_lblTl)  _lblTl.textContent  = CAM.sdi;
+    if (_lblTc)  _lblTc.textContent  = CAM.gamma;
+    if (_lblFps) _lblFps.textContent = CAM.fps + ' FPS';
+    if (_lblBc)  _lblBc.textContent  = `F ${CAM.focus}  ·  ${CAM.tstop}  ·  ${CAM.lens}`;
+    if (_lblBr)  _lblBr.textContent  = `ISO ${CAM.iso}  ·  ${CAM.shutter}°  ·  ${CAM.temp}K`;
     const _mobText = `${CAM.tstop}  ·  ${CAM.lens}  ·  ISO ${CAM.iso}  ·  ${CAM.temp}K`;
-    document.getElementById('lbl-mob').textContent = _mobText;
+    if (_lblMob) _lblMob.textContent = _mobText;
     const _hbTstop   = document.getElementById('home-bot-tstop');
     const _hbLens    = document.getElementById('home-bot-lens');
     const _hbIso     = document.getElementById('home-bot-iso');
@@ -2063,13 +2048,13 @@
     // Dynamic font scaling for mobile homepage prominent labels
     // Resolve TC epoch — a fixed wall-clock anchor so the timecode continues
     // across content-page refreshes, and only resets on a homepage refresh.
-    let _tcEpoch = parseFloat(sessionStorage.getItem('tcEpoch'));
+    let _tcEpoch = parseFloat(_ssGet('tcEpoch'));
     if (!_onContent || isNaN(_tcEpoch)) {
       // Homepage (always) or no stored epoch: compute from preset TC start
       const [th, tm, ts, tf] = CAM.tc.split(':').map(Number);
       const startFrame = ((th * 3600) + (tm * 60) + ts) * tcFps + tf;
       _tcEpoch = Date.now() - (startFrame / tcFps * 1000);
-      sessionStorage.setItem('tcEpoch', _tcEpoch);
+      _ssSet('tcEpoch', _tcEpoch);
     }
 
     // ── Running timecode ──────────────────────────────
@@ -2282,6 +2267,7 @@
         closeMobileMenu();
         if (tabsTimer)        { clearTimeout(tabsTimer);        tabsTimer        = null; }
         if (mobileBarsTimer)  { clearTimeout(mobileBarsTimer);  mobileBarsTimer  = null; }
+        if (mobileOutTimer)   { clearTimeout(mobileOutTimer);   mobileOutTimer   = null; document.body.classList.remove('mobile-home-out'); }
         if (goHomeTimer)      { clearTimeout(goHomeTimer);      goHomeTimer      = null; }
         if (goHomeBarsTimer)  { clearTimeout(goHomeBarsTimer);  goHomeBarsTimer  = null; }
         if (goHomeSlideTimer) { clearTimeout(goHomeSlideTimer); goHomeSlideTimer = null; }
@@ -2403,7 +2389,7 @@
             }
           }
         }, 400);
-        setTimeout(() => { frame.classList.remove('game-mode'); }, 950);
+        setTimeout(() => { frame.classList.remove('game-mode'); }, 500);
       }
 
 
