@@ -1312,6 +1312,13 @@
       /* BC always right-anchored on mobile so position can transition cleanly */
       .frame-label.bc { left: auto; right: 30px; transform-origin: bottom right; text-align: right; }
 
+      /* REC popup: right on homepage, below on content pages (default) */
+      .htb-rec::after {
+        top: 50%;
+        left: calc(100% + 8px);
+        transform: translateY(-50%);
+      }
+
       /* Homepage hero — centred layout */
       .hero-name { font-size: clamp(28px, 13vw, 68px); white-space: nowrap; }
       .hero-role { font-size: clamp(16px, 5.5vw, 26px); }
