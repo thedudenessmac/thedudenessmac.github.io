@@ -2665,7 +2665,7 @@
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) cancelAnimationFrame(raf);
-    else raf = requestAnimationFrame(draw);
+    else { lastT = performance.now(); raf = requestAnimationFrame(draw); }
   });
 })();
 
