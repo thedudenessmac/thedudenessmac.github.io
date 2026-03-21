@@ -2632,12 +2632,23 @@
   gl.uniform1f(U.noise,  NOISE_INTENSITY);
 
   // ── Resize ───────────────────────────────────────────────────────
+  const mobileQ = window.matchMedia('(max-width: 800px)');
   function resize() {
-    const w = canvas.clientWidth  || 1;
-    const h = canvas.clientHeight || 1;
+    let w, h;
+    if (mobileQ.matches) {
+      // On mobile the canvas is 160vmax × 160vmax; compute directly
+      // because Android Chrome can mis-report clientWidth on overflow-clipped elements
+      const vmax = Math.max(window.innerWidth, window.innerHeight);
+      w = h = vmax * 1.6;
+    } else {
+      w = canvas.clientWidth  || 1;
+      h = canvas.clientHeight || 1;
+    }
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const pw = Math.round(w * dpr);
-    const ph = Math.round(h * dpr);
+    // Cap backing store — 160vmax canvases can exceed mobile GPU limits
+    const MAX = 2048;
+    const pw = Math.min(Math.round(w * dpr), MAX);
+    const ph = Math.min(Math.round(h * dpr), MAX);
     if (canvas.width !== pw || canvas.height !== ph) {
       canvas.width  = pw;
       canvas.height = ph;
