@@ -171,7 +171,6 @@
     .frame-line.left   { left: 16px;   top: 16px;  bottom: 16px; width:  5px; transform: scaleY(0); transform-origin: center; animation: line-v 0.6s cubic-bezier(0.4,0,0.2,1) 0.42s forwards; }
     .frame-line.right  { right: 16px;  top: 16px;  bottom: 16px; width:  5px; transform: scaleY(0); transform-origin: center; animation: line-v 0.6s cubic-bezier(0.4,0,0.2,1) 0.42s forwards; }
 
-    /* Center tick marks — hidden */
 
 
     /* Frame metadata — base positions are the content-mode resting state */
@@ -211,6 +210,10 @@
     .frame.prominent .frame-line.right     { animation: none !important; opacity: 0 !important; }
     .frame.prominent .frame-line.top    { top: 58px;    left: 0; right: 0; }
     .frame.prominent .frame-line.bottom { bottom: 58px; left: 0; right: 0; }
+
+    /* Prominent: solid black bars above/below the white frame lines */
+    .frame.prominent .frame-bar.top    { height: 58px; opacity: 1; border-bottom: none; }
+    .frame.prominent .frame-bar.bottom { height: 58px; opacity: 1; border-top: none; }
 
     /* Prominent: label colour/size only — no translateY, labels sit at their base positions */
     .frame.prominent .frame-label { color: rgba(237,234,228,0.85); font-size: clamp(10px, 1.6vw, 22px); }
@@ -270,10 +273,35 @@
       padding: 0;
       border-top: none;
       background: var(--dark);
+      position: relative;
+      overflow: hidden;
+    }
+    #cb-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 4s ease;
+      z-index: 0;
+    }
+    #cb-canvas.cb-visible { opacity: 0.65; }
+    @media (max-width: 800px) {
+      #cb-canvas {
+        inset: auto;
+        width: 160vw;
+        height: 160vw;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
     }
 
     .hero-grid {
       width: 100%;
+      position: relative;
+      z-index: 1;
     }
 
     .hero-name {
@@ -925,7 +953,6 @@
     }
     .footer-play-btn .button_top {
       display: block;
-      box-sizing: border-box;
       border: 2px solid var(--button_outline_color);
       border-radius: var(--button_radius);
       padding: 0.45em 1em;
@@ -1611,6 +1638,7 @@
   <!-- ── Home panel ── -->
   <div class="home-panel" id="home-panel">
 <section id="hero" class="hero-intro">
+    <canvas id="cb-canvas" aria-hidden="true"></canvas>
     <div class="container">
       <div class="hero-grid">
         <div class="hero-left">
@@ -2476,6 +2504,172 @@
 
 
   </script>
+
+<script>
+// ── Silk — vanilla WebGL port ────────────────────────────────────
+(function () {
+  const canvas = document.getElementById('cb-canvas');
+  if (!canvas) return;
+  const gl = canvas.getContext('webgl', { alpha: false, antialias: false, powerPreference: 'high-performance' })
+           || canvas.getContext('experimental-webgl', { alpha: false });
+  if (!gl) return;
+
+  // ── User settings ────────────────────────────────────────────────
+  const SPEED           = 3.3;
+  const SCALE           = 0.8;
+  const COLOR           = [0x25/255, 0x3c/255, 0x64/255];   // #253c64
+  const NOISE_INTENSITY = 1.5;
+  const ROTATION        = 5.3;
+
+  const vert = `
+    attribute vec2 a_pos;
+    attribute vec2 a_uv;
+    varying vec2 vUv;
+    varying vec3 vPosition;
+    void main() {
+      vUv = a_uv;
+      vPosition = vec3(a_pos, 0.0);
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }
+  `;
+
+  const frag = `
+    #ifdef GL_ES
+    precision mediump float;
+    #endif
+    varying vec2 vUv;
+    varying vec3 vPosition;
+    uniform float uTime;
+    uniform vec3  uColor;
+    uniform float uSpeed;
+    uniform float uScale;
+    uniform float uRotation;
+    uniform float uNoiseIntensity;
+
+    const float e = 2.71828182845904523536;
+
+    float noise(vec2 texCoord) {
+      float G = e;
+      vec2  r = (G * sin(G * texCoord));
+      return fract(r.x * r.y * (1.0 + texCoord.x));
+    }
+
+    vec2 rotateUvs(vec2 uv, float angle) {
+      float c = cos(angle);
+      float s = sin(angle);
+      mat2  rot = mat2(c, -s, s, c);
+      return rot * uv;
+    }
+
+    void main() {
+      vec2  fc   = gl_FragCoord.xy;
+      float rnd  = 0.60 * noise(floor(fc / 6.5) + uTime * 18.0)
+                 + 0.28 * noise(floor(fc / 3.2) + uTime * 22.0)
+                 + 0.12 * noise(floor(fc / 1.6) + uTime * 28.0);
+      rnd = pow(rnd, 0.5);
+      vec2  uv      = rotateUvs(vUv * uScale, uRotation);
+      vec2  tex     = uv * uScale;
+      float tOffset = uSpeed * uTime;
+
+      tex.y += 0.03 * sin(8.0 * tex.x - tOffset);
+
+      float pattern = 0.6 +
+                      0.4 * sin(5.0 * (tex.x + tex.y +
+                                       cos(3.0 * tex.x + 5.0 * tex.y) +
+                                       0.02 * tOffset) +
+                               sin(20.0 * (tex.x + tex.y - 0.1 * tOffset)));
+
+      vec4 col = vec4(uColor, 1.0) * vec4(pattern) - rnd / 15.0 * uNoiseIntensity;
+      col.rgb *= 0.985 + 0.015 * sin(vUv.y * 160.0);
+      col.a = 1.0;
+      gl_FragColor = col;
+    }
+  `;
+
+  function mkShader(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, mkShader(gl.VERTEX_SHADER,   vert));
+  gl.attachShader(prog, mkShader(gl.FRAGMENT_SHADER, frag));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  // Fullscreen quad: interleaved pos(xy) + uv(xy), triangle strip
+  const vbuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbuf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+    -1,-1, 0,0,
+     1,-1, 1,0,
+    -1, 1, 0,1,
+     1, 1, 1,1,
+  ]), gl.STATIC_DRAW);
+  const stride = 4 * 4; // 4 floats × 4 bytes
+  const posLoc = gl.getAttribLocation(prog, 'a_pos');
+  const uvLoc  = gl.getAttribLocation(prog, 'a_uv');
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, stride, 0);
+  gl.enableVertexAttribArray(uvLoc);
+  gl.vertexAttribPointer(uvLoc,  2, gl.FLOAT, false, stride, 8);
+
+  // ── Uniforms ─────────────────────────────────────────────────────
+  const U = {
+    time:  gl.getUniformLocation(prog, 'uTime'),
+    color: gl.getUniformLocation(prog, 'uColor'),
+    speed: gl.getUniformLocation(prog, 'uSpeed'),
+    scale: gl.getUniformLocation(prog, 'uScale'),
+    rot:   gl.getUniformLocation(prog, 'uRotation'),
+    noise: gl.getUniformLocation(prog, 'uNoiseIntensity'),
+  };
+
+  gl.uniform3fv(U.color, new Float32Array(COLOR));
+  gl.uniform1f(U.speed,  SPEED);
+  gl.uniform1f(U.scale,  SCALE);
+  gl.uniform1f(U.rot,    ROTATION);
+  gl.uniform1f(U.noise,  NOISE_INTENSITY);
+
+  // ── Resize ───────────────────────────────────────────────────────
+  function resize() {
+    const w = canvas.clientWidth  || 1;
+    const h = canvas.clientHeight || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const pw = Math.round(w * dpr);
+    const ph = Math.round(h * dpr);
+    if (canvas.width !== pw || canvas.height !== ph) {
+      canvas.width  = pw;
+      canvas.height = ph;
+      gl.viewport(0, 0, pw, ph);
+    }
+  }
+  resize();
+  if ('ResizeObserver' in window) new ResizeObserver(resize).observe(canvas);
+
+  // ── Loop — uTime accumulates at 0.1/s to match R3F source ────────
+  let uTime = 0, lastT = performance.now(), raf;
+  function draw() {
+    const now   = performance.now();
+    uTime      += (now - lastT) * 0.0001;  // 0.1 per second
+    lastT       = now;
+    resize();
+    gl.uniform1f(U.time, uTime);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    raf = requestAnimationFrame(draw);
+  }
+  raf = requestAnimationFrame(draw);
+
+  // Fade in after a short delay so the animation is running before it's visible
+  setTimeout(() => canvas.classList.add('cb-visible'), 600);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) cancelAnimationFrame(raf);
+    else raf = requestAnimationFrame(draw);
+  });
+})();
+
+</script>
 
 </body>
 </html>
